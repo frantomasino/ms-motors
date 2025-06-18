@@ -327,42 +327,28 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
                 </span>
               </div>
               <p className="text-gray-400 text-sm">
-                Compra segura, financiación personalizada y atención premium para todos nuestros clientes.
+                Compra segura, atención personalizada y premium para todos nuestros clientes.
               </p>
              <div className="flex space-x-4 mt-4">
-  <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" title="WhatsApp">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-    >
-      <FaWhatsapp className="h-5 w-5" />
-    </Button>
-  </a>
+              <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" title="WhatsApp">
+                <Button variant="ghost" size="icon" className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full">
+                 <FaWhatsapp className="h-5 w-5" />
+                </Button>
+              </a>
 
-  <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" title="Instagram">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-    >
-      <FaInstagram className="h-5 w-5" />
-    </Button>
-  </a>
+              <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" title="Instagram">
+                <Button variant="ghost" size="icon" className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full">
+                 <FaInstagram className="h-5 w-5" />
+                </Button>
+              </a>
 
-  <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" title="TikTok">
-    <Button
-      variant="ghost"
-      size="icon"
-      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-    >
-      <FaTiktok className="h-5 w-5" />
-    </Button>
-  </a>
-</div>
-
+              <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" title="TikTok">
+                <Button variant="ghost" size="icon" className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full">
+                 <FaTiktok className="h-5 w-5" />
+                </Button>
+              </a>
             </div>
-
+          </div>
             <div>
               <h3 className="font-semibold text-lg mb-4">Enlaces Rápidos</h3>
               <ul className="space-y-2">
@@ -409,9 +395,9 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
               <h3 className="font-semibold text-lg mb-4">Contacto</h3>
               <address className="not-italic text-gray-400">
                 <p className="mb-2">Av. Corrientes 1234</p>
-                <p className="mb-2">Buenos Aires, Argentina</p>
-                <p className="mb-2">+54 11 1234-5678</p>
-                <p className="mb-2">info@msmotors.com</p>
+                <p className="mb-2">Quilmes. Buenos Aires</p>
+                <p className="mb-2">+54 11 5945-6142</p>
+                <p className="mb-2">info@msmotors.com</p> 
               </address>
             </div>
           </div>

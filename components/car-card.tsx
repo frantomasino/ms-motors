@@ -77,10 +77,13 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         <Button variant="outline" className="flex-1 text-sm" onClick={onViewDetails}>
           Ver Detalles
         </Button>
-        <Button className="flex-1 bg-green-600 hover:bg-green-700 text-sm">
-          <MessageCircle className="h-4 w-4 mr-1" />
-          WhatsApp
-        </Button>
+          
+        <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="flex-1">
+          <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
+           <MessageCircle className="h-4 w-4 mr-1" />
+             WhatsApp
+          </Button>
+        </a>
       </CardFooter>
     </Card>
   )

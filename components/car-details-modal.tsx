@@ -125,15 +125,29 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
               <p className="text-gray-600">{car.description}</p>
             </div>
 
-            <div className="pt-4">
-              <Button className="w-full bg-green-600 hover:bg-green-700">
-                <MessageCircle className="h-5 w-5 mr-2" />
-                Contactar por WhatsApp
-              </Button>
-            </div>
+          <div className="pt-4">
+  <Button
+    asChild
+    className="w-full bg-green-600 hover:bg-green-700 text-white"
+  >
+    <a
+      href="https://wa.me/5491159456142"
+      target="_blank"
+      rel="noreferrer"
+      aria-label="WhatsApp"
+    >
+      <MessageCircle className="h-5 w-5 mr-2" />
+      Contactar por WhatsApp
+    </a>
+  </Button>
+</div>
+
+
           </div>
         </div>
       </DialogContent>
     </Dialog>
   )
 }
+
+ 
