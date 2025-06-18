@@ -153,10 +153,10 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="relative h-10 w-10">
-                <Image src="/placeholder.svg?height=40&width=40" alt="MS Motors Logo" fill className="object-contain" />
+                <Image src="/logo-ms-motors.png" alt="Logo MS Motors" fill className="object-contain" />
               </div>
               <span className="text-xl font-bold text-gray-900">
-                MS<span className="text-red-600">.Motors</span>
+                MS<span className="text-red-600"> Motors</span>
               </span>
             </div>
 
@@ -173,17 +173,25 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:text-red-600 hover:bg-red-50">
-                <FaInstagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:text-red-600 hover:bg-red-50">
-                <FaTiktok className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="sm" className="hidden md:flex">
-                <FaWhatsapp className="h-4 w-4 mr-2" />
-                Contactar
-              </Button>
+              <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer"aria-label="Instagram">
+                <Button variant="ghost" size="icon" className="text-gray-700 hover:text-red-600 hover:bg-red-50">
+                  <FaInstagram className="h-5 w-5" />
+                </Button>
+              </a>
+
+              <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" aria-label="TikTok">
+                 <Button variant="ghost" size="icon" className="text-gray-700 hover:text-red-600 hover:bg-red-50">
+                  <FaTiktok className="h-5 w-5" />
+                 </Button>
+              </a>
+
+              <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+                 <Button variant="outline" size="sm" className="hidden md:flex">
+                  <FaWhatsapp className="h-4 w-4 mr-2" />Contactar
+                </Button>
+              </a>
             </div>
+
           </div>
         </div>
       </header>
@@ -305,44 +313,54 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="relative h-10 w-10 bg-white rounded-full p-2">
+                <div className="relative h-10 w-10 bg-white rounded-full p-2 overflow-hidden">
                   <Image
-                    src="/placeholder.svg?height=40&width=40"
-                    alt="MS Motors Logo"
-                    fill
-                    className="object-contain"
+                   src="/logo-ms-motors.png"
+                   alt="MS Motors Logo"
+                   fill
+                   className="object-contain"
                   />
                 </div>
+
                 <span className="text-xl font-bold">
-                  MS<span className="text-red-500">.Motors</span>
+                  MS<span className="text-red-500"> Motors</span>
                 </span>
               </div>
               <p className="text-gray-400 text-sm">
                 Compra segura, financiación personalizada y atención premium para todos nuestros clientes.
               </p>
-              <div className="flex space-x-4 mt-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                >
-                  <FaWhatsapp className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                >
-                  <FaInstagram className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                >
-                  <FaTiktok className="h-5 w-5" />
-                </Button>
-              </div>
+             <div className="flex space-x-4 mt-4">
+  <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" title="WhatsApp">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
+    >
+      <FaWhatsapp className="h-5 w-5" />
+    </Button>
+  </a>
+
+  <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" title="Instagram">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
+    >
+      <FaInstagram className="h-5 w-5" />
+    </Button>
+  </a>
+
+  <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" title="TikTok">
+    <Button
+      variant="ghost"
+      size="icon"
+      className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
+    >
+      <FaTiktok className="h-5 w-5" />
+    </Button>
+  </a>
+</div>
+
             </div>
 
             <div>
