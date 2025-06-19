@@ -11,9 +11,11 @@ export default function HeroSection() {
       <div
         className="relative h-[70vh] bg-cover bg-center flex items-center"
         style={{
-          backgroundImage: "url('/placeholder.svg?height=1080&width=1920&text=Premium+Cars')",
+          backgroundImage: "url('/banner-imagen.jpg')",
         }}
-      >
+      > 
+      
+        
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Encuentra tu vehículo ideal</h1>
@@ -21,14 +23,18 @@ export default function HeroSection() {
               Compra segura, financiación personalizada y atención premium para todos nuestros clientes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-red-600 hover:bg-red-700">
-                Ver catálogo
+             <a href="#catalog" className="w-full sm:w-auto">
+              <Button size="lg" className="bg-red-600 hover:bg-red-700 w-full sm:w-auto">
+                  Ver catálogo
                 <ChevronRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" className="text-black border-white hover:bg-white/10">
-                <FaWhatsapp className="h-4 w-4" />
-                Contacto
+             </a>
+             <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="text-black border-white hover:bg-white/10 w-full sm:w-auto">
+                <FaWhatsapp className="h-4 w-4 mr-2" />
+                 Contacto
               </Button>
+             </a>
             </div>
           </div>
         </div>
