@@ -78,8 +78,15 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
           Ver Detalles
         </Button>
           
-        <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer" aria-label="WhatsApp" className="flex-1">
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
+ <a
+                  href={`https://wa.me/5491159456142?text=${encodeURIComponent(
+                    `Hola! Estoy interesado en el ${car.brand} ${car.model}`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="WhatsApp"
+                >
+                            <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
            <MessageCircle className="h-4 w-4 mr-1" />
              WhatsApp
           </Button>
