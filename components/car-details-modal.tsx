@@ -125,13 +125,13 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
               <p className="text-gray-600">{car.description}</p>
             </div>
 
-          <div className="pt-4">
+        <div className="pt-4">
   <Button
     asChild
     className="w-full bg-green-600 hover:bg-green-700 text-white"
   >
     <a
-      href="https://wa.me/5491159456142"
+      href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Estoy interesado en el ${car.brand} ${car.model}`)}`}
       target="_blank"
       rel="noreferrer"
       aria-label="WhatsApp"
