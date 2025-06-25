@@ -24,6 +24,10 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
     }).format(price)
   }
 
+  //  Buscar primera imagen válida que no sea video
+  const firstValidImage =
+    car.images.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg"
+
   return (
     <Card
       className="overflow-hidden transition-all duration-300 hover:shadow-lg group"
@@ -32,14 +36,19 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
     >
       <div className="relative h-48 w-full overflow-hidden">
         <Image
-          src={car.images[0] || "/placeholder.svg"}
+          src={firstValidImage}
           alt={car.model}
           fill
-          className={`object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"}`}
+          className={`object-cover transition-transform duration-500 ${
+            isHovered ? "scale-110" : "scale-100"
+          }`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <Badge className="absolute top-2 right-2 bg-red-600 hover:bg-red-700">{formatPrice(car.price)}</Badge>
+        <Badge className="absolute top-2 right-2 bg-red-600 hover:bg-red-700">
+          {formatPrice(car.price)}
+        </Badge>
       </div>
+
       <CardContent className="p-4">
         <h3 className="font-bold text-lg mb-2 text-gray-800">{car.model}</h3>
         <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
@@ -73,22 +82,23 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
           </div>
         </div>
       </CardContent>
+
       <CardFooter className="p-4 pt-0 flex gap-2">
         <Button variant="outline" className="flex-1 text-sm" onClick={onViewDetails}>
           Ver Detalles
         </Button>
-          
- <a
-                  href={`https://wa.me/5491159456142?text=${encodeURIComponent(
-                    `Hola! Estoy interesado en el ${car.brand} ${car.model}`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="WhatsApp"
-                >
-                            <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
-           <MessageCircle className="h-4 w-4 mr-1" />
-             WhatsApp
+
+        <a
+          href={`https://wa.me/5491159456142?text=${encodeURIComponent(
+            `Hola! Estoy interesado en el ${car.brand} ${car.model}`
+          )}`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="WhatsApp"
+        >
+          <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
+            <MessageCircle className="h-4 w-4 mr-1" />
+            WhatsApp
           </Button>
         </a>
       </CardFooter>

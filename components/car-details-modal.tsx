@@ -23,10 +23,20 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  //   Inicializar currentImageIndex con la primer imagen que NO sea video
+  const getFirstImageIndex = () => {
+    const idx = car.images.findIndex(
+      (img) => img && !img.includes(".mp4") && !img.includes("video")
+    );
+    return idx === -1 ? 0 : idx; 
+  };
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
+
+  // Cuando cambia el auto o se abre el modal, resetear el índice a la primera imagen válida
   useEffect(() => {
     if (isOpen) {
+      setCurrentImageIndex(getFirstImageIndex());
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -34,7 +44,7 @@ export default function CarDetailsModal({
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, car.images]);
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) =>
@@ -76,7 +86,8 @@ export default function CarDetailsModal({
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-              {car.images[currentImageIndex]?.includes(".mp4") ? (
+              {car.images[currentImageIndex]?.includes(".mp4") ||
+              car.images[currentImageIndex]?.includes("video") ? (
                 <video
                   src={car.images[currentImageIndex]}
                   controls
@@ -116,12 +127,15 @@ export default function CarDetailsModal({
               {[...car.images]
                 .map((image, index) => ({ image, index }))
                 .sort((a, b) => {
-                  const isVideoA = a.image.includes(".mp4") || a.image.includes("video");
-                  const isVideoB = b.image.includes(".mp4") || b.image.includes("video");
+                  const isVideoA =
+                    a.image.includes(".mp4") || a.image.includes("video");
+                  const isVideoB =
+                    b.image.includes(".mp4") || b.image.includes("video");
                   return isVideoA === isVideoB ? 0 : isVideoA ? 1 : -1;
                 })
                 .map(({ image, index }) => {
-                  const isVideo = image.includes(".mp4") || image.includes("video");
+                  const isVideo =
+                    image.includes(".mp4") || image.includes("video");
                   return (
                     <button
                       key={index}
