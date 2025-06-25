@@ -180,7 +180,11 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
             <a href="#" className="flex items-center gap-2">
               <div className="relative h-10 w-10">
                 <Image
-                  src="/logo-ms-motors.png" alt="Logo MS Motors" fill className="object-contain"/>
+                  src="/logo-ms-motors.png"
+                  alt="Logo MS Motors"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="text-xl font-bold text-gray-900">
                 MS<span className="text-red-600"> Motors</span>
@@ -188,18 +192,26 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
             </a>
 
             <div className="hidden md:flex items-center space-x-6">
-              <a href="#" className="text-gray-700 hover:text-red-600 font-medium transition-colors">
+              <a
+                href="#"
+                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >
                 Inicio
               </a>
-              <a href="#catalog" className="text-gray-700 hover:text-red-600 font-medium transition-colors">
+              <a
+                href="#catalog"
+                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >
                 Catálogo
-              </a>
-              <a href="#" className="text-gray-700 hover:text-red-600 font-medium transition-colors">
-                Contacto
               </a>
             </div>
             <div className="flex items-center gap-2">
-              <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/ms.motorsquilmes/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -375,14 +387,16 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="relative h-10 w-10 bg-white rounded-full p-2 overflow-hidden">
-                  <Image
-                    src="/logo-ms-motors.png"
-                    alt="MS Motors Logo"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+                <a href="#">
+                  <div className="relative h-10 w-10 bg-white rounded-full p-2 overflow-hidden cursor-pointer">
+                    <Image
+                      src="/logo-ms-motors.png"
+                      alt="MS Motors Logo"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </a>
 
                 <span className="text-xl font-bold">
                   MS<span className="text-red-500"> Motors</span>
