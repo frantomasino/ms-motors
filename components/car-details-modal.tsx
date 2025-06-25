@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,19 @@ export default function CarDetailsModal({
   onClose,
 }: CarDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // 👇 Evitar scroll de fondo cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) =>
