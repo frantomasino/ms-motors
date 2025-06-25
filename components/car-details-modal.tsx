@@ -25,14 +25,12 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // 👇 Evitar scroll de fondo cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-
     return () => {
       document.body.style.overflow = "";
     };
@@ -115,55 +113,62 @@ export default function CarDetailsModal({
             </div>
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
-              {car.images.map((image, index) => {
-                const isVideo = image.includes(".mp4") || image.includes("video");
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentImageIndex(index)}
-                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                      currentImageIndex === index
-                        ? "border-red-600"
-                        : "border-transparent"
-                    }`}
-                    aria-label={`Ver imagen ${index + 1}`}
-                  >
-                    {isVideo ? (
-                      <>
-                        <video
-                          src={image}
-                          muted
-                          preload="metadata"
-                          className="object-cover w-full h-full"
+              {[...car.images]
+                .map((image, index) => ({ image, index }))
+                .sort((a, b) => {
+                  const isVideoA = a.image.includes(".mp4") || a.image.includes("video");
+                  const isVideoB = b.image.includes(".mp4") || b.image.includes("video");
+                  return isVideoA === isVideoB ? 0 : isVideoA ? 1 : -1;
+                })
+                .map(({ image, index }) => {
+                  const isVideo = image.includes(".mp4") || image.includes("video");
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                        currentImageIndex === index
+                          ? "border-red-600"
+                          : "border-transparent"
+                      }`}
+                      aria-label={`Ver imagen ${index + 1}`}
+                    >
+                      {isVideo ? (
+                        <>
+                          <video
+                            src={image}
+                            muted
+                            preload="metadata"
+                            className="object-cover w-full h-full"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-white"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14.752 11.168l-4.586-2.623A1 1 0 009 9.382v5.236a1 1 0 001.166.987l4.586-2.623a1 1 0 000-1.732z"
+                              />
+                            </svg>
+                          </div>
+                        </>
+                      ) : (
+                        <Image
+                          src={image || "/placeholder.svg"}
+                          alt={`${car.model} thumbnail ${index + 1}`}
+                          fill
+                          className="object-cover"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14.752 11.168l-4.586-2.623A1 1 0 009 9.382v5.236a1 1 0 001.166.987l4.586-2.623a1 1 0 000-1.732z"
-                            />
-                          </svg>
-                        </div>
-                      </>
-                    ) : (
-                      <Image
-                        src={image || "/placeholder.svg"}
-                        alt={`${car.model} thumbnail ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </button>
-                );
-              })}
+                      )}
+                    </button>
+                  );
+                })}
             </div>
           </div>
 

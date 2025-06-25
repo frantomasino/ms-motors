@@ -103,7 +103,7 @@ export default function HeroSection() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">
-                 Tomamos tu Usado
+                 Tomamos tu usado
               </h3>
               <p className="text-gray-800">
                 Aceptamos permutas como parte de pago.
