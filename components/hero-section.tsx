@@ -103,10 +103,10 @@ export default function HeroSection() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">
-                Financiación Personalizada
+                 Tomamos tu Usado
               </h3>
               <p className="text-gray-800">
-                Opciones de financiación adaptadas a tus necesidades.
+                Aceptamos permutas como parte de pago.
               </p>
             </div>
 
