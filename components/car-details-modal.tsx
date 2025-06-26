@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,10 +31,13 @@ export default function CarDetailsModal({
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(getFirstImageIndex());
+      setIsZoomed(false); // reset zoom al abrir modal
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -44,17 +47,59 @@ export default function CarDetailsModal({
     };
   }, [isOpen, car.images]);
 
-  const handlePrevImage = () => {
+  const handlePrevImage = useCallback(() => {
     setCurrentImageIndex((prev) =>
       prev === 0 ? car.images.length - 1 : prev - 1
     );
-  };
+    // NO desactivar zoom aquí para mantenerlo activo
+  }, [car.images.length]);
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
     setCurrentImageIndex((prev) =>
       prev === car.images.length - 1 ? 0 : prev + 1
     );
+    // NO desactivar zoom aquí para mantenerlo activo
+  }, [car.images.length]);
+
+  // Manejo de flechas del teclado
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        handlePrevImage();
+      } else if (e.key === "ArrowRight") {
+        handleNextImage();
+      } else if (e.key === "Escape" && isZoomed) {
+        setIsZoomed(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handlePrevImage, handleNextImage, isZoomed]);
+
+  // Drag para cambiar imagen
+  const onDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(clientX);
   };
+
+  const onDragEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    if (dragStartX === null) return;
+    const clientX = "changedTouches" in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = clientX - dragStartX;
+    const threshold = 50; // mínimo para considerar swipe
+
+    if (diff > threshold) {
+      handlePrevImage();
+    } else if (diff < -threshold) {
+      handleNextImage();
+    }
+    setDragStartX(null);
+  };
+
+  const toggleZoom = () => setIsZoomed(!isZoomed);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-US", {
@@ -72,12 +117,12 @@ export default function CarDetailsModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Botón de cerrar personalizado */}
+        {/* Botón de cerrar */}
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="absolute right-4 top-4"
+          className="absolute right-4 top-4 z-50"
           aria-label="Cerrar modal"
         >
           <X className="h-4 w-4" />
@@ -85,7 +130,13 @@ export default function CarDetailsModal({
 
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-4">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+            <div
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-lg"
+              onMouseDown={onDragStart}
+              onTouchStart={onDragStart}
+              onMouseUp={onDragEnd}
+              onTouchEnd={onDragEnd}
+            >
               {car.images[currentImageIndex]?.includes(".mp4") ||
               car.images[currentImageIndex]?.includes("video") ? (
                 <video
@@ -94,33 +145,66 @@ export default function CarDetailsModal({
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <Image
-                  src={car.images[currentImageIndex] || "/placeholder.svg"}
-                  alt={`${car.model} - Image ${currentImageIndex + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                <>
+                  {!isZoomed ? (
+                    <div
+                      onClick={toggleZoom}
+                      className="relative w-full h-full cursor-pointer"
+                    >
+                      <Image
+                        src={car.images[currentImageIndex] || "/placeholder.svg"}
+                        alt={`${car.model} - Image ${currentImageIndex + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      onClick={toggleZoom}
+                      className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out"
+                    >
+                      <Image
+                        src={car.images[currentImageIndex] || "/placeholder.svg"}
+                        alt={`${car.model} - Image ${currentImageIndex + 1}`}
+                        width={800}
+                        height={600}
+                        style={{ objectFit: "contain" }}
+                      />
+                      <button
+                        onClick={toggleZoom}
+                        aria-label="Cerrar zoom"
+                        className="absolute top-4 right-4 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-3"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                aria-label="Imagen anterior"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
+              {!isZoomed && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                    aria-label="Imagen anterior"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </Button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                aria-label="Imagen siguiente"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                    aria-label="Imagen siguiente"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </Button>
+                </>
+              )}
             </div>
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
