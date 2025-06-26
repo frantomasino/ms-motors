@@ -25,6 +25,7 @@ export default function CarDetailsModal({
   onClose,
 }: CarDetailsModalProps) {
   const isMobile = useIsMobile();
+
   const getFirstImageIndex = () =>
     car.images.findIndex(
       (img) => img && !img.includes(".mp4") && !img.includes("video")
@@ -33,6 +34,8 @@ export default function CarDetailsModal({
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
   const [isZoomed, setIsZoomed] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [formattedPrice, setFormattedPrice] = useState("");
+  const [formattedMileage, setFormattedMileage] = useState("");
 
   const handlePrevImage = useCallback(() => {
     setCurrentImageIndex((prev) =>
@@ -48,7 +51,6 @@ export default function CarDetailsModal({
 
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 
-  // Teclado ← →
   useEffect(() => {
     if (!isOpen) return;
 
@@ -61,11 +63,10 @@ export default function CarDetailsModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNextImage, handlePrevImage, isOpen]);
 
-   useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY;
       setScrollPosition(scrollY);
-
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
@@ -84,18 +85,30 @@ export default function CarDetailsModal({
     };
   }, [isOpen, scrollPosition]);
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("es-AR", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
+  useEffect(() => {
+    setFormattedPrice(
+      new Intl.NumberFormat("es-AR", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      }).format(car.price)
+    );
+    setFormattedMileage(
+      new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
+    );
+  }, [car]);
 
   const currentImage = car.images[currentImageIndex];
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className={`sm:max-w-3xl w-full ${
+          isMobile
+            ? "max-h-screen overflow-hidden"
+            : "max-h-[90vh] overflow-y-auto"
+        }`}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {car.model} - {car.year}
@@ -121,7 +134,7 @@ export default function CarDetailsModal({
                   controls
                   className="object-cover w-full h-full"
                 />
-              ) : !isZoomed ? (
+              ) : !isZoomed && !isMobile ? (
                 <div
                   onClick={toggleZoom}
                   className="relative w-full h-full cursor-zoom-in"
@@ -133,25 +146,34 @@ export default function CarDetailsModal({
                     className="object-cover"
                   />
                 </div>
+              ) : !isZoomed && isMobile ? (
+                <Image
+                  src={currentImage || "/placeholder.svg"}
+                  alt={`Image ${currentImageIndex}`}
+                  fill
+                  className="object-cover"
+                />
               ) : (
-                <div
-                  onClick={toggleZoom}
-                  className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
-                >
-                  <Image
-                    src={currentImage || "/placeholder.svg"}
-                    alt={`Zoom Image ${currentImageIndex}`}
-                    width={1000}
-                    height={800}
-                    className="object-contain max-h-full max-w-full"
-                  />
-                  <button
+                !isMobile && (
+                  <div
                     onClick={toggleZoom}
-                    className="absolute top-4 right-4 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-3"
+                    className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
                   >
-                    ×
-                  </button>
-                </div>
+                    <Image
+                      src={currentImage || "/placeholder.svg"}
+                      alt={`Zoom Image ${currentImageIndex}`}
+                      width={1000}
+                      height={800}
+                      className="object-contain max-h-full max-w-full"
+                    />
+                    <button
+                      onClick={toggleZoom}
+                      className="absolute top-4 right-4 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-3"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )
               )}
 
               {!isZoomed && (
@@ -182,9 +204,7 @@ export default function CarDetailsModal({
                 return (
                   <button
                     key={idx}
-                    onClick={() => {
-                      setCurrentImageIndex(idx);
-                     }}
+                    onClick={() => setCurrentImageIndex(idx)}
                     className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
                       currentImageIndex === idx
                         ? "border-red-600"
@@ -215,7 +235,7 @@ export default function CarDetailsModal({
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="text-3xl font-bold text-red-600 mb-2">
-                {formatPrice(car.price)}
+                {formattedPrice}
               </div>
               <div className="space-y-2 divide-y divide-gray-200">
                 <div className="grid grid-cols-2 py-2">
@@ -228,7 +248,7 @@ export default function CarDetailsModal({
                 </div>
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Kilometraje:</span>
-                  <span>{car.mileage.toLocaleString()} km</span>
+                  <span>{formattedMileage}</span>
                 </div>
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Transmisión:</span>
