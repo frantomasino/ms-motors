@@ -26,10 +26,15 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const isMobile = useIsMobile();
 
+  // Validar si hay imágenes válidas
+  const hasValidImages = Array.isArray(car.images) && car.images.length > 0;
+
   const getFirstImageIndex = () =>
-    car.images.findIndex(
-      (img) => img && !img.includes(".mp4") && !img.includes("video")
-    ) || 0;
+    hasValidImages
+      ? car.images.findIndex(
+          (img) => img && !img.includes(".mp4") && !img.includes("video")
+        ) || 0
+      : 0;
 
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -38,16 +43,18 @@ export default function CarDetailsModal({
   const [formattedMileage, setFormattedMileage] = useState("");
 
   const handlePrevImage = useCallback(() => {
+    if (!hasValidImages) return;
     setCurrentImageIndex((prev) =>
       prev === 0 ? car.images.length - 1 : prev - 1
     );
-  }, [car.images]);
+  }, [car.images, hasValidImages]);
 
   const handleNextImage = useCallback(() => {
+    if (!hasValidImages) return;
     setCurrentImageIndex((prev) =>
       prev === car.images.length - 1 ? 0 : prev + 1
     );
-  }, [car.images]);
+  }, [car.images, hasValidImages]);
 
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 
@@ -86,19 +93,29 @@ export default function CarDetailsModal({
   }, [isOpen, scrollPosition]);
 
   useEffect(() => {
-    setFormattedPrice(
-      new Intl.NumberFormat("es-AR", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0,
-      }).format(car.price)
-    );
-    setFormattedMileage(
-      new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-    );
+    if (typeof car.price === "number") {
+      setFormattedPrice(
+        new Intl.NumberFormat("es-AR", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0,
+        }).format(car.price)
+      );
+    }
+
+    if (typeof car.mileage === "number") {
+      setFormattedMileage(
+        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
+      );
+    }
   }, [car]);
 
-  const currentImage = car.images[currentImageIndex];
+  const currentImage =
+    hasValidImages && typeof car.images[currentImageIndex] === "string"
+      ? car.images[currentImageIndex]
+      : "/placeholder.svg";
+
+  if (!car || !hasValidImages) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -140,7 +157,7 @@ export default function CarDetailsModal({
                   className="relative w-full h-full cursor-zoom-in"
                 >
                   <Image
-                    src={currentImage || "/placeholder.svg"}
+                    src={currentImage}
                     alt={`Image ${currentImageIndex}`}
                     fill
                     className="object-cover"
@@ -148,7 +165,7 @@ export default function CarDetailsModal({
                 </div>
               ) : !isZoomed && isMobile ? (
                 <Image
-                  src={currentImage || "/placeholder.svg"}
+                  src={currentImage}
                   alt={`Image ${currentImageIndex}`}
                   fill
                   className="object-cover"
@@ -160,7 +177,7 @@ export default function CarDetailsModal({
                     className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
                   >
                     <Image
-                      src={currentImage || "/placeholder.svg"}
+                      src={currentImage}
                       alt={`Zoom Image ${currentImageIndex}`}
                       width={1000}
                       height={800}
@@ -220,7 +237,7 @@ export default function CarDetailsModal({
                       />
                     ) : (
                       <Image
-                        src={img || "/placeholder.svg"}
+                        src={typeof img === "string" && img ? img : "/placeholder.svg"}
                         alt={`Thumb ${idx}`}
                         fill
                         className="object-cover"

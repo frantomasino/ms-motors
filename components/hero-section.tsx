@@ -20,7 +20,7 @@ export default function HeroSection() {
               Encuentra tu vehículo ideal
             </h1>
             <p className="text-xl text-gray-200 mb-8">
-              Compra segura, financiación personalizada y atención premium para
+              Compra segura, personalizada y atención premium para
               todos nuestros clientes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
