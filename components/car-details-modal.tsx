@@ -23,17 +23,15 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  //   Inicializar currentImageIndex con la primer imagen que NO sea video
   const getFirstImageIndex = () => {
     const idx = car.images.findIndex(
       (img) => img && !img.includes(".mp4") && !img.includes("video")
     );
-    return idx === -1 ? 0 : idx; 
+    return idx === -1 ? 0 : idx;
   };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
 
-  // Cuando cambia el auto o se abre el modal, resetear el índice a la primera imagen válida
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(getFirstImageIndex());
@@ -67,20 +65,23 @@ export default function CarDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      {/* Ocultamos el botón automático del Dialog */}
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto [&>button[data-state=open]]:hidden">
+        {/* Botón personalizado de cerrar */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-10"
+          aria-label="Cerrar modal"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+
         <DialogHeader className="flex justify-between items-center">
           <DialogTitle className="text-2xl font-bold">
             {car.model} - {car.year}
           </DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-4 top-4"
-            aria-label="Cerrar modal"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
         <div className="grid md:grid-cols-2 gap-6 mt-4">
