@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
@@ -26,7 +27,6 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const isMobile = useIsMobile();
 
-  // Validar si hay imágenes válidas
   const hasValidImages = Array.isArray(car.images) && car.images.length > 0;
 
   const getFirstImageIndex = () =>
@@ -130,6 +130,7 @@ export default function CarDetailsModal({
           <DialogTitle className="text-2xl font-bold">
             {car.model} - {car.year}
           </DialogTitle>
+          <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
         </DialogHeader>
 
         <Button
@@ -216,36 +217,40 @@ export default function CarDetailsModal({
             </div>
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
-              {car.images.map((img, idx) => {
-                const isVideo = img.includes(".mp4") || img.includes("video");
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                      currentImageIndex === idx
-                        ? "border-red-600"
-                        : "border-transparent"
-                    }`}
-                  >
-                    {isVideo ? (
-                      <video
-                        src={img}
-                        muted
-                        preload="metadata"
-                        className="object-cover w-full h-full"
-                      />
-                    ) : (
-                      <Image
-                        src={typeof img === "string" && img ? img : "/placeholder.svg"}
-                        alt={`Thumb ${idx}`}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                  </button>
-                );
-              })}
+              {Array.isArray(car.images) &&
+                car.images
+                  .filter((img): img is string => typeof img === "string" && img.length > 0)
+                  .map((img, idx) => {
+                    const isVideo =
+                      img.includes(".mp4") || img.includes("video");
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                          currentImageIndex === idx
+                            ? "border-red-600"
+                            : "border-transparent"
+                        }`}
+                      >
+                        {isVideo ? (
+                          <video
+                            src={img}
+                            muted
+                            preload="metadata"
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <Image
+                            src={img}
+                            alt={`Thumb ${idx}`}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
             </div>
           </div>
 
