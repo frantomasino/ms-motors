@@ -9,6 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  productionBrowserSourceMaps: true, // 🔍 para ver errores en producción
+  reactStrictMode: true, // ✅ buena práctica en desarrollo
 }
 
 export default nextConfig

@@ -12,10 +12,25 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
-import { useIsMobile } from "@/hooks/use-mobile";
+
+// Hook seguro para detectar si es móvil, sin romper SSR
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 768);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+}
 
 interface CarDetailsModalProps {
-  car: Car;
+  car: Car | null;       // Puede ser null para mejor control
   isOpen: boolean;
   onClose: () => void;
 }
@@ -27,11 +42,12 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const isMobile = useIsMobile();
 
-  const hasValidImages = Array.isArray(car.images) && car.images.length > 0;
+  // Validar que el carro y sus imágenes estén disponibles
+  const hasValidImages = car && Array.isArray(car.images) && car.images.length > 0;
 
   const getFirstImageIndex = () =>
     hasValidImages
-      ? car.images.findIndex(
+      ? car!.images.findIndex(
           (img) => img && !img.includes(".mp4") && !img.includes("video")
         ) || 0
       : 0;
@@ -42,19 +58,27 @@ export default function CarDetailsModal({
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
+  // Resetear índice de imagen cuando cambie el auto o se abra el modal
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentImageIndex(getFirstImageIndex());
+      setIsZoomed(false);
+    }
+  }, [car, isOpen]);
+
   const handlePrevImage = useCallback(() => {
     if (!hasValidImages) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? car.images.length - 1 : prev - 1
+      prev === 0 ? car!.images.length - 1 : prev - 1
     );
-  }, [car.images, hasValidImages]);
+  }, [car, hasValidImages]);
 
   const handleNextImage = useCallback(() => {
     if (!hasValidImages) return;
     setCurrentImageIndex((prev) =>
-      prev === car.images.length - 1 ? 0 : prev + 1
+      prev === car!.images.length - 1 ? 0 : prev + 1
     );
-  }, [car.images, hasValidImages]);
+  }, [car, hasValidImages]);
 
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 
@@ -93,7 +117,7 @@ export default function CarDetailsModal({
   }, [isOpen, scrollPosition]);
 
   useEffect(() => {
-    if (typeof car.price === "number") {
+    if (car && typeof car.price === "number") {
       setFormattedPrice(
         new Intl.NumberFormat("es-AR", {
           style: "currency",
@@ -101,21 +125,32 @@ export default function CarDetailsModal({
           maximumFractionDigits: 0,
         }).format(car.price)
       );
+    } else {
+      setFormattedPrice("");
     }
 
-    if (typeof car.mileage === "number") {
+    if (car && typeof car.mileage === "number") {
       setFormattedMileage(
         new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
       );
+    } else {
+      setFormattedMileage("");
     }
   }, [car]);
+
+  // Para evitar errores, siempre renderizamos Dialog. Si no hay auto o imágenes válidas, abrimos cerrado y mostramos contenido básico.
+  if (!car || !hasValidImages) {
+    return (
+      <Dialog open={false} onOpenChange={() => {}}>
+        <DialogContent />
+      </Dialog>
+    );
+  }
 
   const currentImage =
     hasValidImages && typeof car.images[currentImageIndex] === "string"
       ? car.images[currentImageIndex]
       : "/placeholder.svg";
-
-  if (!car || !hasValidImages) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -138,6 +173,7 @@ export default function CarDetailsModal({
           size="icon"
           onClick={onClose}
           className="absolute right-4 top-4 z-50"
+          aria-label="Cerrar modal"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -187,6 +223,7 @@ export default function CarDetailsModal({
                     <button
                       onClick={toggleZoom}
                       className="absolute top-4 right-4 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full px-3"
+                      aria-label="Cerrar zoom"
                     >
                       ×
                     </button>
@@ -201,6 +238,7 @@ export default function CarDetailsModal({
                     size="icon"
                     onClick={handlePrevImage}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                    aria-label="Imagen anterior"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
@@ -209,6 +247,7 @@ export default function CarDetailsModal({
                     size="icon"
                     onClick={handleNextImage}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                    aria-label="Imagen siguiente"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </Button>
@@ -217,40 +256,40 @@ export default function CarDetailsModal({
             </div>
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
-              {Array.isArray(car.images) &&
-                car.images
-                  .filter((img): img is string => typeof img === "string" && img.length > 0)
-                  .map((img, idx) => {
-                    const isVideo =
-                      img.includes(".mp4") || img.includes("video");
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentImageIndex(idx)}
-                        className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                          currentImageIndex === idx
-                            ? "border-red-600"
-                            : "border-transparent"
-                        }`}
-                      >
-                        {isVideo ? (
-                          <video
-                            src={img}
-                            muted
-                            preload="metadata"
-                            className="object-cover w-full h-full"
-                          />
-                        ) : (
-                          <Image
-                            src={img}
-                            alt={`Thumb ${idx}`}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-                      </button>
-                    );
-                  })}
+              {car.images
+                .filter((img): img is string => typeof img === "string" && img.length > 0)
+                .map((img, idx) => {
+                  const isVideo =
+                    img.includes(".mp4") || img.includes("video");
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                        currentImageIndex === idx
+                          ? "border-red-600"
+                          : "border-transparent"
+                      }`}
+                      aria-label={`Miniatura imagen ${idx + 1}`}
+                    >
+                      {isVideo ? (
+                        <video
+                          src={img}
+                          muted
+                          preload="metadata"
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <Image
+                          src={img}
+                          alt={`Thumb ${idx}`}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
             </div>
           </div>
 
@@ -295,6 +334,7 @@ export default function CarDetailsModal({
                   )}`}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label="Contactar por WhatsApp"
                 >
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Contactar por WhatsApp
