@@ -30,7 +30,7 @@ function useIsMobile() {
 }
 
 interface CarDetailsModalProps {
-  car: Car | null;       // Puede ser null para mejor control
+  car: Car | null; // Puede ser null para mejor control
   isOpen: boolean;
   onClose: () => void;
 }
@@ -43,14 +43,15 @@ export default function CarDetailsModal({
   const isMobile = useIsMobile();
 
   // Validar que el carro y sus imágenes estén disponibles
-  const hasValidImages = car && Array.isArray(car.images) && car.images.length > 0;
+  const hasValidImages = car !== null && Array.isArray(car.images) && car.images.length > 0;
 
-  const getFirstImageIndex = () =>
-    hasValidImages
-      ? car!.images.findIndex(
-          (img) => img && !img.includes(".mp4") && !img.includes("video")
-        ) || 0
-      : 0;
+  const getFirstImageIndex = () => {
+    if (!hasValidImages) return 0;
+    const idx = car!.images.findIndex(
+      (img) => img && !img.includes(".mp4") && !img.includes("video")
+    );
+    return idx === -1 ? 0 : idx;
+  };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -67,16 +68,16 @@ export default function CarDetailsModal({
   }, [car, isOpen]);
 
   const handlePrevImage = useCallback(() => {
-    if (!hasValidImages) return;
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? car!.images.length - 1 : prev - 1
+      prev === 0 ? car.images.length - 1 : prev - 1
     );
   }, [car, hasValidImages]);
 
   const handleNextImage = useCallback(() => {
-    if (!hasValidImages) return;
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === car!.images.length - 1 ? 0 : prev + 1
+      prev === car.images.length - 1 ? 0 : prev + 1
     );
   }, [car, hasValidImages]);
 
@@ -130,9 +131,7 @@ export default function CarDetailsModal({
     }
 
     if (car && typeof car.mileage === "number") {
-      setFormattedMileage(
-        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-      );
+      setFormattedMileage(new Intl.NumberFormat("es-AR").format(car.mileage) + " km");
     } else {
       setFormattedMileage("");
     }
@@ -156,9 +155,7 @@ export default function CarDetailsModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className={`sm:max-w-3xl w-full ${
-          isMobile
-            ? "max-h-screen overflow-hidden"
-            : "max-h-[90vh] overflow-y-auto"
+          isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
         }`}
       >
         <DialogHeader>
@@ -181,32 +178,14 @@ export default function CarDetailsModal({
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-              {currentImage?.includes(".mp4") ||
-              currentImage?.includes("video") ? (
-                <video
-                  src={currentImage}
-                  controls
-                  className="object-cover w-full h-full"
-                />
+              {currentImage?.includes(".mp4") || currentImage?.includes("video") ? (
+                <video src={currentImage} controls className="object-cover w-full h-full" />
               ) : !isZoomed && !isMobile ? (
-                <div
-                  onClick={toggleZoom}
-                  className="relative w-full h-full cursor-zoom-in"
-                >
-                  <Image
-                    src={currentImage}
-                    alt={`Image ${currentImageIndex}`}
-                    fill
-                    className="object-cover"
-                  />
+                <div onClick={toggleZoom} className="relative w-full h-full cursor-zoom-in">
+                  <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
                 </div>
               ) : !isZoomed && isMobile ? (
-                <Image
-                  src={currentImage}
-                  alt={`Image ${currentImageIndex}`}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
               ) : (
                 !isMobile && (
                   <div
@@ -257,35 +236,22 @@ export default function CarDetailsModal({
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
               {car.images
-                .filter((img): img is string => typeof img === "string" && img.length > 0)
+                .filter((img) => typeof img === "string" && img.length > 0)
                 .map((img, idx) => {
-                  const isVideo =
-                    img.includes(".mp4") || img.includes("video");
+                  const isVideo = img.includes(".mp4") || img.includes("video");
                   return (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
                       className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                        currentImageIndex === idx
-                          ? "border-red-600"
-                          : "border-transparent"
+                        currentImageIndex === idx ? "border-red-600" : "border-transparent"
                       }`}
                       aria-label={`Miniatura imagen ${idx + 1}`}
                     >
                       {isVideo ? (
-                        <video
-                          src={img}
-                          muted
-                          preload="metadata"
-                          className="object-cover w-full h-full"
-                        />
+                        <video src={img} muted preload="metadata" className="object-cover w-full h-full" />
                       ) : (
-                        <Image
-                          src={img}
-                          alt={`Thumb ${idx}`}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={img} alt={`Thumb ${idx}`} fill className="object-cover" />
                       )}
                     </button>
                   );
@@ -295,9 +261,7 @@ export default function CarDetailsModal({
 
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-red-600 mb-2">
-                {formattedPrice}
-              </div>
+              <div className="text-3xl font-bold text-red-600 mb-2">{formattedPrice}</div>
               <div className="space-y-2 divide-y divide-gray-200">
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Color:</span>
@@ -324,10 +288,7 @@ export default function CarDetailsModal({
             </div>
 
             <div className="pt-4">
-              <Button
-                asChild
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-              >
+              <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
                 <a
                   href={`https://wa.me/5491159456142?text=${encodeURIComponent(
                     `Hola! Estoy interesado en el ${car.brand} ${car.model}`
