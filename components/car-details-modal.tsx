@@ -137,10 +137,9 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
- if (!car || !hasValidImages) {
+  if (!car || !hasValidImages) {
   return null;
 }
-
 
   const currentImage =
     hasValidImages && typeof car.images[currentImageIndex] === "string"
