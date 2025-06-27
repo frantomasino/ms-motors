@@ -137,14 +137,10 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
-  // Para evitar errores, siempre renderizamos Dialog. Si no hay auto o imágenes válidas, abrimos cerrado y mostramos contenido básico.
-  if (!car || !hasValidImages) {
-    return (
-      <Dialog open={false} onOpenChange={() => {}}>
-        <DialogContent />
-      </Dialog>
-    );
-  }
+ if (!car || !hasValidImages) {
+  return null;
+}
+
 
   const currentImage =
     hasValidImages && typeof car.images[currentImageIndex] === "string"
