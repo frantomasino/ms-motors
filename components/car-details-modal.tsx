@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
 
-// Hook para detectar si es móvil
+// Hook seguro para detectar si es móvil, sin romper SSR
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -38,13 +38,16 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const isMobile = useIsMobile();
 
+  // Validar que el carro y sus imágenes estén disponibles
   const hasValidImages = !!car && Array.isArray(car.images) && car.images.length > 0;
-  const getFirstImageIndex = () =>
-    hasValidImages
-      ? car!.images.findIndex(
-          (img) => img && !img.includes(".mp4") && !img.includes("video")
-        ) || 0
-      : 0;
+
+  const getFirstImageIndex = () => {
+    if (!hasValidImages) return 0;
+    const idx = car!.images.findIndex(
+      (img) => img && !img.includes(".mp4") && !img.includes("video")
+    );
+    return idx === -1 ? 0 : idx;
+  };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -52,6 +55,7 @@ export default function CarDetailsModal({
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
+  // Resetear índice de imagen y zoom cuando cambia el auto o modal se abre
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(getFirstImageIndex());
@@ -60,14 +64,14 @@ export default function CarDetailsModal({
   }, [car, isOpen]);
 
   const handlePrevImage = useCallback(() => {
-    if (!hasValidImages) return;
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
       prev === 0 ? car!.images.length - 1 : prev - 1
     );
   }, [car, hasValidImages]);
 
   const handleNextImage = useCallback(() => {
-    if (!hasValidImages) return;
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
       prev === car!.images.length - 1 ? 0 : prev + 1
     );
@@ -75,16 +79,20 @@ export default function CarDetailsModal({
 
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 
+  // Navegación por flechas teclado cuando modal abierto
   useEffect(() => {
     if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") handlePrevImage();
       if (e.key === "ArrowRight") handleNextImage();
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNextImage, handlePrevImage, isOpen]);
 
+  // Bloquear scroll del body cuando modal abierto
   useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY;
@@ -107,6 +115,7 @@ export default function CarDetailsModal({
     };
   }, [isOpen, scrollPosition]);
 
+  // Formateo de precio y kilometraje
   useEffect(() => {
     if (car && typeof car.price === "number") {
       setFormattedPrice(
@@ -121,19 +130,16 @@ export default function CarDetailsModal({
     }
 
     if (car && typeof car.mileage === "number") {
-      setFormattedMileage(
-        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-      );
+      setFormattedMileage(new Intl.NumberFormat("es-AR").format(car.mileage) + " km");
     } else {
       setFormattedMileage("");
     }
   }, [car]);
 
-  // ✅ FIX: Si no hay auto o imágenes válidas, no renderizamos nada
   if (!car || !hasValidImages) return null;
 
   const currentImage =
-    typeof car.images[currentImageIndex] === "string"
+    hasValidImages && typeof car.images[currentImageIndex] === "string"
       ? car.images[currentImageIndex]
       : "/placeholder.svg";
 
@@ -141,9 +147,7 @@ export default function CarDetailsModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className={`sm:max-w-3xl w-full ${
-          isMobile
-            ? "max-h-screen overflow-hidden"
-            : "max-h-[90vh] overflow-y-auto"
+          isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
         }`}
       >
         <DialogHeader>
@@ -167,8 +171,7 @@ export default function CarDetailsModal({
           {/* Galería */}
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-              {currentImage?.includes(".mp4") ||
-              currentImage?.includes("video") ? (
+              {currentImage?.includes(".mp4") || currentImage?.includes("video") ? (
                 <video
                   src={currentImage}
                   controls
@@ -241,6 +244,7 @@ export default function CarDetailsModal({
               )}
             </div>
 
+            {/* Miniaturas */}
             <div className="flex space-x-2 overflow-x-auto pb-2">
               {car.images
                 .filter((img): img is string => typeof img === "string" && img.length > 0)
