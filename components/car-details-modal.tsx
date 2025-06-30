@@ -36,6 +36,9 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
+  // Aquí el console.log para ver qué llega en car
+  console.log("Car details modal received car:", car);
+
   const isMobile = useIsMobile();
 
   // Validar que el carro y sus imágenes estén disponibles
