@@ -13,18 +13,6 @@ import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
 
-// Hook seguro para detectar si es móvil, sin romper SSR
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return isMobile;
-}
-
 interface CarDetailsModalProps {
   car: Car | null;
   isOpen: boolean;
@@ -36,79 +24,45 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  const isMobile = useIsMobile();
+  const hasValidImages =
+    !!car &&
+    Array.isArray(car.images) &&
+    car.images.some((img) => typeof img === "string" && img.length > 0);
 
-  const hasValidImages = !!car && Array.isArray(car.images) && car.images.length > 0;
+  const validImages = hasValidImages
+    ? car!.images.filter(
+        (img): img is string =>
+          typeof img === "string" &&
+          img.length > 0 &&
+          !img.includes("video") &&
+          !img.includes(".mp4")
+      )
+    : [];
 
-  const getFirstImageIndex = () => {
-    if (!hasValidImages) return 0;
-    const idx = car!.images.findIndex(
-      (img) => img && !img.includes(".mp4") && !img.includes("video")
-    );
-    return idx === -1 ? 0 : idx;
-  };
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
   useEffect(() => {
-    if (isOpen) {
-      setCurrentImageIndex(getFirstImageIndex());
-    }
+    if (isOpen) setCurrentImageIndex(0);
   }, [car, isOpen]);
 
   const handlePrevImage = useCallback(() => {
-    if (!hasValidImages || !car) return;
+    if (!validImages.length) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? car!.images.length - 1 : prev - 1
+      prev === 0 ? validImages.length - 1 : prev - 1
     );
-  }, [car, hasValidImages]);
+  }, [validImages]);
 
   const handleNextImage = useCallback(() => {
-    if (!hasValidImages || !car) return;
+    if (!validImages.length) return;
     setCurrentImageIndex((prev) =>
-      prev === car!.images.length - 1 ? 0 : prev + 1
+      prev === validImages.length - 1 ? 0 : prev + 1
     );
-  }, [car, hasValidImages]);
+  }, [validImages]);
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") handlePrevImage();
-      if (e.key === "ArrowRight") handleNextImage();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleNextImage, handlePrevImage, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const scrollY = window.scrollY;
-      setScrollPosition(scrollY);
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.overflow = "";
-      window.scrollTo(0, scrollPosition);
-    }
-    return () => {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.overflow = "";
-      window.scrollTo(0, scrollPosition);
-    };
-  }, [isOpen, scrollPosition]);
-
-  useEffect(() => {
-    if (car && typeof car.price === "number") {
+    if (car?.price) {
       setFormattedPrice(
         new Intl.NumberFormat("es-AR", {
           style: "currency",
@@ -116,31 +70,21 @@ export default function CarDetailsModal({
           maximumFractionDigits: 0,
         }).format(car.price)
       );
-    } else {
-      setFormattedPrice("");
     }
-
-    if (car && typeof car.mileage === "number") {
-      setFormattedMileage(new Intl.NumberFormat("es-AR").format(car.mileage) + " km");
-    } else {
-      setFormattedMileage("");
+    if (car?.mileage) {
+      setFormattedMileage(
+        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
+      );
     }
   }, [car]);
 
   if (!car || !hasValidImages) return null;
 
-  const currentImage =
-    hasValidImages && typeof car.images[currentImageIndex] === "string"
-      ? car.images[currentImageIndex]
-      : "/placeholder.svg";
+  const currentImage = validImages[currentImageIndex] ?? "/placeholder.svg";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent
-        className={`sm:max-w-3xl w-full ${
-          isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
-        }`}
-      >
+      <DialogContent className="sm:max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {car.model} - {car.year}
@@ -162,85 +106,58 @@ export default function CarDetailsModal({
           {/* Galería */}
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-              {currentImage?.includes(".mp4") || currentImage?.includes("video") ? (
-                <video
-                  src={currentImage}
-                  controls
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <Image
-                  src={currentImage}
-                  alt={`Image ${currentImageIndex}`}
-                  fill
-                  className="object-cover"
-                />
-              )}
+              <Image
+                src={currentImage}
+                alt={`Imagen ${currentImageIndex}`}
+                fill
+                className="object-cover"
+              />
 
-              {!isMobile && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handlePrevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                    aria-label="Imagen anterior"
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                    aria-label="Imagen siguiente"
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                aria-label="Imagen siguiente"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
             </div>
 
             {/* Miniaturas */}
             <div className="flex space-x-2 overflow-x-auto pb-2">
-              {car.images
-                .filter((img): img is string => typeof img === "string" && img.length > 0)
-                .map((img, idx) => {
-                  const isVideo =
-                    img.includes(".mp4") || img.includes("video");
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => setCurrentImageIndex(idx)}
-                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                        currentImageIndex === idx
-                          ? "border-red-600"
-                          : "border-transparent"
-                      }`}
-                      aria-label={`Miniatura imagen ${idx + 1}`}
-                    >
-                      {isVideo ? (
-                        <video
-                          src={img}
-                          muted
-                          preload="metadata"
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <Image
-                          src={img}
-                          alt={`Thumb ${idx}`}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </button>
-                  );
-                })}
+              {validImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                    currentImageIndex === idx
+                      ? "border-red-600"
+                      : "border-transparent"
+                  }`}
+                  aria-label={`Miniatura imagen ${idx + 1}`}
+                >
+                  <Image
+                    src={img}
+                    alt={`Thumb ${idx}`}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Información */}
+          {/* Info del auto */}
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="text-3xl font-bold text-red-600 mb-2">
@@ -282,7 +199,6 @@ export default function CarDetailsModal({
                   )}`}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label="Contactar por WhatsApp"
                 >
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Contactar por WhatsApp
