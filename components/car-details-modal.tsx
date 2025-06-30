@@ -36,9 +36,6 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  // Aquí el console.log para ver qué llega en car
-  console.log("Car details modal received car:", car);
-
   const isMobile = useIsMobile();
 
   // Validar que el carro y sus imágenes estén disponibles
@@ -146,6 +143,11 @@ export default function CarDetailsModal({
       ? car.images[currentImageIndex]
       : "/placeholder.svg";
 
+  // Logs para debug
+  console.log("Car details modal received car:", car);
+  console.log("Car images:", car.images);
+  console.log("Current image index:", currentImageIndex);
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
@@ -251,19 +253,19 @@ export default function CarDetailsModal({
             <div className="flex space-x-2 overflow-x-auto pb-2">
               {car.images
                 .filter((img): img is string => typeof img === "string" && img.length > 0)
-                .map((img, idx) => {
+                .map((img) => {
                   const isVideo =
                     img.includes(".mp4") || img.includes("video");
                   return (
                     <button
-                      key={idx}
-                      onClick={() => setCurrentImageIndex(idx)}
+                      key={img} // <-- Cambié el key para evitar errores
+                      onClick={() => setCurrentImageIndex(car.images.indexOf(img))}
                       className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                        currentImageIndex === idx
+                        currentImageIndex === car.images.indexOf(img)
                           ? "border-red-600"
                           : "border-transparent"
                       }`}
-                      aria-label={`Miniatura imagen ${idx + 1}`}
+                      aria-label={`Miniatura imagen ${car.images.indexOf(img) + 1}`}
                     >
                       {isVideo ? (
                         <video
@@ -275,7 +277,7 @@ export default function CarDetailsModal({
                       ) : (
                         <Image
                           src={img}
-                          alt={`Thumb ${idx}`}
+                          alt={`Thumb ${car.images.indexOf(img)}`}
                           fill
                           className="object-cover"
                         />
