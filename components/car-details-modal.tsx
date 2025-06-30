@@ -9,9 +9,21 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, MessageCircle, ZoomIn } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
+
+// Hook para detectar si es móvil
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile;
+}
 
 interface CarDetailsModalProps {
   car: Car | null;
@@ -24,39 +36,56 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  const [zoomOpen, setZoomOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const isMobile = useIsMobile();
+  const hasValidImages = !!car && Array.isArray(car.images) && car.images.length > 0;
+
+  const getFirstImageIndex = () => {
+    if (!hasValidImages) return 0;
+    const idx = car!.images.findIndex(
+      (img) => img && !img.includes(".mp4") && !img.includes("video")
+    );
+    return idx === -1 ? 0 : idx;
+  };
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(getFirstImageIndex);
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
-
-  const validImages = !!car?.images
-    ? car.images.filter(
-        (img): img is string =>
-          typeof img === "string" &&
-          img.length > 0 &&
-          !img.includes("video") &&
-          !img.includes(".mp4")
-      )
-    : [];
+  const [zoomOpen, setZoomOpen] = useState(false);
 
   useEffect(() => {
-    if (isOpen) setCurrentImageIndex(0);
+    if (isOpen) {
+      setCurrentImageIndex(getFirstImageIndex());
+    }
   }, [car, isOpen]);
 
-  const handlePrevImage = () => {
+  const handlePrevImage = useCallback(() => {
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? validImages.length - 1 : prev - 1
+      prev === 0 ? car!.images.length - 1 : prev - 1
     );
-  };
+  }, [car, hasValidImages]);
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
+    if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === validImages.length - 1 ? 0 : prev + 1
+      prev === car!.images.length - 1 ? 0 : prev + 1
     );
-  };
+  }, [car, hasValidImages]);
 
   useEffect(() => {
-    if (car?.price) {
+    if (zoomOpen) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "ArrowLeft") handlePrevImage();
+        if (e.key === "ArrowRight") handleNextImage();
+        if (e.key === "Escape") setZoomOpen(false);
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [zoomOpen, handlePrevImage, handleNextImage]);
+
+  useEffect(() => {
+    if (car && typeof car.price === "number") {
       setFormattedPrice(
         new Intl.NumberFormat("es-AR", {
           style: "currency",
@@ -64,23 +93,32 @@ export default function CarDetailsModal({
           maximumFractionDigits: 0,
         }).format(car.price)
       );
+    } else {
+      setFormattedPrice("");
     }
-    if (car?.mileage) {
-      setFormattedMileage(
-        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-      );
+
+    if (car && typeof car.mileage === "number") {
+      setFormattedMileage(new Intl.NumberFormat("es-AR").format(car.mileage) + " km");
+    } else {
+      setFormattedMileage("");
     }
   }, [car]);
 
-  if (!car || validImages.length === 0) return null;
+  if (!car || !hasValidImages) return null;
 
-  const currentImage = validImages[currentImageIndex];
+  const currentImage =
+    typeof car.images[currentImageIndex] === "string"
+      ? car.images[currentImageIndex]
+      : "/placeholder.svg";
 
   return (
     <>
-      {/* Modal principal */}
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <DialogContent
+          className={`sm:max-w-3xl w-full ${
+            isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
+          }`}
+        >
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
@@ -93,6 +131,7 @@ export default function CarDetailsModal({
             size="icon"
             onClick={onClose}
             className="absolute right-4 top-4 z-50"
+            aria-label="Cerrar modal"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -100,69 +139,85 @@ export default function CarDetailsModal({
           <div className="grid md:grid-cols-2 gap-6 mt-4">
             {/* Galería */}
             <div className="space-y-4">
-              <div
-                className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-zoom-in"
-                onClick={() => setZoomOpen(true)}
-              >
-                <Image
-                  src={currentImage}
-                  alt={`Imagen ${currentImageIndex}`}
-                  fill
-                  className="object-cover"
-                />
-
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+                {currentImage.includes(".mp4") ? (
+                  <video
+                    src={currentImage}
+                    controls
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div
+                    onClick={() => setZoomOpen(true)}
+                    className="relative w-full h-full cursor-pointer"
+                  >
+                    <Image
+                      src={currentImage}
+                      alt={`Image ${currentImageIndex}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                {/* Flechas */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevImage();
-                  }}
+                  onClick={handlePrevImage}
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                  aria-label="Imagen anterior"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNextImage();
-                  }}
+                  onClick={handleNextImage}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
+                  aria-label="Imagen siguiente"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
-
-                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                  <ZoomIn className="w-3 h-3" />
-                  Zoom
-                </div>
               </div>
 
+              {/* Miniaturas */}
               <div className="flex space-x-2 overflow-x-auto pb-2">
-                {validImages.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                      currentImageIndex === idx
-                        ? "border-red-600"
-                        : "border-transparent"
-                    }`}
-                  >
-                    <Image
-                      src={img}
-                      alt={`Thumb ${idx}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
+                {car.images
+                  .filter((img): img is string => typeof img === "string" && img.length > 0)
+                  .map((img, idx) => {
+                    const isVideo = img.includes(".mp4");
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                          currentImageIndex === idx
+                            ? "border-red-600"
+                            : "border-transparent"
+                        }`}
+                      >
+                        {isVideo ? (
+                          <video
+                            src={img}
+                            muted
+                            preload="metadata"
+                            className="object-cover w-full h-full"
+                          />
+                        ) : (
+                          <Image
+                            src={img}
+                            alt={`Thumb ${idx}`}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 
-            {/* Info del auto */}
+            {/* Información */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-red-600 mb-2">
@@ -215,9 +270,9 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom */}
+      {/* Zoom modal separado */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative">
           <Button
             variant="ghost"
             size="icon"
@@ -225,6 +280,22 @@ export default function CarDetailsModal({
             className="absolute right-4 top-4 z-50 text-white"
           >
             <X className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handlePrevImage}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white bg-black/50 hover:bg-black/70 rounded-full h-10 w-10"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNextImage}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white bg-black/50 hover:bg-black/70 rounded-full h-10 w-10"
+          >
+            <ChevronRight className="h-6 w-6" />
           </Button>
           <div className="relative w-full h-[80vh]">
             <Image
