@@ -13,7 +13,6 @@ import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
 
-// Hook seguro para detectar si es móvil, sin romper SSR
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -29,21 +28,19 @@ function useIsMobile() {
   return isMobile;
 }
 
-interface CarDetailsModalProps {
-  car: Car | null; // Puede ser null para mejor control
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 export default function CarDetailsModal({
   car,
   isOpen,
   onClose,
-}: CarDetailsModalProps) {
+}: {
+  car: Car | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const isMobile = useIsMobile();
 
-  // Validar que el carro y sus imágenes estén disponibles
-  const hasValidImages = car !== null && Array.isArray(car.images) && car.images.length > 0;
+  // Validar si tiene imágenes válidas
+  const hasValidImages = car !== null && Array.isArray(car?.images) && car.images.length > 0;
 
   const getFirstImageIndex = () => {
     if (!hasValidImages) return 0;
@@ -59,7 +56,7 @@ export default function CarDetailsModal({
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
-  // Resetear índice de imagen cuando cambie el auto o se abra el modal
+  // Resetear índice y zoom al abrir o cambiar carro
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(getFirstImageIndex());
@@ -137,17 +134,12 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
-  if (!car || !hasValidImages) {
-  return null;
-}
-
-  const currentImage =
-    hasValidImages && typeof car.images[currentImageIndex] === "string"
-      ? car.images[currentImageIndex]
-      : "/placeholder.svg";
-
+  // Siempre renderizar el Dialog, controlar visibilidad con open
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen && car !== null && hasValidImages}
+      onOpenChange={(open) => !open && onClose()}
+    >
       <DialogContent
         className={`sm:max-w-3xl w-full ${
           isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
@@ -155,7 +147,7 @@ export default function CarDetailsModal({
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            {car.model} - {car.year}
+            {car?.model} - {car?.year}
           </DialogTitle>
           <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
         </DialogHeader>
@@ -173,14 +165,28 @@ export default function CarDetailsModal({
         <div className="grid md:grid-cols-2 gap-6 mt-4">
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-              {currentImage?.includes(".mp4") || currentImage?.includes("video") ? (
-                <video src={currentImage} controls className="object-cover w-full h-full" />
+              {car && car.images[currentImageIndex]?.includes(".mp4") || car?.images[currentImageIndex]?.includes("video") ? (
+                <video
+                  src={car?.images[currentImageIndex]}
+                  controls
+                  className="object-cover w-full h-full"
+                />
               ) : !isZoomed && !isMobile ? (
                 <div onClick={toggleZoom} className="relative w-full h-full cursor-zoom-in">
-                  <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
+                  <Image
+                    src={car?.images[currentImageIndex] ?? "/placeholder.svg"}
+                    alt={`Image ${currentImageIndex}`}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               ) : !isZoomed && isMobile ? (
-                <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
+                <Image
+                  src={car?.images[currentImageIndex] ?? "/placeholder.svg"}
+                  alt={`Image ${currentImageIndex}`}
+                  fill
+                  className="object-cover"
+                />
               ) : (
                 !isMobile && (
                   <div
@@ -188,7 +194,7 @@ export default function CarDetailsModal({
                     className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center cursor-zoom-out overflow-auto"
                   >
                     <Image
-                      src={currentImage}
+                      src={car?.images[currentImageIndex] ?? "/placeholder.svg"}
                       alt={`Zoom Image ${currentImageIndex}`}
                       width={1000}
                       height={800}
@@ -230,7 +236,7 @@ export default function CarDetailsModal({
             </div>
 
             <div className="flex space-x-2 overflow-x-auto pb-2">
-              {car.images
+              {car?.images
                 .filter((img) => typeof img === "string" && img.length > 0)
                 .map((img, idx) => {
                   const isVideo = img.includes(".mp4") || img.includes("video");
@@ -260,11 +266,11 @@ export default function CarDetailsModal({
               <div className="space-y-2 divide-y divide-gray-200">
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Color:</span>
-                  <span>{car.color}</span>
+                  <span>{car?.color}</span>
                 </div>
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Combustible:</span>
-                  <span>{car.fuelType}</span>
+                  <span>{car?.fuelType}</span>
                 </div>
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Kilometraje:</span>
@@ -272,21 +278,21 @@ export default function CarDetailsModal({
                 </div>
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Transmisión:</span>
-                  <span>{car.transmission}</span>
+                  <span>{car?.transmission}</span>
                 </div>
               </div>
             </div>
 
             <div>
               <h3 className="font-medium text-gray-800 mb-2">Descripción:</h3>
-              <p className="text-gray-600">{car.description}</p>
+              <p className="text-gray-600">{car?.description}</p>
             </div>
 
             <div className="pt-4">
               <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
                 <a
                   href={`https://wa.me/5491159456142?text=${encodeURIComponent(
-                    `Hola! Estoy interesado en el ${car.brand} ${car.model}`
+                    `Hola! Estoy interesado en el ${car?.brand} ${car?.model}`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
