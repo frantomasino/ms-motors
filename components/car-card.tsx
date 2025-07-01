@@ -1,32 +1,36 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import type { Car } from "@/types"
-import Image from "next/image"
-import { Calendar, Circle, Gauge, MessageCircle } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import type { Car } from "@/types";
+import Image from "next/image";
+import { Calendar, Circle, Gauge, MessageCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 interface CarCardProps {
-  car: Car
-  onViewDetails: () => void
+  car: Car;
+  onViewDetails: () => void;
 }
 
 export default function CarCard({ car, onViewDetails }: CarCardProps) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       maximumFractionDigits: 0,
-    }).format(price)
-  }
+    }).format(price);
+  };
 
-  //  Buscar primera imagen válida que no sea video
+  const formatMileage = (mileage: number) => {
+    return new Intl.NumberFormat("en-US").format(mileage);
+  };
+
+  // Buscar primera imagen válida que no sea video
   const firstValidImage =
-    car.images.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg"
+    car.images.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg";
 
   return (
     <Card
@@ -62,7 +66,7 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
           </div>
           <div className="flex items-center">
             <Gauge className="h-4 w-4 mr-1 text-gray-500" />
-            <span>{car.mileage.toLocaleString()} km</span>
+            <span>{formatMileage(car.mileage)} km</span>
           </div>
           <div className="flex items-center">
             <svg
@@ -103,5 +107,5 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         </a>
       </CardFooter>
     </Card>
-  )
+  );
 }
