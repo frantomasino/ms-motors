@@ -16,17 +16,21 @@ import type { Car } from "@/types";
 // Hook seguro para detectar si es móvil, sin romper SSR
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 768);
+    }
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
   return isMobile;
 }
 
 interface CarDetailsModalProps {
-  car: Car | null;
+  car: Car | null; // Puede ser null para mejor control
   isOpen: boolean;
   onClose: () => void;
 }
@@ -39,7 +43,7 @@ export default function CarDetailsModal({
   const isMobile = useIsMobile();
 
   // Validar que el carro y sus imágenes estén disponibles
-  const hasValidImages = !!car && Array.isArray(car.images) && car.images.length > 0;
+  const hasValidImages = car !== null && Array.isArray(car.images) && car.images.length > 0;
 
   const getFirstImageIndex = () => {
     if (!hasValidImages) return 0;
@@ -55,7 +59,7 @@ export default function CarDetailsModal({
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
-  // Resetear índice de imagen y zoom cuando cambia el auto o modal se abre
+  // Resetear índice de imagen cuando cambie el auto o se abra el modal
   useEffect(() => {
     if (isOpen) {
       setCurrentImageIndex(getFirstImageIndex());
@@ -66,20 +70,19 @@ export default function CarDetailsModal({
   const handlePrevImage = useCallback(() => {
     if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === 0 ? car!.images.length - 1 : prev - 1
+      prev === 0 ? car.images.length - 1 : prev - 1
     );
   }, [car, hasValidImages]);
 
   const handleNextImage = useCallback(() => {
     if (!hasValidImages || !car) return;
     setCurrentImageIndex((prev) =>
-      prev === car!.images.length - 1 ? 0 : prev + 1
+      prev === car.images.length - 1 ? 0 : prev + 1
     );
   }, [car, hasValidImages]);
 
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 
-  // Navegación por flechas teclado cuando modal abierto
   useEffect(() => {
     if (!isOpen) return;
 
@@ -92,7 +95,6 @@ export default function CarDetailsModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNextImage, handlePrevImage, isOpen]);
 
-  // Bloquear scroll del body cuando modal abierto
   useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY;
@@ -115,7 +117,6 @@ export default function CarDetailsModal({
     };
   }, [isOpen, scrollPosition]);
 
-  // Formateo de precio y kilometraje
   useEffect(() => {
     if (car && typeof car.price === "number") {
       setFormattedPrice(
@@ -136,7 +137,9 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
-  if (!car || !hasValidImages) return null;
+  if (!car || !hasValidImages) {
+  return null;
+}
 
   const currentImage =
     hasValidImages && typeof car.images[currentImageIndex] === "string"
@@ -168,34 +171,16 @@ export default function CarDetailsModal({
         </Button>
 
         <div className="grid md:grid-cols-2 gap-6 mt-4">
-          {/* Galería */}
           <div className="space-y-4">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
               {currentImage?.includes(".mp4") || currentImage?.includes("video") ? (
-                <video
-                  src={currentImage}
-                  controls
-                  className="object-cover w-full h-full"
-                />
+                <video src={currentImage} controls className="object-cover w-full h-full" />
               ) : !isZoomed && !isMobile ? (
-                <div
-                  onClick={toggleZoom}
-                  className="relative w-full h-full cursor-zoom-in"
-                >
-                  <Image
-                    src={currentImage}
-                    alt={`Image ${currentImageIndex}`}
-                    fill
-                    className="object-cover"
-                  />
+                <div onClick={toggleZoom} className="relative w-full h-full cursor-zoom-in">
+                  <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
                 </div>
               ) : !isZoomed && isMobile ? (
-                <Image
-                  src={currentImage}
-                  alt={`Image ${currentImageIndex}`}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={currentImage} alt={`Image ${currentImageIndex}`} fill className="object-cover" />
               ) : (
                 !isMobile && (
                   <div
@@ -244,38 +229,24 @@ export default function CarDetailsModal({
               )}
             </div>
 
-            {/* Miniaturas */}
             <div className="flex space-x-2 overflow-x-auto pb-2">
               {car.images
-                .filter((img): img is string => typeof img === "string" && img.length > 0)
+                .filter((img) => typeof img === "string" && img.length > 0)
                 .map((img, idx) => {
-                  const isVideo =
-                    img.includes(".mp4") || img.includes("video");
+                  const isVideo = img.includes(".mp4") || img.includes("video");
                   return (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
                       className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                        currentImageIndex === idx
-                          ? "border-red-600"
-                          : "border-transparent"
+                        currentImageIndex === idx ? "border-red-600" : "border-transparent"
                       }`}
                       aria-label={`Miniatura imagen ${idx + 1}`}
                     >
                       {isVideo ? (
-                        <video
-                          src={img}
-                          muted
-                          preload="metadata"
-                          className="object-cover w-full h-full"
-                        />
+                        <video src={img} muted preload="metadata" className="object-cover w-full h-full" />
                       ) : (
-                        <Image
-                          src={img}
-                          alt={`Thumb ${idx}`}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={img} alt={`Thumb ${idx}`} fill className="object-cover" />
                       )}
                     </button>
                   );
@@ -283,12 +254,9 @@ export default function CarDetailsModal({
             </div>
           </div>
 
-          {/* Información */}
           <div className="space-y-4">
             <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="text-3xl font-bold text-red-600 mb-2">
-                {formattedPrice}
-              </div>
+              <div className="text-3xl font-bold text-red-600 mb-2">{formattedPrice}</div>
               <div className="space-y-2 divide-y divide-gray-200">
                 <div className="grid grid-cols-2 py-2">
                   <span className="text-gray-600 font-medium">Color:</span>
@@ -315,10 +283,7 @@ export default function CarDetailsModal({
             </div>
 
             <div className="pt-4">
-              <Button
-                asChild
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-              >
+              <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
                 <a
                   href={`https://wa.me/5491159456142?text=${encodeURIComponent(
                     `Hola! Estoy interesado en el ${car.brand} ${car.model}`
