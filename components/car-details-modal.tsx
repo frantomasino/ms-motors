@@ -13,17 +13,6 @@ import { ChevronLeft, ChevronRight, X, MessageCircle, ZoomIn } from "lucide-reac
 import Image from "next/image";
 import type { Car } from "@/types";
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return isMobile;
-}
-
 interface CarDetailsModalProps {
   car: Car | null;
   isOpen: boolean;
@@ -35,9 +24,14 @@ export default function CarDetailsModal({
   isOpen,
   onClose,
 }: CarDetailsModalProps) {
-  const isMobile = useIsMobile();
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [formattedPrice, setFormattedPrice] = useState("");
+  const [formattedMileage, setFormattedMileage] = useState("");
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
 
-  const validImages = car?.images
+  const validImages = !!car?.images
     ? car.images.filter(
         (img): img is string =>
           typeof img === "string" &&
@@ -47,23 +41,8 @@ export default function CarDetailsModal({
       )
     : [];
 
-  const hasValidImages = validImages.length > 0;
-
-  const getFirstImageIndex = () => {
-    if (!hasValidImages) return 0;
-    return 0; // siempre empieza en la primera imagen válida
-  };
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [zoomOpen, setZoomOpen] = useState(false);
-  const [formattedPrice, setFormattedPrice] = useState("");
-  const [formattedMileage, setFormattedMileage] = useState("");
-
   useEffect(() => {
-    if (isOpen) {
-      setCurrentImageIndex(getFirstImageIndex());
-      setZoomOpen(false);
-    }
+    if (isOpen) setCurrentImageIndex(0);
   }, [car, isOpen]);
 
   const handlePrevImage = () => {
@@ -78,17 +57,28 @@ export default function CarDetailsModal({
     );
   };
 
+  // Teclado ← →
   useEffect(() => {
-    if (zoomOpen) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === "ArrowLeft") handlePrevImage();
-        if (e.key === "ArrowRight") handleNextImage();
-        if (e.key === "Escape") setZoomOpen(false);
-      };
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [zoomOpen]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen || zoomOpen) return;
+      if (e.key === "ArrowLeft") handlePrevImage();
+      if (e.key === "ArrowRight") handleNextImage();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, zoomOpen, validImages.length]);
+
+  // Swipe táctil
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    setTouchEndX(e.changedTouches[0].clientX);
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    if (deltaX > 50) handlePrevImage();
+    if (deltaX < -50) handleNextImage();
+  };
 
   useEffect(() => {
     if (car?.price) {
@@ -99,32 +89,22 @@ export default function CarDetailsModal({
           maximumFractionDigits: 0,
         }).format(car.price)
       );
-    } else {
-      setFormattedPrice("");
     }
-
     if (car?.mileage) {
       setFormattedMileage(
         new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
       );
-    } else {
-      setFormattedMileage("");
     }
   }, [car]);
 
-  if (!car || !hasValidImages) return null;
+  if (!car || validImages.length === 0) return null;
 
   const currentImage = validImages[currentImageIndex];
 
   return (
     <>
-      {/* Modal principal */}
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent
-          className={`sm:max-w-3xl w-full ${
-            isMobile ? "max-h-screen overflow-hidden" : "max-h-[90vh] overflow-y-auto"
-          }`}
-        >
+        <DialogContent className="sm:max-w-3xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
@@ -137,17 +117,17 @@ export default function CarDetailsModal({
             size="icon"
             onClick={onClose}
             className="absolute right-4 top-4 z-50"
-            aria-label="Cerrar modal"
           >
             <X className="h-4 w-4" />
           </Button>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4">
-            {/* Galería */}
             <div className="space-y-4">
               <div
                 className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-zoom-in"
                 onClick={() => setZoomOpen(true)}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
               >
                 <Image
                   src={currentImage}
@@ -164,7 +144,6 @@ export default function CarDetailsModal({
                     handlePrevImage();
                   }}
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                  aria-label="Imagen anterior"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
@@ -176,7 +155,6 @@ export default function CarDetailsModal({
                     handleNextImage();
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
-                  aria-label="Imagen siguiente"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
@@ -187,7 +165,6 @@ export default function CarDetailsModal({
                 </div>
               </div>
 
-              {/* Miniaturas */}
               <div className="flex space-x-2 overflow-x-auto pb-2">
                 {validImages.map((img, idx) => (
                   <button
@@ -198,7 +175,6 @@ export default function CarDetailsModal({
                         ? "border-red-600"
                         : "border-transparent"
                     }`}
-                    aria-label={`Miniatura imagen ${idx + 1}`}
                   >
                     <Image
                       src={img}
@@ -211,10 +187,11 @@ export default function CarDetailsModal({
               </div>
             </div>
 
-            {/* Información */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">{formattedPrice}</div>
+                <div className="text-3xl font-bold text-red-600 mb-2">
+                  {formattedPrice}
+                </div>
                 <div className="space-y-2 divide-y divide-gray-200">
                   <div className="grid grid-cols-2 py-2">
                     <span className="text-gray-600 font-medium">Color:</span>
@@ -241,14 +218,16 @@ export default function CarDetailsModal({
               </div>
 
               <div className="pt-4">
-                <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
+                <Button
+                  asChild
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
                   <a
                     href={`https://wa.me/5491159456142?text=${encodeURIComponent(
                       `Hola! Estoy interesado en el ${car.brand} ${car.model}`
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label="Contactar por WhatsApp"
                   >
                     <MessageCircle className="h-5 w-5 mr-2" />
                     Contactar por WhatsApp
@@ -260,38 +239,16 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Zoom modal separado */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative">
-          <DialogHeader>
-            <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+          <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setZoomOpen(false)}
             className="absolute right-4 top-4 z-50 text-white"
-            aria-label="Cerrar zoom"
           >
             <X className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-50 text-white bg-black/50 hover:bg-black/70 rounded-full h-10 w-10"
-            aria-label="Imagen anterior"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-50 text-white bg-black/50 hover:bg-black/70 rounded-full h-10 w-10"
-            aria-label="Imagen siguiente"
-          >
-            <ChevronRight className="h-6 w-6" />
           </Button>
           <div className="relative w-full h-[80vh]">
             <Image
