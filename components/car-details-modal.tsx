@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,8 +28,6 @@ export default function CarDetailsModal({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
-  const [touchStartX, setTouchStartX] = useState(0);
-  const [touchEndX, setTouchEndX] = useState(0);
 
   const validImages = !!car?.images
     ? car.images.filter(
@@ -57,29 +55,6 @@ export default function CarDetailsModal({
     );
   };
 
-  // Teclado ← →
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen || zoomOpen) return;
-      if (e.key === "ArrowLeft") handlePrevImage();
-      if (e.key === "ArrowRight") handleNextImage();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, zoomOpen, validImages.length]);
-
-  // Swipe táctil
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEndX(e.changedTouches[0].clientX);
-    const deltaX = e.changedTouches[0].clientX - touchStartX;
-    if (deltaX > 50) handlePrevImage();
-    if (deltaX < -50) handleNextImage();
-  };
-
   useEffect(() => {
     if (car?.price) {
       setFormattedPrice(
@@ -103,6 +78,7 @@ export default function CarDetailsModal({
 
   return (
     <>
+      {/* Modal principal */}
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-3xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -122,12 +98,11 @@ export default function CarDetailsModal({
           </Button>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4">
+            {/* Galería */}
             <div className="space-y-4">
               <div
                 className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-zoom-in"
                 onClick={() => setZoomOpen(true)}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
               >
                 <Image
                   src={currentImage}
@@ -187,6 +162,7 @@ export default function CarDetailsModal({
               </div>
             </div>
 
+            {/* Info del auto */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-red-600 mb-2">
@@ -239,9 +215,9 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
+      {/* Modal de zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
-          <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
           <Button
             variant="ghost"
             size="icon"
