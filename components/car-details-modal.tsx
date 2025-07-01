@@ -25,32 +25,28 @@ export default function CarDetailsModal({
   onClose,
 }: CarDetailsModalProps) {
   const [zoomOpen, setZoomOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
-  // Validar imágenes y videos: strings no vacíos
-  const validMedia = !!car?.images
-    ? car.images.filter(
-        (media): media is string =>
-          typeof media === "string" &&
-          media.length > 0
-      )
-    : [];
+  const mediaList = car?.images ?? [];
 
   useEffect(() => {
-    if (isOpen) setCurrentImageIndex(0);
+    if (isOpen) setCurrentMediaIndex(0);
   }, [car, isOpen]);
 
+  const isVideo = (url: string) =>
+    url.endsWith(".mp4") || url.includes("video") || url.includes(".mov") || url.includes(".webm");
+
   const handlePrevMedia = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? validMedia.length - 1 : prev - 1
+    setCurrentMediaIndex((prev) =>
+      prev === 0 ? mediaList.length - 1 : prev - 1
     );
   };
 
   const handleNextMedia = () => {
-    setCurrentImageIndex((prev) =>
-      prev === validMedia.length - 1 ? 0 : prev + 1
+    setCurrentMediaIndex((prev) =>
+      prev === mediaList.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -71,10 +67,25 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
-  if (!car || validMedia.length === 0) return null;
+  if (!car || mediaList.length === 0) return null;
 
-  const currentMedia = validMedia[currentImageIndex];
-  const isVideo = /\.(mp4|webm|ogg)$/i.test(currentMedia);
+  const currentMedia = mediaList[currentMediaIndex];
+  const currentIsVideo = isVideo(currentMedia);
+
+  // Keyboard navigation for arrows
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!isOpen) return;
+      if (e.key === "ArrowLeft") handlePrevMedia();
+      if (e.key === "ArrowRight") handleNextMedia();
+      if (e.key === "Escape") {
+        if (zoomOpen) setZoomOpen(false);
+        else onClose();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, zoomOpen]);
 
   return (
     <>
@@ -100,20 +111,23 @@ export default function CarDetailsModal({
           <div className="grid md:grid-cols-2 gap-6 mt-4">
             {/* Galería */}
             <div className="space-y-4">
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-pointer">
-                {isVideo ? (
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+                {currentIsVideo ? (
                   <video
                     src={currentMedia}
                     controls
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-contain"
                   />
                 ) : (
-                  <div onClick={() => setZoomOpen(true)} className="cursor-zoom-in h-full relative">
+                  <div
+                    className="relative w-full h-full cursor-zoom-in"
+                    onClick={() => setZoomOpen(true)}
+                  >
                     <Image
                       src={currentMedia}
-                      alt={`Imagen ${currentImageIndex}`}
+                      alt={`Imagen ${currentMediaIndex}`}
                       fill
-                      className="object-cover rounded-lg"
+                      className="object-cover"
                     />
                     <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                       <ZoomIn className="w-3 h-3" />
@@ -125,10 +139,7 @@ export default function CarDetailsModal({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handlePrevMedia();
-                  }}
+                  onClick={handlePrevMedia}
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -136,10 +147,7 @@ export default function CarDetailsModal({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNextMedia();
-                  }}
+                  onClick={handleNextMedia}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
                 >
                   <ChevronRight className="h-5 w-5" />
@@ -147,32 +155,31 @@ export default function CarDetailsModal({
               </div>
 
               <div className="flex space-x-2 overflow-x-auto pb-2">
-                {validMedia.map((media, idx) => {
-                  const thumbIsVideo = /\.(mp4|webm|ogg)$/i.test(media);
+                {mediaList.map((media, idx) => {
+                  const thumbIsVideo = isVideo(media);
                   return (
                     <button
                       key={idx}
-                      onClick={() => setCurrentImageIndex(idx)}
+                      onClick={() => setCurrentMediaIndex(idx)}
                       className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                        currentImageIndex === idx
+                        currentMediaIndex === idx
                           ? "border-red-600"
                           : "border-transparent"
                       }`}
                     >
                       {thumbIsVideo ? (
-                        // Para video thumbnail podés usar el primer frame o ícono
                         <video
                           src={media}
                           muted
-                          className="object-cover w-full h-full rounded-md"
-                          playsInline
+                          className="object-cover w-full h-full"
+                          preload="metadata"
                         />
                       ) : (
                         <Image
                           src={media}
                           alt={`Thumb ${idx}`}
                           fill
-                          className="object-cover rounded-md"
+                          className="object-cover"
                         />
                       )}
                     </button>
@@ -234,8 +241,8 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom SOLO para imágenes */}
-      <Dialog open={zoomOpen && !isVideo} onOpenChange={setZoomOpen}>
+      {/* Modal de zoom para imágenes */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
           <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
           <Button
@@ -247,12 +254,14 @@ export default function CarDetailsModal({
             <X className="h-5 w-5" />
           </Button>
           <div className="relative w-full h-[80vh]">
-            <Image
-              src={currentMedia}
-              alt="Zoom"
-              fill
-              className="object-contain"
-            />
+            {!currentIsVideo && (
+              <Image
+                src={currentMedia}
+                alt="Zoom"
+                fill
+                className="object-contain"
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
