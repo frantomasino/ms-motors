@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,13 +29,12 @@ export default function CarDetailsModal({
   const [formattedPrice, setFormattedPrice] = useState("");
   const [formattedMileage, setFormattedMileage] = useState("");
 
-  const validImages = !!car?.images
+  // Validar imágenes y videos: strings no vacíos
+  const validMedia = !!car?.images
     ? car.images.filter(
-        (img): img is string =>
-          typeof img === "string" &&
-          img.length > 0 &&
-          !img.includes("video") &&
-          !img.includes(".mp4")
+        (media): media is string =>
+          typeof media === "string" &&
+          media.length > 0
       )
     : [];
 
@@ -43,15 +42,15 @@ export default function CarDetailsModal({
     if (isOpen) setCurrentImageIndex(0);
   }, [car, isOpen]);
 
-  const handlePrevImage = () => {
+  const handlePrevMedia = () => {
     setCurrentImageIndex((prev) =>
-      prev === 0 ? validImages.length - 1 : prev - 1
+      prev === 0 ? validMedia.length - 1 : prev - 1
     );
   };
 
-  const handleNextImage = () => {
+  const handleNextMedia = () => {
     setCurrentImageIndex((prev) =>
-      prev === validImages.length - 1 ? 0 : prev + 1
+      prev === validMedia.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -72,9 +71,10 @@ export default function CarDetailsModal({
     }
   }, [car]);
 
-  if (!car || validImages.length === 0) return null;
+  if (!car || validMedia.length === 0) return null;
 
-  const currentImage = validImages[currentImageIndex];
+  const currentMedia = validMedia[currentImageIndex];
+  const isVideo = /\.(mp4|webm|ogg)$/i.test(currentMedia);
 
   return (
     <>
@@ -100,23 +100,34 @@ export default function CarDetailsModal({
           <div className="grid md:grid-cols-2 gap-6 mt-4">
             {/* Galería */}
             <div className="space-y-4">
-              <div
-                className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-zoom-in"
-                onClick={() => setZoomOpen(true)}
-              >
-                <Image
-                  src={currentImage}
-                  alt={`Imagen ${currentImageIndex}`}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg cursor-pointer">
+                {isVideo ? (
+                  <video
+                    src={currentMedia}
+                    controls
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <div onClick={() => setZoomOpen(true)} className="cursor-zoom-in h-full relative">
+                    <Image
+                      src={currentMedia}
+                      alt={`Imagen ${currentImageIndex}`}
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                    <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                      <ZoomIn className="w-3 h-3" />
+                      Zoom
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handlePrevImage();
+                    handlePrevMedia();
                   }}
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
                 >
@@ -127,38 +138,46 @@ export default function CarDetailsModal({
                   size="icon"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleNextImage();
+                    handleNextMedia();
                   }}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full h-8 w-8"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
-
-                <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                  <ZoomIn className="w-3 h-3" />
-                  Zoom
-                </div>
               </div>
 
               <div className="flex space-x-2 overflow-x-auto pb-2">
-                {validImages.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentImageIndex(idx)}
-                    className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
-                      currentImageIndex === idx
-                        ? "border-red-600"
-                        : "border-transparent"
-                    }`}
-                  >
-                    <Image
-                      src={img}
-                      alt={`Thumb ${idx}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
+                {validMedia.map((media, idx) => {
+                  const thumbIsVideo = /\.(mp4|webm|ogg)$/i.test(media);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                        currentImageIndex === idx
+                          ? "border-red-600"
+                          : "border-transparent"
+                      }`}
+                    >
+                      {thumbIsVideo ? (
+                        // Para video thumbnail podés usar el primer frame o ícono
+                        <video
+                          src={media}
+                          muted
+                          className="object-cover w-full h-full rounded-md"
+                          playsInline
+                        />
+                      ) : (
+                        <Image
+                          src={media}
+                          alt={`Thumb ${idx}`}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -215,9 +234,10 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+      {/* Modal de zoom SOLO para imágenes */}
+      <Dialog open={zoomOpen && !isVideo} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+          <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -228,7 +248,7 @@ export default function CarDetailsModal({
           </Button>
           <div className="relative w-full h-[80vh]">
             <Image
-              src={currentImage}
+              src={currentMedia}
               alt="Zoom"
               fill
               className="object-contain"
