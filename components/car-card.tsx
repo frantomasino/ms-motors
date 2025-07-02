@@ -25,7 +25,7 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   };
 
   const formatMileage = (mileage: number) => {
-    return new Intl.NumberFormat("en-US").format(mileage);
+    return new Intl.NumberFormat("es-AR").format(mileage); // Cambio hecho acá
   };
 
   // Buscar primera imagen válida que no sea video
