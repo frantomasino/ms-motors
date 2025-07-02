@@ -78,8 +78,10 @@ export default function HeroSection() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Compra Segura</h3>
-              <p className="text-gray-800">
+              <h3 className="text-lg md:text-xl font-semibold mb-1 md:mb-2">
+                Compra Segura
+              </h3>
+              <p className="text-gray-800 leading-relaxed text-sm md:text-base">
                 Todos nuestros vehículos están verificados y con garantía.
               </p>
             </div>
@@ -102,10 +104,10 @@ export default function HeroSection() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                 Tomamos tu usado
+              <h3 className="text-lg md:text-xl font-semibold mb-1 md:mb-2">
+                Tomamos tu usado
               </h3>
-              <p className="text-gray-800">
+              <p className="text-gray-800 leading-relaxed text-sm md:text-base">
                 Aceptamos permutas como parte de pago.
               </p>
             </div>
@@ -128,8 +130,10 @@ export default function HeroSection() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Atención Premium</h3>
-              <p className="text-gray-800">
+              <h3 className="text-lg md:text-xl font-semibold mb-1 md:mb-2">
+                Atención Premium
+              </h3>
+              <p className="text-gray-800 leading-relaxed text-sm md:text-base">
                 Servicio personalizado antes, durante y después de la compra.
               </p>
             </div>

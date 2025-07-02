@@ -17,18 +17,13 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
+    return `${new Intl.NumberFormat("es-AR").format(price)} USD`;
   };
 
   const formatMileage = (mileage: number) => {
-    return new Intl.NumberFormat("es-AR").format(mileage); // Cambio hecho acá
+    return new Intl.NumberFormat("es-AR").format(mileage);
   };
 
-  // Buscar primera imagen válida que no sea video
   const firstValidImage =
     car.images.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg";
 
