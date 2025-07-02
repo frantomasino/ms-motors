@@ -112,29 +112,31 @@ export default function CarDetailsModal({
             {/* Galería */}
             <div className="space-y-4">
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-                {currentIsVideo ? (
-                  <video
-                    src={currentMedia}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div
-                    className="relative w-full h-full cursor-zoom-in"
-                    onClick={() => setZoomOpen(true)}
-                  >
-                    <Image
+                <div
+                  className={`relative w-full h-full cursor-zoom-in`}
+                  onClick={() => setZoomOpen(true)}
+                >
+                  {currentIsVideo ? (
+                    <video
                       src={currentMedia}
-                      alt={`Imagen ${currentMediaIndex}`}
-                      fill
-                      className="object-cover"
+                      controls
+                      className="w-full h-full object-contain"
                     />
-                    <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-                      <ZoomIn className="w-3 h-3" />
-                      Zoom
-                    </div>
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      <Image
+                        src={currentMedia}
+                        alt={`Imagen ${currentMediaIndex}`}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                        <ZoomIn className="w-3 h-3" />
+                        Zoom
+                      </div>
+                    </>
+                  )}
+                </div>
 
                 <Button
                   variant="ghost"
@@ -241,10 +243,10 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom para imágenes */}
+      {/* Modal de zoom para imagen o video */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
-          <DialogTitle className="sr-only">Zoom de imagen</DialogTitle>
+          <DialogTitle className="sr-only">Zoom de media</DialogTitle>
           <Button
             variant="ghost"
             size="icon"
@@ -253,8 +255,15 @@ export default function CarDetailsModal({
           >
             <X className="h-5 w-5" />
           </Button>
-          <div className="relative w-full h-[80vh]">
-            {!currentIsVideo && (
+          <div className="relative w-full h-[80vh] flex items-center justify-center">
+            {currentIsVideo ? (
+              <video
+                src={currentMedia}
+                controls
+                autoPlay
+                className="h-full w-full object-contain"
+              />
+            ) : (
               <Image
                 src={currentMedia}
                 alt="Zoom"
