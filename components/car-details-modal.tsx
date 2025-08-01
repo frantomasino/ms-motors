@@ -42,6 +42,18 @@ export default function CarDetailsModal({
     if (isOpen) setCurrentMediaIndex(0);
   }, [car, isOpen]);
 
+  // Bloqueo scroll body cuando modal está abierto
+  useEffect(() => {
+    if (isOpen || zoomOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, zoomOpen]);
+
   const isVideo = (url: string) =>
     url.endsWith(".mp4") ||
     url.includes("video") ||
@@ -99,24 +111,34 @@ export default function CarDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
-          <DialogHeader className="w-full">
+        <DialogContent
+          className="
+            fixed inset-0 m-auto
+            max-w-3xl w-full max-h-[95vh]
+            overflow-y-auto
+            flex flex-col justify-center items-center
+            bg-white dark:bg-gray-900
+            rounded-md
+            p-4
+            z-[9999]
+            shadow-lg
+          "
+        >
+          <DialogHeader className="w-full relative">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
             </DialogTitle>
-            <DialogDescription>
-              Detalles del vehículo seleccionado.
-            </DialogDescription>
-          </DialogHeader>
+            <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-50"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-[10000] bg-white dark:bg-gray-900 shadow"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </DialogHeader>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
             {/* Galería */}
@@ -215,21 +237,15 @@ export default function CarDetailsModal({
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Combustible:
-                    </span>
+                    <span className="text-gray-600 font-medium">Combustible:</span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Kilometraje:
-                    </span>
+                    <span className="text-gray-600 font-medium">Kilometraje:</span>
                     <span>{formattedMileage}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Transmisión:
-                    </span>
+                    <span className="text-gray-600 font-medium">Transmisión:</span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
@@ -264,7 +280,7 @@ export default function CarDetailsModal({
 
       {/* Modal de zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative z-[9999]">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
           <Button
             variant="ghost"
@@ -295,4 +311,4 @@ export default function CarDetailsModal({
       </Dialog>
     </>
   );
-}  
+}
