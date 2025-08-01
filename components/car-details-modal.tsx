@@ -1,3 +1,4 @@
+car-details-modal.tsx 
 "use client";
 
 import { useEffect, useState, useRef } from "react";
@@ -99,9 +100,7 @@ export default function CarDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent
-          className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center relative z-[9999]"
-        >
+        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
           <DialogHeader className="w-full">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
@@ -111,14 +110,13 @@ export default function CarDetailsModal({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Botón cerrar mejorado */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute right-4 top-4 z-[99999] bg-black bg-opacity-60 hover:bg-opacity-80 text-white rounded-full p-1"
+            className="absolute right-4 top-4 z-50"
           >
-            <X className="h-6 w-6" />
+            <X className="h-4 w-4" />
           </Button>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
@@ -267,7 +265,7 @@ export default function CarDetailsModal({
 
       {/* Modal de zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative z-[9999]">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
           <Button
             variant="ghost"
@@ -298,4 +296,4 @@ export default function CarDetailsModal({
       </Dialog>
     </>
   );
-}
+}  
