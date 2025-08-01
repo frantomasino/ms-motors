@@ -111,13 +111,14 @@ export default function CarDetailsModal({
             </DialogDescription>
           </DialogHeader>
 
+          {/* Botón cerrar mejorado */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute right-4 top-4 z-50"
+            className="absolute right-4 top-4 z-[99999] bg-black bg-opacity-60 hover:bg-opacity-80 text-white rounded-full p-1"
           >
-            <X className="h-4 w-4" />
+            <X className="h-6 w-6" />
           </Button>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
