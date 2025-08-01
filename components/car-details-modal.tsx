@@ -42,11 +42,28 @@ export default function CarDetailsModal({
     if (isOpen) setCurrentMediaIndex(0);
   }, [car, isOpen]);
 
+  useEffect(() => {
+    if (car?.price) {
+      setFormattedPrice(`USD ${new Intl.NumberFormat("es-AR").format(car.price)}`);
+    }
+    if (car?.mileage) {
+      setFormattedMileage(`${new Intl.NumberFormat("es-AR").format(car.mileage)} km`);
+    }
+  }, [car]);
+
+  useEffect(() => {
+    if (isOpen || zoomOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, zoomOpen]);
+
   const isVideo = (url: string) =>
-    url.endsWith(".mp4") ||
-    url.includes("video") ||
-    url.includes(".mov") ||
-    url.includes(".webm");
+    url.endsWith(".mp4") || url.includes("video") || url.includes(".mov") || url.includes(".webm");
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -59,28 +76,6 @@ export default function CarDetailsModal({
       prev === mediaList.length - 1 ? 0 : prev + 1
     );
   };
-
-  useEffect(() => {
-    if (car?.price) {
-      setFormattedPrice(
-        new Intl.NumberFormat("es-AR", {
-          style: "currency",
-          currency: "USD",
-          maximumFractionDigits: 0,
-        }).format(car.price)
-      );
-    }
-    if (car?.mileage) {
-      setFormattedMileage(
-        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-      );
-    }
-  }, [car]);
-
-  if (!car || mediaList.length === 0) return null;
-
-  const currentMedia = mediaList[currentMediaIndex];
-  const currentIsVideo = isVideo(currentMedia);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -96,27 +91,40 @@ export default function CarDetailsModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, zoomOpen]);
 
+  if (!car || mediaList.length === 0) return null;
+
+  const currentMedia = mediaList[currentMediaIndex];
+  const currentIsVideo = isVideo(currentMedia);
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
-          <DialogHeader className="w-full">
+        <DialogContent
+          className="
+            fixed inset-0 z-50 m-auto
+            sm:max-w-3xl w-full max-h-[95vh]
+            overflow-y-auto
+            bg-white dark:bg-gray-900
+            rounded-lg shadow-lg
+            flex flex-col justify-center items-center
+            p-4
+          "
+        >
+          <DialogHeader className="w-full relative">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
             </DialogTitle>
-            <DialogDescription>
-              Detalles del vehículo seleccionado.
-            </DialogDescription>
-          </DialogHeader>
+            <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-50"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-50"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogHeader>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
             {/* Galería */}
@@ -203,9 +211,9 @@ export default function CarDetailsModal({
               </div>
             </div>
 
-            {/* Info del auto */}
+            {/* Info */}
             <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50 p-4 rounded-lg w-full">
                 <div className="text-3xl font-bold text-red-600 mb-2">
                   {formattedPrice}
                 </div>
@@ -215,21 +223,15 @@ export default function CarDetailsModal({
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Combustible:
-                    </span>
+                    <span className="text-gray-600 font-medium">Combustible:</span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Kilometraje:
-                    </span>
+                    <span className="text-gray-600 font-medium">Kilometraje:</span>
                     <span>{formattedMileage}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Transmisión:
-                    </span>
+                    <span className="text-gray-600 font-medium">Transmisión:</span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
@@ -262,9 +264,9 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom */}
+      {/* Zoom Modal */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+<DialogContent className="fixed inset-0 m-auto sm:max-w-3xl max-h-[95vh] w-full overflow-y-auto flex flex-col justify-center items-center z-50 bg-white rounded-lg p-4 shadow-lg">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
           <Button
             variant="ghost"
