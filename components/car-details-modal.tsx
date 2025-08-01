@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import {
@@ -136,7 +136,7 @@ export default function CarDetailsModal({
                     <>
                       <Image
                         src={currentMedia}
-                        alt={Imagen ${currentMediaIndex}}
+                        alt={`Imagen ${currentMediaIndex}`}
                         fill
                         className="object-cover"
                       />
@@ -176,11 +176,11 @@ export default function CarDetailsModal({
                     <button
                       key={idx}
                       onClick={() => setCurrentMediaIndex(idx)}
-                      className={relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
                         currentMediaIndex === idx
                           ? "border-red-600"
                           : "border-transparent"
-                      }}
+                      }`}
                     >
                       {thumbIsVideo ? (
                         <video
@@ -192,7 +192,7 @@ export default function CarDetailsModal({
                       ) : (
                         <Image
                           src={media}
-                          alt={Thumb ${idx}}
+                          alt={`Thumb ${idx}`}
                           fill
                           className="object-cover"
                         />
@@ -246,9 +246,9 @@ export default function CarDetailsModal({
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
                   <a
-                    href={https://wa.me/5491159456142?text=${encodeURIComponent(
-                      Hola! Estoy interesado en el ${car.brand} ${car.model}
-                    )}}
+                    href={`https://wa.me/5491159456142?text=${encodeURIComponent(
+                      `Hola! Estoy interesado en el ${car.brand} ${car.model}`
+                    )}`}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -295,4 +295,4 @@ export default function CarDetailsModal({
       </Dialog>
     </>
   );
-}  
+}
