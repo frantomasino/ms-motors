@@ -9,7 +9,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, X, MessageCircle, ZoomIn } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  MessageCircle,
+  ZoomIn,
+} from "lucide-react";
 import Image from "next/image";
 import type { Car } from "@/types";
 
@@ -37,7 +43,10 @@ export default function CarDetailsModal({
   }, [car, isOpen]);
 
   const isVideo = (url: string) =>
-    url.endsWith(".mp4") || url.includes("video") || url.includes(".mov") || url.includes(".webm");
+    url.endsWith(".mp4") ||
+    url.includes("video") ||
+    url.includes(".mov") ||
+    url.includes(".webm");
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) =>
@@ -90,12 +99,16 @@ export default function CarDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
+        <DialogContent
+          className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center relative z-[9999]"
+        >
           <DialogHeader className="w-full">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
             </DialogTitle>
-            <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
+            <DialogDescription>
+              Detalles del vehículo seleccionado.
+            </DialogDescription>
           </DialogHeader>
 
           <Button
@@ -204,15 +217,21 @@ export default function CarDetailsModal({
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Combustible:</span>
+                    <span className="text-gray-600 font-medium">
+                      Combustible:
+                    </span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Kilometraje:</span>
+                    <span className="text-gray-600 font-medium">
+                      Kilometraje:
+                    </span>
                     <span>{formattedMileage}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Transmisión:</span>
+                    <span className="text-gray-600 font-medium">
+                      Transmisión:
+                    </span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
@@ -247,7 +266,7 @@ export default function CarDetailsModal({
 
       {/* Modal de zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative z-[9999]">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
           <Button
             variant="ghost"
