@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState, useRef } from "react";
 import {
@@ -41,18 +41,6 @@ export default function CarDetailsModal({
   useEffect(() => {
     if (isOpen) setCurrentMediaIndex(0);
   }, [car, isOpen]);
-
-  // Bloquear scroll al abrir modal
-  useEffect(() => {
-    if (isOpen || zoomOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen, zoomOpen]);
 
   const isVideo = (url: string) =>
     url.endsWith(".mp4") ||
@@ -111,22 +99,24 @@ export default function CarDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center relative">
-          <DialogHeader className="w-full relative">
+        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
+          <DialogHeader className="w-full">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
             </DialogTitle>
-            <DialogDescription>Detalles del vehículo seleccionado.</DialogDescription>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="absolute right-4 top-4 z-[50] bg-white/80 backdrop-blur text-black"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <DialogDescription>
+              Detalles del vehículo seleccionado.
+            </DialogDescription>
           </DialogHeader>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="absolute right-4 top-4 z-50"
+          >
+            <X className="h-4 w-4" />
+          </Button>
 
           <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
             {/* Galería */}
@@ -146,7 +136,7 @@ export default function CarDetailsModal({
                     <>
                       <Image
                         src={currentMedia}
-                        alt={`Imagen ${currentMediaIndex}`}
+                        alt={Imagen ${currentMediaIndex}}
                         fill
                         className="object-cover"
                       />
@@ -176,18 +166,21 @@ export default function CarDetailsModal({
                 </Button>
               </div>
 
-              <div ref={scrollRef} className="flex space-x-2 overflow-x-auto pb-2">
+              <div
+                ref={scrollRef}
+                className="flex space-x-2 overflow-x-auto pb-2"
+              >
                 {mediaList.map((media, idx) => {
                   const thumbIsVideo = isVideo(media);
                   return (
                     <button
                       key={idx}
                       onClick={() => setCurrentMediaIndex(idx)}
-                      className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
+                      className={relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 ${
                         currentMediaIndex === idx
                           ? "border-red-600"
                           : "border-transparent"
-                      }`}
+                      }}
                     >
                       {thumbIsVideo ? (
                         <video
@@ -199,7 +192,7 @@ export default function CarDetailsModal({
                       ) : (
                         <Image
                           src={media}
-                          alt={`Thumb ${idx}`}
+                          alt={Thumb ${idx}}
                           fill
                           className="object-cover"
                         />
@@ -213,22 +206,30 @@ export default function CarDetailsModal({
             {/* Info del auto */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">{formattedPrice}</div>
+                <div className="text-3xl font-bold text-red-600 mb-2">
+                  {formattedPrice}
+                </div>
                 <div className="space-y-2 divide-y divide-gray-200">
                   <div className="grid grid-cols-2 py-2">
                     <span className="text-gray-600 font-medium">Color:</span>
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Combustible:</span>
+                    <span className="text-gray-600 font-medium">
+                      Combustible:
+                    </span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Kilometraje:</span>
+                    <span className="text-gray-600 font-medium">
+                      Kilometraje:
+                    </span>
                     <span>{formattedMileage}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Transmisión:</span>
+                    <span className="text-gray-600 font-medium">
+                      Transmisión:
+                    </span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
@@ -245,9 +246,9 @@ export default function CarDetailsModal({
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
                   <a
-                    href={`https://wa.me/5491159456142?text=${encodeURIComponent(
-                      `Hola! Estoy interesado en el ${car.brand} ${car.model}`
-                    )}`}
+                    href={https://wa.me/5491159456142?text=${encodeURIComponent(
+                      Hola! Estoy interesado en el ${car.brand} ${car.model}
+                    )}}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -260,6 +261,38 @@ export default function CarDetailsModal({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de zoom */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
+          <DialogTitle className="sr-only">Zoom</DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setZoomOpen(false)}
+            className="absolute right-4 top-4 z-50 text-white"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <div className="relative w-full h-[80vh] flex items-center justify-center">
+            {currentIsVideo ? (
+              <video
+                src={currentMedia}
+                controls
+                autoPlay
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <Image
+                src={currentMedia}
+                alt="Zoom"
+                fill
+                className="object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
-}
+}  
