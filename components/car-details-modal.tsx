@@ -32,8 +32,6 @@ export default function CarDetailsModal({
 }: CarDetailsModalProps) {
   const [zoomOpen, setZoomOpen] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [formattedPrice, setFormattedPrice] = useState("");
-  const [formattedMileage, setFormattedMileage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const mediaList = car?.images ?? [];
@@ -60,22 +58,11 @@ export default function CarDetailsModal({
     );
   };
 
-  useEffect(() => {
-    if (car?.price) {
-      setFormattedPrice(`USD ${new Intl.NumberFormat("es-AR").format(car.price)}`);
+  const formatPrice = (price: number) =>
+    `USD ${new Intl.NumberFormat("es-AR").format(price)}`;
 
-    }
-    if (car?.mileage) {
-      setFormattedMileage(
-        new Intl.NumberFormat("es-AR").format(car.mileage) + " km"
-      );
-    }
-  }, [car]);
-
-  if (!car || mediaList.length === 0) return null;
-
-  const currentMedia = mediaList[currentMediaIndex];
-  const currentIsVideo = isVideo(currentMedia);
+  const formatMileage = (mileage: number) =>
+    `${new Intl.NumberFormat("es-AR").format(mileage)} km`;
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -91,32 +78,33 @@ export default function CarDetailsModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, zoomOpen]);
 
+  if (!car) return null;
+
+  const currentMedia = mediaList[currentMediaIndex];
+  const currentIsVideo = isVideo(currentMedia);
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center">
-          <DialogHeader className="w-full">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-center justify-between relative">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
             </DialogTitle>
-            <DialogDescription>
-              Detalles del vehículo seleccionado.
-            </DialogDescription>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-50"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </DialogHeader>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-50"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-
-          <div className="grid md:grid-cols-2 gap-6 mt-4 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             {/* Galería */}
             <div className="space-y-4">
-<div className="relative w-full h-[280px] md:h-[320px] overflow-hidden rounded-lg">
+              <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden rounded-lg">
                 <div
                   className="relative w-full h-full cursor-zoom-in"
                   onClick={() => setZoomOpen(true)}
@@ -131,7 +119,7 @@ export default function CarDetailsModal({
                     <>
                       <Image
                         src={currentMedia}
-                        alt={`Imagen ${currentMediaIndex}`}
+                        alt={`${car.model} - Image ${currentMediaIndex + 1}`}
                         fill
                         className="object-cover"
                       />
@@ -187,7 +175,7 @@ export default function CarDetailsModal({
                       ) : (
                         <Image
                           src={media}
-                          alt={`Thumb ${idx}`}
+                          alt={`${car.model} thumbnail ${idx + 1}`}
                           fill
                           className="object-cover"
                         />
@@ -202,7 +190,7 @@ export default function CarDetailsModal({
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-red-600 mb-2">
-                  {formattedPrice}
+                  {car.price ? formatPrice(car.price) : ""}
                 </div>
                 <div className="space-y-2 divide-y divide-gray-200">
                   <div className="grid grid-cols-2 py-2">
@@ -210,21 +198,17 @@ export default function CarDetailsModal({
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Combustible:
-                    </span>
+                    <span className="text-gray-600 font-medium">Combustible:</span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Kilometraje:
+                    <span className="text-gray-600 font-medium">Kilometraje:</span>
+                    <span>
+                      {car.mileage ? formatMileage(car.mileage) : ""}
                     </span>
-                    <span>{formattedMileage}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">
-                      Transmisión:
-                    </span>
+                    <span className="text-gray-600 font-medium">Transmisión:</span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
@@ -257,7 +241,7 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal de zoom */}
+      {/* Modal zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
