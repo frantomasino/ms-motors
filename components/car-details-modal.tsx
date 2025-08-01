@@ -42,7 +42,7 @@ export default function CarDetailsModal({
     if (isOpen) setCurrentMediaIndex(0);
   }, [car, isOpen]);
 
-  // Bloqueo scroll body cuando modal está abierto
+  // Bloquear scroll al abrir modal
   useEffect(() => {
     if (isOpen || zoomOpen) {
       document.body.style.overflow = "hidden";
@@ -111,19 +111,7 @@ export default function CarDetailsModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent
-          className="
-            fixed inset-0 m-auto
-            max-w-3xl w-full max-h-[95vh]
-            overflow-y-auto
-            flex flex-col justify-center items-center
-            bg-white dark:bg-gray-900
-            rounded-md
-            p-4
-            z-[9999]
-            shadow-lg
-          "
-        >
+        <DialogContent className="sm:max-w-3xl w-full max-h-[95vh] overflow-y-auto flex flex-col justify-center items-center relative">
           <DialogHeader className="w-full relative">
             <DialogTitle className="text-2xl font-bold">
               {car.model} - {car.year}
@@ -134,7 +122,7 @@ export default function CarDetailsModal({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="absolute right-4 top-4 z-[10000] bg-white dark:bg-gray-900 shadow"
+              className="absolute right-4 top-4 z-[50] bg-white/80 backdrop-blur text-black"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -188,10 +176,7 @@ export default function CarDetailsModal({
                 </Button>
               </div>
 
-              <div
-                ref={scrollRef}
-                className="flex space-x-2 overflow-x-auto pb-2"
-              >
+              <div ref={scrollRef} className="flex space-x-2 overflow-x-auto pb-2">
                 {mediaList.map((media, idx) => {
                   const thumbIsVideo = isVideo(media);
                   return (
@@ -228,9 +213,7 @@ export default function CarDetailsModal({
             {/* Info del auto */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">
-                  {formattedPrice}
-                </div>
+                <div className="text-3xl font-bold text-red-600 mb-2">{formattedPrice}</div>
                 <div className="space-y-2 divide-y divide-gray-200">
                   <div className="grid grid-cols-2 py-2">
                     <span className="text-gray-600 font-medium">Color:</span>
@@ -274,38 +257,6 @@ export default function CarDetailsModal({
                 </Button>
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de zoom */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative z-[9999]">
-          <DialogTitle className="sr-only">Zoom</DialogTitle>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setZoomOpen(false)}
-            className="absolute right-4 top-4 z-50 text-white"
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          <div className="relative w-full h-[80vh] flex items-center justify-center">
-            {currentIsVideo ? (
-              <video
-                src={currentMedia}
-                controls
-                autoPlay
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <Image
-                src={currentMedia}
-                alt="Zoom"
-                fill
-                className="object-contain"
-              />
-            )}
           </div>
         </DialogContent>
       </Dialog>
