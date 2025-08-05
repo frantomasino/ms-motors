@@ -524,22 +524,11 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-  <p>
-    &copy; {new Date().getFullYear()} MS Motors. Todos los derechos reservados.
-  </p>
-  <p className="mt-2 text-xs text-gray-600">
-    Desarrollado por{" "}
-    <a
-      href="https://www.linkedin.com/in/francisco-tomasino/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="hover:underline text-blue-400"
-    >
-      FTS
-    </a>
-  </p>
-</div>
-
+            <p>
+              &copy; {new Date().getFullYear()} MS Motors. Todos los derechos
+              reservados.
+            </p>
+          </div>
         </div>
       </footer>
 
