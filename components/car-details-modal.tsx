@@ -33,6 +33,7 @@ export default function CarDetailsModal({
   const [zoomOpen, setZoomOpen] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<HTMLDivElement>(null); // 👈 NUEVO REF
 
   const mediaList = car?.images ?? [];
 
@@ -64,6 +65,7 @@ export default function CarDetailsModal({
   const formatMileage = (mileage: number) =>
     `${new Intl.NumberFormat("es-AR").format(mileage)} km`;
 
+  // Navegación con teclado
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!isOpen) return;
@@ -77,6 +79,44 @@ export default function CarDetailsModal({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, zoomOpen]);
+
+  // Swipe con el dedo en mobile 👇
+  useEffect(() => {
+    const swipeEl = swipeRef.current;
+    if (!swipeEl) return;
+
+    let startX = 0;
+    let endX = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      endX = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = () => {
+      const diffX = endX - startX;
+      if (Math.abs(diffX) > 50) {
+        if (diffX < 0) {
+          handleNextMedia(); // Swipe left
+        } else {
+          handlePrevMedia(); // Swipe right
+        }
+      }
+    };
+
+    swipeEl.addEventListener("touchstart", handleTouchStart);
+    swipeEl.addEventListener("touchmove", handleTouchMove);
+    swipeEl.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      swipeEl.removeEventListener("touchstart", handleTouchStart);
+      swipeEl.removeEventListener("touchmove", handleTouchMove);
+      swipeEl.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [mediaList, currentMediaIndex]);
 
   if (!car) return null;
 
@@ -106,6 +146,7 @@ export default function CarDetailsModal({
             <div className="space-y-4">
               <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden rounded-lg">
                 <div
+                  ref={swipeRef} // 👈 APLICAMOS EL REF ACÁ
                   className="relative w-full h-full cursor-zoom-in"
                   onClick={() => setZoomOpen(true)}
                 >
@@ -198,17 +239,23 @@ export default function CarDetailsModal({
                     <span>{car.color}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Combustible:</span>
+                    <span className="text-gray-600 font-medium">
+                      Combustible:
+                    </span>
                     <span>{car.fuelType}</span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Kilometraje:</span>
+                    <span className="text-gray-600 font-medium">
+                      Kilometraje:
+                    </span>
                     <span>
                       {car.mileage ? formatMileage(car.mileage) : ""}
                     </span>
                   </div>
                   <div className="grid grid-cols-2 py-2">
-                    <span className="text-gray-600 font-medium">Transmisión:</span>
+                    <span className="text-gray-600 font-medium">
+                      Transmisión:
+                    </span>
                     <span>{car.transmission}</span>
                   </div>
                 </div>
