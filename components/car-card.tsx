@@ -49,7 +49,9 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
       </div>
 
       <CardContent className="p-4">
-        <h3 className="font-bold text-lg mb-2 text-gray-800">{car.model}</h3>
+<h3 className="font-bold text-lg mb-2 text-gray-800">
+  {car.brand} {car.model}
+</h3>
         <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
           <div className="flex items-center">
             <Calendar className="h-4 w-4 mr-1 text-gray-500" />
