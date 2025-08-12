@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,8 +33,7 @@ export default function CarDetailsModal({
   const [zoomOpen, setZoomOpen] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const swipeRef = useRef<HTMLDivElement>(null);
-  const zoomSwipeRef = useRef<HTMLDivElement>(null);
+  const swipeRef = useRef<HTMLDivElement>(null); // 👈 NUEVO REF
 
   const mediaList = car?.images ?? [];
 
@@ -65,10 +65,10 @@ export default function CarDetailsModal({
   const formatMileage = (mileage: number) =>
     `${new Intl.NumberFormat("es-AR").format(mileage)} km`;
 
-  // Navegación con teclado (aplica a modal normal y zoom)
+  // Navegación con teclado
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (!isOpen && !zoomOpen) return;
+      if (!isOpen) return;
       if (e.key === "ArrowLeft") handlePrevMedia();
       if (e.key === "ArrowRight") handleNextMedia();
       if (e.key === "Escape") {
@@ -80,7 +80,7 @@ export default function CarDetailsModal({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, zoomOpen]);
 
-  // Swipe en galería normal
+  // Swipe con el dedo en mobile 👇
   useEffect(() => {
     const swipeEl = swipeRef.current;
     if (!swipeEl) return;
@@ -91,45 +91,19 @@ export default function CarDetailsModal({
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX;
     };
+
     const handleTouchMove = (e: TouchEvent) => {
       endX = e.touches[0].clientX;
     };
+
     const handleTouchEnd = () => {
       const diffX = endX - startX;
       if (Math.abs(diffX) > 50) {
-        diffX < 0 ? handleNextMedia() : handlePrevMedia();
-      }
-    };
-
-    swipeEl.addEventListener("touchstart", handleTouchStart);
-    swipeEl.addEventListener("touchmove", handleTouchMove);
-    swipeEl.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      swipeEl.removeEventListener("touchstart", handleTouchStart);
-      swipeEl.removeEventListener("touchmove", handleTouchMove);
-      swipeEl.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [mediaList, currentMediaIndex]);
-
-  // Swipe en modal de zoom
-  useEffect(() => {
-    const swipeEl = zoomSwipeRef.current;
-    if (!swipeEl) return;
-
-    let startX = 0;
-    let endX = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-    };
-    const handleTouchMove = (e: TouchEvent) => {
-      endX = e.touches[0].clientX;
-    };
-    const handleTouchEnd = () => {
-      const diffX = endX - startX;
-      if (Math.abs(diffX) > 50) {
-        diffX < 0 ? handleNextMedia() : handlePrevMedia();
+        if (diffX < 0) {
+          handleNextMedia(); // Swipe left
+        } else {
+          handlePrevMedia(); // Swipe right
+        }
       }
     };
 
@@ -151,7 +125,6 @@ export default function CarDetailsModal({
 
   return (
     <>
-      {/* Modal principal */}
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="flex flex-row items-center justify-between relative">
@@ -173,7 +146,7 @@ export default function CarDetailsModal({
             <div className="space-y-4">
               <div className="relative w-full h-[280px] md:h-[320px] overflow-hidden rounded-lg">
                 <div
-                  ref={swipeRef}
+                  ref={swipeRef}  
                   className="relative w-full h-full cursor-zoom-in"
                   onClick={() => setZoomOpen(true)}
                 >
@@ -199,7 +172,6 @@ export default function CarDetailsModal({
                   )}
                 </div>
 
-                {/* Botones prev/next */}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -218,7 +190,6 @@ export default function CarDetailsModal({
                 </Button>
               </div>
 
-              {/* Thumbnails */}
               <div
                 ref={scrollRef}
                 className="flex space-x-2 overflow-x-auto pb-2"
@@ -256,7 +227,7 @@ export default function CarDetailsModal({
               </div>
             </div>
 
-            {/* Info */}
+            {/* Info del auto */}
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-red-600 mb-2">
@@ -317,9 +288,9 @@ export default function CarDetailsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Modal zoom con swipe */}
+      {/* Modal zoom */}
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black relative">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 bg-black">
           <DialogTitle className="sr-only">Zoom</DialogTitle>
           <Button
             variant="ghost"
@@ -329,12 +300,7 @@ export default function CarDetailsModal({
           >
             <X className="h-5 w-5" />
           </Button>
-
-          {/* Swipe area */}
-          <div
-            ref={zoomSwipeRef}
-            className="relative w-full h-[80vh] flex items-center justify-center"
-          >
+          <div className="relative w-full h-[80vh] flex items-center justify-center">
             {currentIsVideo ? (
               <video
                 src={currentMedia}
@@ -350,24 +316,6 @@ export default function CarDetailsModal({
                 className="object-contain"
               />
             )}
-
-            {/* Botones navegación */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handlePrevMedia}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full h-10 w-10"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNextMedia}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full h-10 w-10"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
