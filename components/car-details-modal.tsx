@@ -33,7 +33,7 @@ export default function CarDetailsModal({
   const [zoomOpen, setZoomOpen] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const swipeRef = useRef<HTMLDivElement>(null); // 👈 NUEVO REF
+  const swipeRef = useRef<HTMLDivElement>(null);
 
   const mediaList = car?.images ?? [];
 
