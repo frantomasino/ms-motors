@@ -34,3 +34,8 @@ next-env.d.ts
 # Directorios de build
 .next
 out
+
+
+.env
+.env.local
+.env.*.local

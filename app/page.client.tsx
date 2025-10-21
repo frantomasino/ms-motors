@@ -11,6 +11,7 @@ import HeroSection from "@/components/hero-section";
 import { Input } from "@/components/ui/input";
 import FilterPanel from "@/components/filter-panel";
 import { CarType, FilterState } from "@/types";
+import ScrollToTopButton from "@/components/scroll-to-top-button"; // 👈 agregado
 
 interface ClientPageProps {
   initialCars: CarType[];
@@ -473,11 +474,16 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
                   </a>
                 </li>
                 <li>
-              <a href="https://wa.me/5491159456142"  target="_blank"  rel="noopener noreferrer"   className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="https://wa.me/5491159456142"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Contacto
-               </a>
+                  </a>
                 </li>
-     </ul>
+              </ul>
             </div>
 
             <div>
@@ -507,7 +513,7 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
                     Seguros
                   </a>
                 </li>
-                 <li>
+                <li>
                   <a
                     href="#"
                     className="text-gray-400 hover:text-white transition-colors"
@@ -523,7 +529,7 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
               <address className="not-italic text-gray-400">
                 <p className="mb-2">Quilmes. Buenos Aires</p>
                 <p className="mb-2">+54 11 5945-6142</p>
-               </address>
+              </address>
             </div>
           </div>
 
@@ -553,6 +559,9 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
         onFiltersChange={setFilters}
         cars={cars}
       />
+
+      {/* 👇 Botón flotante “Subir” (oculto si el modal está abierto) */}
+      <ScrollToTopButton hidden={isModalOpen} />
     </div>
   );
 }
