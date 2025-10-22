@@ -11,7 +11,7 @@ import HeroSection from "@/components/hero-section";
 import { Input } from "@/components/ui/input";
 import FilterPanel from "@/components/filter-panel";
 import { CarType, FilterState } from "@/types";
-import ScrollToTopButton from "@/components/scroll-to-top-button"; // 👈 agregado
+import ScrollToTopButton from "@/components/scroll-to-top-button";
 
 interface ClientPageProps {
   initialCars: CarType[];
@@ -147,7 +147,7 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
     });
   }, [cars, searchTerm, filters]);
 
-  // Calculate active filters count
+  // Calculate active filters count (para badge en botón)
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (filters.brands.length > 0) count++;
@@ -171,6 +171,100 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
       count++;
     return count;
   }, [filters, filterOptions]);
+
+  // ====== NUEVO: helper ranges + chips removibles ======
+  const defaultRanges = useMemo(() => ({
+    price: [0, filterOptions.priceRange[1]] as [number, number],
+    year: [filterOptions.yearRange[0], filterOptions.yearRange[1]] as [number, number],
+    mileage: [0, filterOptions.mileageRange[1]] as [number, number],
+  }), [filterOptions]);
+
+  const removeBrand = (b: string) =>
+    setFilters((prev) => ({ ...prev, brands: prev.brands.filter((x) => x !== b) }));
+
+  const removeTransmission = (t: string) =>
+    setFilters((prev) => ({ ...prev, transmissions: prev.transmissions.filter((x) => x !== t) }));
+
+  const removeColor = (c: string) =>
+    setFilters((prev) => ({ ...prev, colors: prev.colors.filter((x) => x !== c) }));
+
+  const removeFuel = (f: string) =>
+    setFilters((prev) => ({ ...prev, fuelTypes: prev.fuelTypes.filter((x) => x !== f) }));
+
+  const resetPrice = () =>
+    setFilters((prev) => ({ ...prev, priceRange: defaultRanges.price }));
+
+  const resetYear = () =>
+    setFilters((prev) => ({ ...prev, yearRange: defaultRanges.year }));
+
+  const resetMileage = () =>
+    setFilters((prev) => ({ ...prev, mileageRange: defaultRanges.mileage }));
+
+  const clearSearch = () => setSearchTerm("");
+
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onRemove: () => void }[] = [];
+
+    if (searchTerm.trim()) {
+      chips.push({
+        key: `q:${searchTerm}`,
+        label: `Búsqueda: “${searchTerm}”`,
+        onRemove: clearSearch,
+      });
+    }
+
+    filters.brands.forEach((b) =>
+      chips.push({ key: `brand:${b}`, label: `Marca: ${b}`, onRemove: () => removeBrand(b) })
+    );
+
+    filters.transmissions.forEach((t) =>
+      chips.push({ key: `tr:${t}`, label: `Transmisión: ${t}`, onRemove: () => removeTransmission(t) })
+    );
+
+    filters.colors.forEach((c) =>
+      chips.push({ key: `color:${c}`, label: `Color: ${c}`, onRemove: () => removeColor(c) })
+    );
+
+    filters.fuelTypes.forEach((f) =>
+      chips.push({ key: `fuel:${f}`, label: `Combustible: ${f}`, onRemove: () => removeFuel(f) })
+    );
+
+    if (
+      filters.priceRange[0] !== defaultRanges.price[0] ||
+      filters.priceRange[1] !== defaultRanges.price[1]
+    ) {
+      chips.push({
+        key: `price:${filters.priceRange.join("-")}`,
+        label: `Precio: USD ${filters.priceRange[0].toLocaleString()} – USD ${filters.priceRange[1].toLocaleString()}`,
+        onRemove: resetPrice,
+      });
+    }
+
+    if (
+      filters.yearRange[0] !== defaultRanges.year[0] ||
+      filters.yearRange[1] !== defaultRanges.year[1]
+    ) {
+      chips.push({
+        key: `year:${filters.yearRange.join("-")}`,
+        label: `Año: ${filters.yearRange[0]} – ${filters.yearRange[1]}`,
+        onRemove: resetYear,
+      });
+    }
+
+    if (
+      filters.mileageRange[0] !== defaultRanges.mileage[0] ||
+      filters.mileageRange[1] !== defaultRanges.mileage[1]
+    ) {
+      chips.push({
+        key: `km:${filters.mileageRange.join("-")}`,
+        label: `Km: ${filters.mileageRange[0].toLocaleString()} – ${filters.mileageRange[1].toLocaleString()}`,
+        onRemove: resetMileage,
+      });
+    }
+
+    return chips;
+  }, [filters, searchTerm, defaultRanges]);
+  // =====================================================
 
   return (
     <div className="min-h-screen bg-white">
@@ -297,61 +391,39 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
             </div>
           </div>
 
-          {/* Active Filters Display */}
-          {(activeFiltersCount > 0 || searchTerm) && (
+          {/* ======= Filtros activos con chips removibles ======= */}
+          {activeChips.length > 0 && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-700">
                   Filtros activos:
                 </span>
-                {searchTerm && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Búsqueda: "{searchTerm}"
-                  </span>
-                )}
-                {filters.brands.map((brand) => (
-                  <span
-                    key={brand}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Limpiar todos los filtros
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {activeChips.map((chip) => (
+                  <button
+                    key={chip.key}
+                    onClick={chip.onRemove}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition"
+                    title="Quitar filtro"
                   >
-                    {brand}
-                  </span>
-                ))}
-                {filters.transmissions.map((transmission) => (
-                  <span
-                    key={transmission}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-                  >
-                    {transmission}
-                  </span>
-                ))}
-                {filters.colors.map((color) => (
-                  <span
-                    key={color}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                  >
-                    {color}
-                  </span>
-                ))}
-                {filters.fuelTypes.map((fuel) => (
-                  <span
-                    key={fuel}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
-                  >
-                    {fuel}
-                  </span>
+                    {chip.label}
+                    <span className="ml-1 text-gray-600">×</span>
+                  </button>
                 ))}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="text-red-600 hover:text-red-700"
-              >
-                Limpiar todos los filtros
-              </Button>
             </div>
           )}
+          {/* =================================================== */}
 
           {filteredCars.length === 0 ? (
             <div className="text-center py-12">
@@ -561,7 +633,8 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
       />
 
       {/* 👇 Botón flotante “Subir” (oculto si el modal está abierto) */}
-      <ScrollToTopButton hidden={isModalOpen} />
+ <ScrollToTopButton hidden={isModalOpen || isFilterOpen} />
+
     </div>
   );
 }
