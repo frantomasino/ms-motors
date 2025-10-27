@@ -54,6 +54,21 @@ function FilterSection({
   );
 }
 
+// ✅ Funciones de formato unificadas
+const fmtUSD = (n: number) => {
+  const formatted = n
+    .toFixed(0)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${formatted} USD`;
+};
+
+const fmtKM = (n: number) => {
+  const formatted = n
+    .toFixed(0)
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${formatted} KM`;
+};
+
 export default function FilterPanel({
   isOpen,
   onClose,
@@ -108,9 +123,6 @@ export default function FilterPanel({
     onFiltersChange(cleared);
     onClose(); // 👈 se cierra el panel
   };
-
-  const fmtUSD = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -172,8 +184,8 @@ export default function FilterPanel({
               className="w-full"
             />
             <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{localFilters.mileageRange[0].toLocaleString()} km</span>
-              <span>{localFilters.mileageRange[1].toLocaleString()} km</span>
+              <span>{fmtKM(localFilters.mileageRange[0])}</span>
+              <span>{fmtKM(localFilters.mileageRange[1])}</span>
             </div>
           </FilterSection>
 
