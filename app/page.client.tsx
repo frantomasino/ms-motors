@@ -147,52 +147,48 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
     });
   }, [cars, searchTerm, filters]);
 
-  // Calculate active filters count (para badge en botón)
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (filters.brands.length > 0) count++;
-    if (filters.transmissions.length > 0) count++;
-    if (filters.colors.length > 0) count++;
-    if (filters.fuelTypes.length > 0) count++;
-    if (
-      filters.priceRange[0] > 0 ||
-      filters.priceRange[1] < filterOptions.priceRange[1]
-    )
-      count++;
-    if (
-      filters.yearRange[0] > filterOptions.yearRange[0] ||
-      filters.yearRange[1] < filterOptions.yearRange[1]
-    )
-      count++;
-    if (
-      filters.mileageRange[0] > 0 ||
-      filters.mileageRange[1] < filterOptions.mileageRange[1]
-    )
-      count++;
-    return count;
-  }, [filters, filterOptions]);
-
-  // ====== NUEVO: helper ranges + chips removibles ======
-  const defaultRanges = useMemo(() => ({
-    price: [0, filterOptions.priceRange[1]] as [number, number],
-    year: [filterOptions.yearRange[0], filterOptions.yearRange[1]] as [number, number],
-    mileage: [0, filterOptions.mileageRange[1]] as [number, number],
-  }), [filterOptions]);
+  // ====== helper ranges + chips removibles ======
+  const defaultRanges = useMemo(
+    () => ({
+      price: [0, filterOptions.priceRange[1]] as [number, number],
+      year: [
+        filterOptions.yearRange[0],
+        filterOptions.yearRange[1],
+      ] as [number, number],
+      mileage: [0, filterOptions.mileageRange[1]] as [number, number],
+    }),
+    [filterOptions]
+  );
 
   const removeBrand = (b: string) =>
-    setFilters((prev) => ({ ...prev, brands: prev.brands.filter((x) => x !== b) }));
+    setFilters((prev) => ({
+      ...prev,
+      brands: prev.brands.filter((x) => x !== b),
+    }));
 
   const removeTransmission = (t: string) =>
-    setFilters((prev) => ({ ...prev, transmissions: prev.transmissions.filter((x) => x !== t) }));
+    setFilters((prev) => ({
+      ...prev,
+      transmissions: prev.transmissions.filter((x) => x !== t),
+    }));
 
   const removeColor = (c: string) =>
-    setFilters((prev) => ({ ...prev, colors: prev.colors.filter((x) => x !== c) }));
+    setFilters((prev) => ({
+      ...prev,
+      colors: prev.colors.filter((x) => x !== c),
+    }));
 
   const removeFuel = (f: string) =>
-    setFilters((prev) => ({ ...prev, fuelTypes: prev.fuelTypes.filter((x) => x !== f) }));
+    setFilters((prev) => ({
+      ...prev,
+      fuelTypes: prev.fuelTypes.filter((x) => x !== f),
+    }));
 
   const resetPrice = () =>
-    setFilters((prev) => ({ ...prev, priceRange: defaultRanges.price }));
+    setFilters((prev) => ({
+      ...prev,
+      priceRange: [0, 50000] as [number, number], // rango base
+    }));
 
   const resetYear = () =>
     setFilters((prev) => ({ ...prev, yearRange: defaultRanges.year }));
@@ -214,25 +210,38 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
     }
 
     filters.brands.forEach((b) =>
-      chips.push({ key: `brand:${b}`, label: `Marca: ${b}`, onRemove: () => removeBrand(b) })
+      chips.push({
+        key: `brand:${b}`,
+        label: `Marca: ${b}`,
+        onRemove: () => removeBrand(b),
+      })
     );
 
     filters.transmissions.forEach((t) =>
-      chips.push({ key: `tr:${t}`, label: `Transmisión: ${t}`, onRemove: () => removeTransmission(t) })
+      chips.push({
+        key: `tr:${t}`,
+        label: `Transmisión: ${t}`,
+        onRemove: () => removeTransmission(t),
+      })
     );
 
     filters.colors.forEach((c) =>
-      chips.push({ key: `color:${c}`, label: `Color: ${c}`, onRemove: () => removeColor(c) })
+      chips.push({
+        key: `color:${c}`,
+        label: `Color: ${c}`,
+        onRemove: () => removeColor(c),
+      })
     );
 
     filters.fuelTypes.forEach((f) =>
-      chips.push({ key: `fuel:${f}`, label: `Combustible: ${f}`, onRemove: () => removeFuel(f) })
+      chips.push({
+        key: `fuel:${f}`,
+        label: `Combustible: ${f}`,
+        onRemove: () => removeFuel(f),
+      })
     );
 
-    if (
-      filters.priceRange[0] !== defaultRanges.price[0] ||
-      filters.priceRange[1] !== defaultRanges.price[1]
-    ) {
+    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 50000) {
       chips.push({
         key: `price:${filters.priceRange.join("-")}`,
         label: `Precio: USD ${filters.priceRange[0].toLocaleString()} – USD ${filters.priceRange[1].toLocaleString()}`,
@@ -264,6 +273,9 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
 
     return chips;
   }, [filters, searchTerm, defaultRanges]);
+
+  // 👈 el número del botón Filtros sale directamente de los chips
+  const activeFiltersCount = activeChips.length;
   // =====================================================
 
   return (
@@ -391,7 +403,7 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
             </div>
           </div>
 
-          {/* ======= Filtros activos con chips removibles ======= */}
+          {/* Filtros activos con chips removibles */}
           {activeChips.length > 0 && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center justify-between mb-3">
@@ -423,7 +435,6 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
               </div>
             </div>
           )}
-          {/* =================================================== */}
 
           {filteredCars.length === 0 ? (
             <div className="text-center py-12">
@@ -632,9 +643,8 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
         cars={cars}
       />
 
-      {/* 👇 Botón flotante “Subir” (oculto si el modal está abierto) */}
- <ScrollToTopButton hidden={isModalOpen || isFilterOpen} />
-
+      {/* Botón flotante “Subir” */}
+      <ScrollToTopButton hidden={isModalOpen || isFilterOpen} />
     </div>
   );
 }
