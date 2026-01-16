@@ -9,7 +9,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -50,12 +49,15 @@ function FilterSection({
         className="w-full flex items-center justify-between py-4"
         aria-expanded={open}
       >
-        <span className="text-lg font-semibold">{title}</span>
+        {/* ✅ tipografía/tamaño como VehicleFilters */}
+        <span className="font-title text-sm">{title}</span>
+
         <ChevronDown
           className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>
+
       {open && <div className="pb-4">{children}</div>}
     </div>
   );
@@ -77,13 +79,13 @@ function FilterOption({
       type="button"
       onClick={onClick}
       className={[
-        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition",
-        isSelected ? "bg-gray-100" : "hover:bg-gray-50",
+        // ✅ tipografía/tamaño/espaciado como VehicleFilters (más compacto)
+        "font-body flex w-full items-center justify-between py-1 text-left text-xs transition-colors",
+        isSelected ? "text-foreground" : "text-muted-foreground hover:text-foreground",
       ].join(" ")}
     >
-      <span className="text-sm">{label}</span>
-      {/* ✅ conteo como (n) */}
-      <span className="text-xs text-gray-500">({count})</span>
+      <span>{label}</span>
+      <span className="text-xs text-muted-foreground">({count})</span>
     </button>
   );
 }
@@ -190,6 +192,25 @@ export default function FilterPanel({
 
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
 
+  // ✅ Kilometraje igual que Precio (rangos + inputs)
+  const mileageRanges = useMemo(
+    () => [
+      { label: "Hasta 50.000 km", min: 0, max: 50000 },
+      { label: "50.000 – 100.000 km", min: 50000, max: 100000 },
+      { label: "100.000 – 150.000 km", min: 100000, max: 150000 },
+      { label: "150.000 – 200.000 km", min: 150000, max: 200000 },
+      { label: "Más de 200.000 km", min: 200000, max: maxMileage },
+    ],
+    [maxMileage]
+  );
+
+  const [mileageRange, setMileageRange] = useState<[number, number]>([
+    0,
+    maxMileage,
+  ]);
+  const [minMileageInput, setMinMileageInput] = useState("");
+  const [maxMileageInput, setMaxMileageInput] = useState("");
+
   // modelos dependen de la marca seleccionada (para parecerse a tu ejemplo)
   const models = useMemo(() => {
     if (!selectedBrand) return allModels;
@@ -208,12 +229,14 @@ export default function FilterPanel({
       years: {} as Record<number, number>,
       colors: {} as Record<string, number>,
       priceRanges: {} as Record<string, number>,
+      mileageRanges: {} as Record<string, number>,
     };
 
     for (const car of cars) {
       counts.brands[car.brand] = (counts.brands[car.brand] || 0) + 1;
       counts.models[car.model] = (counts.models[car.model] || 0) + 1;
-      counts.fuelTypes[car.fuelType] = (counts.fuelTypes[car.fuelType] || 0) + 1;
+      counts.fuelTypes[car.fuelType] =
+        (counts.fuelTypes[car.fuelType] || 0) + 1;
       counts.transmissions[car.transmission] =
         (counts.transmissions[car.transmission] || 0) + 1;
       counts.years[car.year] = (counts.years[car.year] || 0) + 1;
@@ -226,8 +249,14 @@ export default function FilterPanel({
       ).length;
     }
 
+    for (const r of mileageRanges) {
+      counts.mileageRanges[r.label] = cars.filter(
+        (c) => c.mileage >= r.min && c.mileage <= r.max
+      ).length;
+    }
+
     return counts;
-  }, [cars, priceRanges]);
+  }, [cars, priceRanges, mileageRanges]);
 
   // ====== Sincronizar selections -> localFilters ======
   useEffect(() => {
@@ -240,6 +269,7 @@ export default function FilterPanel({
       colors: selectedColor ? [selectedColor] : [],
       yearRange: selectedYear ? [selectedYear, selectedYear] : [minYear, maxYear],
       priceRange: priceRange,
+      mileageRange: mileageRange,
     }));
   }, [
     selectedBrand,
@@ -249,6 +279,7 @@ export default function FilterPanel({
     selectedYear,
     selectedColor,
     priceRange,
+    mileageRange,
     minYear,
     maxYear,
   ]);
@@ -303,6 +334,21 @@ export default function FilterPanel({
     setPriceRange([clampedMin, clampedMax]);
   };
 
+  // ✅ Km custom
+  const handleMileageRangeClick = (min: number, max: number) => {
+    setMileageRange([min, max]);
+    setMinMileageInput(String(min));
+    setMaxMileageInput(String(max));
+  };
+
+  const handleCustomMileageRange = () => {
+    const min = Number(minMileageInput || 0);
+    const max = Number(maxMileageInput || maxMileage);
+    const clampedMin = Math.max(0, min);
+    const clampedMax = Math.min(maxMileage, max);
+    setMileageRange([clampedMin, clampedMax]);
+  };
+
   // ✅ "Aplicar" se mantiene: ya aplicó en vivo, esto solo cierra
   const applyFilters = () => {
     onClose();
@@ -318,6 +364,11 @@ export default function FilterPanel({
     setMinPriceInput("");
     setMaxPriceInput("");
     setPriceRange([0, maxPrice]);
+
+    // ✅ reset km
+    setMinMileageInput("");
+    setMaxMileageInput("");
+    setMileageRange([0, maxMileage]);
 
     const cleared: FilterState = {
       brands: [],
@@ -338,17 +389,17 @@ export default function FilterPanel({
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto" side="right">
-        <SheetHeader>
-          <SheetTitle>Filtros</SheetTitle>
-          <SheetDescription>
-            Refina tu búsqueda para encontrar el vehículo perfecto
-          </SheetDescription>
-        </SheetHeader>
+        {/* <SheetHeader>
+  <SheetTitle>Filtros</SheetTitle>
+  <SheetDescription>
+    Refina tu búsqueda para encontrar el vehículo perfecto
+  </SheetDescription>
+</SheetHeader> */}
 
         <div className="mt-6 space-y-2">
           {/* Marca */}
           <FilterSection title="Marca" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todas las marcas"
                 count={Object.values(vehicleCounts.brands).reduce((a, b) => a + b, 0)}
@@ -375,7 +426,7 @@ export default function FilterPanel({
 
           {/* Modelo */}
           <FilterSection title="Modelo" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todos los modelos"
                 count={Object.values(vehicleCounts.models).reduce((a, b) => a + b, 0)}
@@ -396,7 +447,7 @@ export default function FilterPanel({
 
           {/* Combustible */}
           <FilterSection title="Combustible" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todos"
                 count={Object.values(vehicleCounts.fuelTypes).reduce((a, b) => a + b, 0)}
@@ -417,7 +468,7 @@ export default function FilterPanel({
 
           {/* Transmisión */}
           <FilterSection title="Transmisión" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todas"
                 count={Object.values(vehicleCounts.transmissions).reduce((a, b) => a + b, 0)}
@@ -440,7 +491,7 @@ export default function FilterPanel({
 
           {/* Año */}
           <FilterSection title="Año" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todos los años"
                 count={Object.values(vehicleCounts.years).reduce((a, b) => a + b, 0)}
@@ -461,7 +512,7 @@ export default function FilterPanel({
 
           {/* Precio */}
           <FilterSection title="Precio" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {priceRanges.map((range) => (
                 <FilterOption
                   key={range.label}
@@ -507,7 +558,7 @@ export default function FilterPanel({
 
           {/* Color */}
           <FilterSection title="Color" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <FilterOption
                 label="Todos los colores"
                 count={Object.values(vehicleCounts.colors).reduce((a, b) => a + b, 0)}
@@ -526,23 +577,51 @@ export default function FilterPanel({
             </div>
           </FilterSection>
 
-          <Separator />
-
-          {/* Kilometraje (lo dejo como slider como lo tenías) */}
+          {/* Kilometraje */}
           <FilterSection title="Kilometraje" defaultOpen={false} resetSignal={resetSignal}>
-            <Slider
-              value={localFilters.mileageRange}
-              onValueChange={(v) =>
-                setLocalFilters((s) => ({ ...s, mileageRange: v as [number, number] }))
-              }
-              min={0}
-              max={maxMileage}
-              step={5000}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{fmtKM(localFilters.mileageRange[0])}</span>
-              <span>{fmtKM(localFilters.mileageRange[1])}</span>
+            <div className="space-y-1">
+              {mileageRanges.map((range) => (
+                <FilterOption
+                  key={range.label}
+                  label={range.label}
+                  count={vehicleCounts.mileageRanges[range.label] || 0}
+                  isSelected={
+                    mileageRange[0] === range.min && mileageRange[1] === range.max
+                  }
+                  onClick={() => handleMileageRangeClick(range.min, range.max)}
+                />
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Mínimo"
+                value={minMileageInput}
+                onChange={(e) => setMinMileageInput(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <span className="text-gray-500">—</span>
+              <Input
+                type="number"
+                placeholder="Máximo"
+                value={maxMileageInput}
+                onChange={(e) => setMaxMileageInput(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleCustomMileageRange}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-900 hover:text-white"
+                aria-label="Aplicar rango de km personalizado"
+              >
+                <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
+              </button>
+            </div>
+
+            <div className="mt-3 flex justify-between text-sm text-gray-600">
+              <span>{fmtKM(mileageRange[0])}</span>
+              <span>{fmtKM(mileageRange[1])}</span>
             </div>
           </FilterSection>
 
