@@ -1,37 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { ArrowUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-type Props = { hidden?: boolean };
+type ScrollToTopButtonProps = {
+  hidden?: boolean;
+};
 
-export default function ScrollToTopButton({ hidden = false }: Props) {
-  const [visible, setVisible] = useState(false);
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
-  useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 320);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+export default function ScrollToTopButton({ hidden }: ScrollToTopButtonProps) {
+  const scrollToTopSlow = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const prefersReducedMotion =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    if (prefersReducedMotion) {
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    const startY = window.scrollY || window.pageYOffset;
+    const duration = 900; // 👈 más lento (ms). Subí a 1200 si lo querés todavía más suave.
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = easeInOutCubic(t);
+
+      window.scrollTo(0, Math.round(startY * (1 - eased)));
+
+      if (t < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
   }, []);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-
-  // 👇 si está oculto (panel o modal abierto) o no hay scroll, no se muestra nada
-  if (hidden || !visible) return null;
+  if (hidden) return null;
 
   return (
-    <button
-      aria-label="Volver arriba"
-      onClick={scrollTop}
-      className="fixed z-[60] right-4 md:right-6 bottom-20 md:bottom-8 transition-all duration-300"
-    >
-      <div
-        className="h-12 w-12 rounded-full bg-red-600 hover:bg-red-700 grid place-items-center 
-        shadow-lg shadow-black/25 ring-1 ring-white/30 hover:scale-105 active:scale-95"
-      >
-        <ArrowUp className="h-5 w-5 text-white" />
-      </div>
-    </button>
+    <div className="fixed bottom-6 right-6 z-50">
+      <Button
+  type="button"
+  onClick={scrollToTopSlow}
+  size="icon"
+  className="rounded-full shadow-lg bg-red-600 text-white hover:bg-red-700"
+  aria-label="Subir"
+>
+  <ArrowUp className="h-5 w-5" />
+</Button>
+
+    </div>
   );
 }

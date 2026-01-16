@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Search, Phone } from "lucide-react";
+import { Features } from "@/components/features";
+import { useState, useMemo, useEffect } from "react";
 import CarCard from "@/components/car-card";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { FaWhatsapp, FaTiktok, FaInstagram } from "react-icons/fa";
+ import { FaWhatsapp, FaTiktok, FaInstagram } from "react-icons/fa";
 import Image from "next/image";
 import CarDetailsModal from "@/components/car-details-modal";
 import HeroSection from "@/components/hero-section";
@@ -32,6 +33,18 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
     colors: [],
     fuelTypes: [],
   });
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollTop(window.scrollY > 300); // umbral
+    };
+
+    onScroll(); // set inicial
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Use the server-fetched cars instead of the mocked data
   const cars = initialCars;
@@ -311,6 +324,14 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
               >
                 Catálogo
               </a>
+
+               <a
+                href="#nosotros"
+                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
+              >
+                Nosotros
+              </a>
+
             </div>
             <div className="flex items-center gap-2">
               <a
@@ -343,17 +364,19 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
                 </Button>
               </a>
 
-              <a
-                href="https://wa.me/5491159456142"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="WhatsApp"
-              >
-                <Button variant="outline" size="sm" className="hidden md:flex">
-                  <FaWhatsapp className="h-4 w-4 mr-2" />
-                  Contactar
-                </Button>
-              </a>
+              <div className="hidden items-center gap-4 md:flex">
+  <a
+    href="https://wa.me/5491159456142"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <Button className="font-body gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90">
+      <Phone className="h-4 w-4" />
+      Contactar
+    </Button>
+  </a>
+</div>
+
             </div>
           </div>
         </div>
@@ -361,6 +384,9 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
 
       {/* Hero Section */}
       <HeroSection />
+
+      <Features />
+
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16">
@@ -644,7 +670,7 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
       />
 
       {/* Botón flotante “Subir” */}
-      <ScrollToTopButton hidden={isModalOpen || isFilterOpen} />
+<ScrollToTopButton hidden={!showScrollTop || isModalOpen || isFilterOpen} />
     </div>
   );
 }
