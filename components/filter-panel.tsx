@@ -135,10 +135,14 @@ export default function FilterPanel({
     allModels,
   } = useMemo(() => {
     const brands = Array.from(new Set(cars.map((c) => c.brand))).sort();
-    const transmissions = Array.from(new Set(cars.map((c) => c.transmission))).sort();
+    const transmissions = Array.from(
+      new Set(cars.map((c) => c.transmission))
+    ).sort();
     const colors = Array.from(new Set(cars.map((c) => c.color))).sort();
     const fuels = Array.from(new Set(cars.map((c) => c.fuelType))).sort();
-    const years = Array.from(new Set(cars.map((c) => c.year))).sort((a, b) => b - a);
+    const years = Array.from(new Set(cars.map((c) => c.year))).sort(
+      (a, b) => b - a
+    );
     const allModels = Array.from(new Set(cars.map((c) => c.model))).sort();
 
     const maxPrice = Math.max(...cars.map((c) => c.price), 50000);
@@ -164,7 +168,9 @@ export default function FilterPanel({
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
-  const [selectedTransmission, setSelectedTransmission] = useState<string | null>(null);
+  const [selectedTransmission, setSelectedTransmission] = useState<string | null>(
+    null
+  );
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
@@ -208,19 +214,22 @@ export default function FilterPanel({
       counts.brands[car.brand] = (counts.brands[car.brand] || 0) + 1;
       counts.models[car.model] = (counts.models[car.model] || 0) + 1;
       counts.fuelTypes[car.fuelType] = (counts.fuelTypes[car.fuelType] || 0) + 1;
-      counts.transmissions[car.transmission] = (counts.transmissions[car.transmission] || 0) + 1;
+      counts.transmissions[car.transmission] =
+        (counts.transmissions[car.transmission] || 0) + 1;
       counts.years[car.year] = (counts.years[car.year] || 0) + 1;
       counts.colors[car.color] = (counts.colors[car.color] || 0) + 1;
     }
 
     for (const r of priceRanges) {
-      counts.priceRanges[r.label] = cars.filter((c) => c.price >= r.min && c.price <= r.max).length;
+      counts.priceRanges[r.label] = cars.filter(
+        (c) => c.price >= r.min && c.price <= r.max
+      ).length;
     }
 
     return counts;
   }, [cars, priceRanges]);
 
-  // ====== Sincronizar selections -> localFilters (sin cambiar tu FilterState) ======
+  // ====== Sincronizar selections -> localFilters ======
   useEffect(() => {
     setLocalFilters((prev) => ({
       ...prev,
@@ -244,11 +253,40 @@ export default function FilterPanel({
     maxYear,
   ]);
 
+  // ====== helpers para evitar loop infinito (React error #185) ======
+  const sameArr = (a: string[], b: string[]) => {
+    if (a === b) return true;
+    if (a.length !== b.length) return false;
+    const aa = [...a].sort();
+    const bb = [...b].sort();
+    return aa.every((v, i) => v === bb[i]);
+  };
+
+  const sameRange = (a: [number, number], b: [number, number]) =>
+    a[0] === b[0] && a[1] === b[1];
+
+  const sameFilters = (a: FilterState, b: FilterState) => {
+    return (
+      sameArr(a.brands, b.brands) &&
+      sameArr(a.models, b.models) &&
+      sameArr(a.transmissions, b.transmissions) &&
+      sameArr(a.colors, b.colors) &&
+      sameArr(a.fuelTypes, b.fuelTypes) &&
+      sameRange(a.priceRange, b.priceRange) &&
+      sameRange(a.yearRange, b.yearRange) &&
+      sameRange(a.mileageRange, b.mileageRange)
+    );
+  };
+
   // ✅ LIVE: mientras filtrás, se actualiza el catálogo sin esperar "Aplicar"
   useEffect(() => {
     if (!isOpen) return;
+
+    // ✅ evita loop infinito
+    if (sameFilters(localFilters, filters)) return;
+
     onFiltersChange(localFilters);
-  }, [localFilters, isOpen, onFiltersChange]);
+  }, [localFilters, isOpen, onFiltersChange, filters]);
 
   // Precio custom
   const handlePriceRangeClick = (min: number, max: number) => {
@@ -302,7 +340,9 @@ export default function FilterPanel({
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto" side="right">
         <SheetHeader>
           <SheetTitle>Filtros</SheetTitle>
-          <SheetDescription>Refina tu búsqueda para encontrar el vehículo perfecto</SheetDescription>
+          <SheetDescription>
+            Refina tu búsqueda para encontrar el vehículo perfecto
+          </SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-2">
@@ -510,7 +550,10 @@ export default function FilterPanel({
             <Button variant="outline" onClick={clearFilters} className="flex-1">
               Limpiar
             </Button>
-            <Button onClick={applyFilters} className="flex-1 bg-red-600 hover:bg-red-700">
+            <Button
+              onClick={applyFilters}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
               Aplicar filtros
             </Button>
           </div>
