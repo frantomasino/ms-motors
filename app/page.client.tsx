@@ -24,15 +24,17 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isRecommendationOpen, setIsRecommendationOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<FilterState>({
-    brands: [],
-    transmissions: [],
-    priceRange: [0, 50000],
-    yearRange: [2000, 2025],
-    mileageRange: [0, 300000],
-    colors: [],
-    fuelTypes: [],
-  });
+ const [filters, setFilters] = useState<FilterState>({
+  brands: [],
+  models: [],
+  transmissions: [],
+  priceRange: [0, 50000],
+  yearRange: [2000, 2025],
+  mileageRange: [0, 300000],
+  colors: [],
+  fuelTypes: [],
+});
+
 
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -61,14 +63,15 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
 
   const clearAllFilters = () => {
     setFilters({
-      brands: [],
-      transmissions: [],
-      priceRange: [0, 50000],
-      yearRange: [2000, 2025],
-      mileageRange: [0, 300000],
-      colors: [],
-      fuelTypes: [],
-    });
+  brands: [],
+  models: [],
+  transmissions: [],
+  priceRange: [0, 50000],
+  yearRange: [2000, 2025],
+  mileageRange: [0, 300000],
+  colors: [],
+  fuelTypes: [],
+});
     setSearchTerm("");
   };
 
@@ -113,6 +116,12 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
       if (filters.brands.length > 0 && !filters.brands.includes(car.brand)) {
         return false;
       }
+
+      // Model filter 👇 PEGÁ ESTO
+if (filters.models.length > 0 && !filters.models.includes(car.model)) {
+  return false;
+}
+
 
       // Transmission filter
       if (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -9,11 +9,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { ChevronDown } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { CarType, FilterState } from "@/types";
 
 interface FilterPanelProps {
@@ -29,12 +28,20 @@ function FilterSection({
   title,
   children,
   defaultOpen = false,
+  resetSignal = 0,
 }: {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  resetSignal?: number;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+
+  // ✅ cada vez que abrís el panel, se cierran todas las secciones
+  useEffect(() => {
+    setOpen(false);
+  }, [resetSignal]);
+
   return (
     <div className="border-b">
       <button
@@ -54,18 +61,41 @@ function FilterSection({
   );
 }
 
+function FilterOption({
+  label,
+  count,
+  isSelected,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition",
+        isSelected ? "bg-gray-100" : "hover:bg-gray-50",
+      ].join(" ")}
+    >
+      <span className="text-sm">{label}</span>
+      {/* ✅ conteo como (n) */}
+      <span className="text-xs text-gray-500">({count})</span>
+    </button>
+  );
+}
+
 // ✅ Funciones de formato unificadas
 const fmtUSD = (n: number) => {
-  const formatted = n
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const formatted = n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return `${formatted} USD`;
 };
 
 const fmtKM = (n: number) => {
-  const formatted = n
-    .toFixed(0)
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const formatted = n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return `${formatted} KM`;
 };
 
@@ -78,6 +108,19 @@ export default function FilterPanel({
 }: FilterPanelProps) {
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
 
+  // ✅ señal para resetear (cerrar) secciones al abrir
+  const [resetSignal, setResetSignal] = useState(0);
+
+  // Mantener sync cuando se abre/cierra o cambian filtros externos
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters, isOpen]);
+
+  // ✅ cada vez que se abre el panel, incrementa señal (cierra todo)
+  useEffect(() => {
+    if (isOpen) setResetSignal((s) => s + 1);
+  }, [isOpen]);
+
   // Derivados (límites + opciones)
   const {
     maxPrice,
@@ -88,30 +131,159 @@ export default function FilterPanel({
     transmissions,
     colors,
     fuels,
+    years,
+    allModels,
   } = useMemo(() => {
     const brands = Array.from(new Set(cars.map((c) => c.brand))).sort();
     const transmissions = Array.from(new Set(cars.map((c) => c.transmission))).sort();
     const colors = Array.from(new Set(cars.map((c) => c.color))).sort();
     const fuels = Array.from(new Set(cars.map((c) => c.fuelType))).sort();
+    const years = Array.from(new Set(cars.map((c) => c.year))).sort((a, b) => b - a);
+    const allModels = Array.from(new Set(cars.map((c) => c.model))).sort();
+
     const maxPrice = Math.max(...cars.map((c) => c.price), 50000);
     const minYear = Math.min(...cars.map((c) => c.year), 2000);
     const maxYear = Math.max(...cars.map((c) => c.year), 2025);
     const maxMileage = Math.max(...cars.map((c) => c.mileage), 300000);
-    return { maxPrice, minYear, maxYear, maxMileage, brands, transmissions, colors, fuels };
+
+    return {
+      maxPrice,
+      minYear,
+      maxYear,
+      maxMileage,
+      brands,
+      transmissions,
+      colors,
+      fuels,
+      years,
+      allModels,
+    };
   }, [cars]);
 
-  // Handlers para listas
-  const toggleInArray = (arr: string[], value: string, checked: boolean) =>
-    checked ? [...arr, value] : arr.filter((v) => v !== value);
+  // ====== Estado estilo "lista con conteo" (single select) ======
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
+  const [selectedTransmission, setSelectedTransmission] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
-  const applyFilters = () => {
+  const [minPriceInput, setMinPriceInput] = useState("");
+  const [maxPriceInput, setMaxPriceInput] = useState("");
+
+  const priceRanges = useMemo(
+    () => [
+      { label: "Hasta USD 10.000", min: 0, max: 10000 },
+      { label: "USD 10.000 – 20.000", min: 10000, max: 20000 },
+      { label: "USD 20.000 – 30.000", min: 20000, max: 30000 },
+      { label: "USD 30.000 – 40.000", min: 30000, max: 40000 },
+      { label: "Más de USD 40.000", min: 40000, max: maxPrice },
+    ],
+    [maxPrice]
+  );
+
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+
+  // modelos dependen de la marca seleccionada (para parecerse a tu ejemplo)
+  const models = useMemo(() => {
+    if (!selectedBrand) return allModels;
+    return Array.from(
+      new Set(cars.filter((c) => c.brand === selectedBrand).map((c) => c.model))
+    ).sort();
+  }, [cars, allModels, selectedBrand]);
+
+  // Conteos (globales)
+  const vehicleCounts = useMemo(() => {
+    const counts = {
+      brands: {} as Record<string, number>,
+      models: {} as Record<string, number>,
+      fuelTypes: {} as Record<string, number>,
+      transmissions: {} as Record<string, number>,
+      years: {} as Record<number, number>,
+      colors: {} as Record<string, number>,
+      priceRanges: {} as Record<string, number>,
+    };
+
+    for (const car of cars) {
+      counts.brands[car.brand] = (counts.brands[car.brand] || 0) + 1;
+      counts.models[car.model] = (counts.models[car.model] || 0) + 1;
+      counts.fuelTypes[car.fuelType] = (counts.fuelTypes[car.fuelType] || 0) + 1;
+      counts.transmissions[car.transmission] = (counts.transmissions[car.transmission] || 0) + 1;
+      counts.years[car.year] = (counts.years[car.year] || 0) + 1;
+      counts.colors[car.color] = (counts.colors[car.color] || 0) + 1;
+    }
+
+    for (const r of priceRanges) {
+      counts.priceRanges[r.label] = cars.filter((c) => c.price >= r.min && c.price <= r.max).length;
+    }
+
+    return counts;
+  }, [cars, priceRanges]);
+
+  // ====== Sincronizar selections -> localFilters (sin cambiar tu FilterState) ======
+  useEffect(() => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      brands: selectedBrand ? [selectedBrand] : [],
+      models: selectedModel ? [selectedModel] : [],
+      fuelTypes: selectedFuelType ? [selectedFuelType] : [],
+      transmissions: selectedTransmission ? [selectedTransmission] : [],
+      colors: selectedColor ? [selectedColor] : [],
+      yearRange: selectedYear ? [selectedYear, selectedYear] : [minYear, maxYear],
+      priceRange: priceRange,
+    }));
+  }, [
+    selectedBrand,
+    selectedModel,
+    selectedFuelType,
+    selectedTransmission,
+    selectedYear,
+    selectedColor,
+    priceRange,
+    minYear,
+    maxYear,
+  ]);
+
+  // ✅ LIVE: mientras filtrás, se actualiza el catálogo sin esperar "Aplicar"
+  useEffect(() => {
+    if (!isOpen) return;
     onFiltersChange(localFilters);
+  }, [localFilters, isOpen, onFiltersChange]);
+
+  // Precio custom
+  const handlePriceRangeClick = (min: number, max: number) => {
+    setPriceRange([min, max]);
+    setMinPriceInput(String(min));
+    setMaxPriceInput(String(max));
+  };
+
+  const handleCustomPriceRange = () => {
+    const min = Number(minPriceInput || 0);
+    const max = Number(maxPriceInput || maxPrice);
+    const clampedMin = Math.max(0, min);
+    const clampedMax = Math.min(maxPrice, max);
+    setPriceRange([clampedMin, clampedMax]);
+  };
+
+  // ✅ "Aplicar" se mantiene: ya aplicó en vivo, esto solo cierra
+  const applyFilters = () => {
     onClose();
   };
 
   const clearFilters = () => {
+    setSelectedBrand(null);
+    setSelectedModel(null);
+    setSelectedFuelType(null);
+    setSelectedTransmission(null);
+    setSelectedYear(null);
+    setSelectedColor(null);
+    setMinPriceInput("");
+    setMaxPriceInput("");
+    setPriceRange([0, maxPrice]);
+
     const cleared: FilterState = {
       brands: [],
+      models: [],
       transmissions: [],
       priceRange: [0, maxPrice],
       yearRange: [minYear, maxYear],
@@ -119,60 +291,205 @@ export default function FilterPanel({
       colors: [],
       fuelTypes: [],
     };
+
     setLocalFilters(cleared);
     onFiltersChange(cleared);
-    onClose(); // 👈 se cierra el panel
+    onClose();
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto" side="right">
         <SheetHeader>
-          <SheetTitle>Filtros de búsqueda</SheetTitle>
-          <SheetDescription>
-            Refina tu búsqueda para encontrar el vehículo perfecto
-          </SheetDescription>
+          <SheetTitle>Filtros</SheetTitle>
+          <SheetDescription>Refina tu búsqueda para encontrar el vehículo perfecto</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-2">
-          {/* Precio */}
-          <FilterSection title="Rango de precio" defaultOpen>
-            <Slider
-              value={localFilters.priceRange}
-              onValueChange={(v) =>
-                setLocalFilters((s) => ({ ...s, priceRange: v as [number, number] }))
-              }
-              min={0}
-              max={maxPrice}
-              step={500}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{fmtUSD(localFilters.priceRange[0])}</span>
-              <span>{fmtUSD(localFilters.priceRange[1])}</span>
+          {/* Marca */}
+          <FilterSection title="Marca" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todas las marcas"
+                count={Object.values(vehicleCounts.brands).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedBrand}
+                onClick={() => {
+                  setSelectedBrand(null);
+                  setSelectedModel(null);
+                }}
+              />
+              {brands.map((brand) => (
+                <FilterOption
+                  key={brand}
+                  label={brand}
+                  count={vehicleCounts.brands[brand] || 0}
+                  isSelected={selectedBrand === brand}
+                  onClick={() => {
+                    setSelectedBrand(selectedBrand === brand ? null : brand);
+                    setSelectedModel(null);
+                  }}
+                />
+              ))}
+            </div>
+          </FilterSection>
+
+          {/* Modelo */}
+          <FilterSection title="Modelo" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todos los modelos"
+                count={Object.values(vehicleCounts.models).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedModel}
+                onClick={() => setSelectedModel(null)}
+              />
+              {models.map((model) => (
+                <FilterOption
+                  key={model}
+                  label={model}
+                  count={vehicleCounts.models[model] || 0}
+                  isSelected={selectedModel === model}
+                  onClick={() => setSelectedModel(selectedModel === model ? null : model)}
+                />
+              ))}
+            </div>
+          </FilterSection>
+
+          {/* Combustible */}
+          <FilterSection title="Combustible" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todos"
+                count={Object.values(vehicleCounts.fuelTypes).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedFuelType}
+                onClick={() => setSelectedFuelType(null)}
+              />
+              {fuels.map((fuel) => (
+                <FilterOption
+                  key={fuel}
+                  label={fuel}
+                  count={vehicleCounts.fuelTypes[fuel] || 0}
+                  isSelected={selectedFuelType === fuel}
+                  onClick={() => setSelectedFuelType(selectedFuelType === fuel ? null : fuel)}
+                />
+              ))}
+            </div>
+          </FilterSection>
+
+          {/* Transmisión */}
+          <FilterSection title="Transmisión" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todas"
+                count={Object.values(vehicleCounts.transmissions).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedTransmission}
+                onClick={() => setSelectedTransmission(null)}
+              />
+              {transmissions.map((trans) => (
+                <FilterOption
+                  key={trans}
+                  label={trans}
+                  count={vehicleCounts.transmissions[trans] || 0}
+                  isSelected={selectedTransmission === trans}
+                  onClick={() =>
+                    setSelectedTransmission(selectedTransmission === trans ? null : trans)
+                  }
+                />
+              ))}
             </div>
           </FilterSection>
 
           {/* Año */}
-          <FilterSection title="Año" defaultOpen>
-            <Slider
-              value={localFilters.yearRange}
-              onValueChange={(v) =>
-                setLocalFilters((s) => ({ ...s, yearRange: v as [number, number] }))
-              }
-              min={minYear}
-              max={maxYear}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{localFilters.yearRange[0]}</span>
-              <span>{localFilters.yearRange[1]}</span>
+          <FilterSection title="Año" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todos los años"
+                count={Object.values(vehicleCounts.years).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedYear}
+                onClick={() => setSelectedYear(null)}
+              />
+              {years.map((year) => (
+                <FilterOption
+                  key={year}
+                  label={String(year)}
+                  count={vehicleCounts.years[year] || 0}
+                  isSelected={selectedYear === year}
+                  onClick={() => setSelectedYear(selectedYear === year ? null : year)}
+                />
+              ))}
             </div>
           </FilterSection>
 
-          {/* Kilometraje */}
-          <FilterSection title="Kilometraje" defaultOpen>
+          {/* Precio */}
+          <FilterSection title="Precio" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              {priceRanges.map((range) => (
+                <FilterOption
+                  key={range.label}
+                  label={range.label}
+                  count={vehicleCounts.priceRanges[range.label] || 0}
+                  isSelected={priceRange[0] === range.min && priceRange[1] === range.max}
+                  onClick={() => handlePriceRangeClick(range.min, range.max)}
+                />
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Mínimo"
+                value={minPriceInput}
+                onChange={(e) => setMinPriceInput(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <span className="text-gray-500">—</span>
+              <Input
+                type="number"
+                placeholder="Máximo"
+                value={maxPriceInput}
+                onChange={(e) => setMaxPriceInput(e.target.value)}
+                className="h-9 text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleCustomPriceRange}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-900 hover:text-white"
+                aria-label="Aplicar rango personalizado"
+              >
+                <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
+              </button>
+            </div>
+
+            <div className="mt-3 flex justify-between text-sm text-gray-600">
+              <span>{fmtUSD(priceRange[0])}</span>
+              <span>{fmtUSD(priceRange[1])}</span>
+            </div>
+          </FilterSection>
+
+          {/* Color */}
+          <FilterSection title="Color" defaultOpen={false} resetSignal={resetSignal}>
+            <div className="space-y-2">
+              <FilterOption
+                label="Todos los colores"
+                count={Object.values(vehicleCounts.colors).reduce((a, b) => a + b, 0)}
+                isSelected={!selectedColor}
+                onClick={() => setSelectedColor(null)}
+              />
+              {colors.map((color) => (
+                <FilterOption
+                  key={color}
+                  label={color}
+                  count={vehicleCounts.colors[color] || 0}
+                  isSelected={selectedColor === color}
+                  onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+                />
+              ))}
+            </div>
+          </FilterSection>
+
+          <Separator />
+
+          {/* Kilometraje (lo dejo como slider como lo tenías) */}
+          <FilterSection title="Kilometraje" defaultOpen={false} resetSignal={resetSignal}>
             <Slider
               value={localFilters.mileageRange}
               onValueChange={(v) =>
@@ -186,92 +503,6 @@ export default function FilterPanel({
             <div className="flex justify-between text-sm text-gray-600 mt-2">
               <span>{fmtKM(localFilters.mileageRange[0])}</span>
               <span>{fmtKM(localFilters.mileageRange[1])}</span>
-            </div>
-          </FilterSection>
-
-          <Separator />
-
-          {/* Marca */}
-          <FilterSection title="Marca">
-            <div className="space-y-2">
-              {brands.map((brand) => (
-                <label key={brand} htmlFor={`brand-${brand}`} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`brand-${brand}`}
-                    checked={localFilters.brands.includes(brand)}
-                    onCheckedChange={(c) =>
-                      setLocalFilters((s) => ({
-                        ...s,
-                        brands: toggleInArray(s.brands, brand, Boolean(c)),
-                      }))
-                    }
-                  />
-                  <span className="text-sm">{brand}</span>
-                </label>
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Transmisión */}
-          <FilterSection title="Transmisión">
-            <div className="space-y-2">
-              {transmissions.map((t) => (
-                <label key={t} htmlFor={`tr-${t}`} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`tr-${t}`}
-                    checked={localFilters.transmissions.includes(t)}
-                    onCheckedChange={(c) =>
-                      setLocalFilters((s) => ({
-                        ...s,
-                        transmissions: toggleInArray(s.transmissions, t, Boolean(c)),
-                      }))
-                    }
-                  />
-                  <span className="text-sm">{t}</span>
-                </label>
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Color */}
-          <FilterSection title="Color">
-            <div className="space-y-2">
-              {colors.map((c) => (
-                <label key={c} htmlFor={`color-${c}`} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`color-${c}`}
-                    checked={localFilters.colors.includes(c)}
-                    onCheckedChange={(ch) =>
-                      setLocalFilters((s) => ({
-                        ...s,
-                        colors: toggleInArray(s.colors, c, Boolean(ch)),
-                      }))
-                    }
-                  />
-                  <span className="text-sm">{c}</span>
-                </label>
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Combustible */}
-          <FilterSection title="Tipo de combustible">
-            <div className="space-y-2">
-              {fuels.map((f) => (
-                <label key={f} htmlFor={`fuel-${f}`} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`fuel-${f}`}
-                    checked={localFilters.fuelTypes.includes(f)}
-                    onCheckedChange={(ch) =>
-                      setLocalFilters((s) => ({
-                        ...s,
-                        fuelTypes: toggleInArray(s.fuelTypes, f, Boolean(ch)),
-                      }))
-                    }
-                  />
-                  <span className="text-sm">{f}</span>
-                </label>
-              ))}
             </div>
           </FilterSection>
 

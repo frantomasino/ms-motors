@@ -16,6 +16,7 @@ export interface CarType {
 
 export interface FilterState {
   brands: string[]
+   models: string[]
   transmissions: string[]
   priceRange: [number, number]
   yearRange: [number, number]
