@@ -19,8 +19,8 @@ const values = [
   },
   {
     icon: MapPin,
-    title: "En Quilmes desde 2014",
-    desc: "10+ años atendiendo el sur del Gran Buenos Aires con la misma pasión y dedicación.",
+    title: "En Quilmes desde 2021",
+    desc: "5+ años atendiendo el sur del Gran Buenos Aires con la misma pasión y dedicación.",
   },
 ];
 
@@ -48,9 +48,9 @@ export default function AboutSection() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-100">
               {[
-                { value: "200+", label: "Autos vendidos" },
+                { value: "100+", label: "Autos vendidos" },
                 { value: "5.0★", label: "En Google" },
-                { value: "10+", label: "Años de trayectoria" },
+                { value: "5+", label: "Años de trayectoria" },
               ].map((s, i) => (
                 <div key={i}>
                   <p className="text-2xl sm:text-3xl font-bold text-gray-900">{s.value}</p>

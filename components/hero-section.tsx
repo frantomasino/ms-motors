@@ -58,9 +58,9 @@ export default function HeroSection() {
           {/* Stats — más compactos en mobile */}
           <div className="flex flex-wrap gap-6 pb-8">
             {[
-              { value: "200+", label: "Autos vendidos" },
+              { value: "100+", label: "Autos vendidos" },
               { value: "5.0 ★", label: "En Google" },
-              { value: "10+", label: "Años" },
+              { value: "5+", label: "Años" },
             ].map((s, i) => (
               <div key={i}>
                 <p className="text-xl sm:text-2xl font-bold text-white">{s.value}</p>
