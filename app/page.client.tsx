@@ -1,18 +1,22 @@
 "use client";
 
 import { Search, Phone } from "lucide-react";
-import { Features } from "@/components/features";
 import { useState, useMemo, useEffect } from "react";
 import CarCard from "@/components/car-card";
 import { Button } from "@/components/ui/button";
- import { FaWhatsapp, FaTiktok, FaInstagram } from "react-icons/fa";
+import { FaWhatsapp, FaTiktok, FaInstagram } from "react-icons/fa";
 import Image from "next/image";
 import CarDetailsModal from "@/components/car-details-modal";
 import HeroSection from "@/components/hero-section";
 import { Input } from "@/components/ui/input";
 import FilterPanel from "@/components/filter-panel";
 import { CarType, FilterState } from "@/types";
-import ScrollToTopButton from "@/components/scroll-to-top-button";
+import Footer from "@/components/footer";
+import SoldCarsSection from "@/components/sold-cars-section";
+import AboutSection from "@/components/about-section";
+import WhatsAppButton from "@/components/whatsapp-button";
+import ReviewsSection from "@/components/reviews-section";
+import AnimateOnScroll from "@/components/animate-on-scroll";
 
 interface ClientPageProps {
   initialCars: CarType[];
@@ -36,14 +40,12 @@ export default function ClientPage({ initialCars }: ClientPageProps) {
 });
 
 
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<"default" | "price-asc" | "price-desc" | "year-desc" | "mileage-asc">("default");
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      setShowScrollTop(window.scrollY > 300); // umbral
-    };
-
-    onScroll(); // set inicial
+    const onScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -303,173 +305,201 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <a href="#" className="flex items-center gap-2">
-              <div className="relative h-10 w-10">
-                <Image
-                  src="/logo-ms-motors.png"
-                  alt="Logo MS Motors"
-                  fill
-                  className="object-contain"
-                />
+      <header className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled ? "bg-white/95 backdrop-blur-md border-b border-gray-100/80 shadow-sm" : "bg-white/10 backdrop-blur-sm border-b border-transparent"
+      }`}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+
+            {/* Logo */}
+            <a href="#" className="flex items-center gap-2.5 shrink-0">
+              <div className="relative h-9 w-9">
+                <Image src="/logo-ms-motors.png" alt="Logo MS Motors" fill className="object-contain" />
               </div>
-              <span className="text-xl font-bold text-gray-900">
-                MS<span className="text-red-600"> Motors</span>
+              <span className={`text-lg font-bold tracking-tight transition-colors ${scrolled ? "text-gray-900" : "text-white"}`}>
+                MS<span className="text-red-500"> Motors</span>
               </span>
             </a>
 
-            <div className="hidden md:flex items-center space-x-6">
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >
-                Inicio
-              </a>
-              <a
-                href="#catalog"
-                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >
-                Catálogo
-              </a>
+            {/* Nav desktop */}
+            <nav className="hidden md:flex items-center gap-1">
+              {[
+                { href: "#", label: "Inicio" },
+                { href: "#catalog", label: "Catálogo" },
+                { href: "#nosotros", label: "Nosotros" },
+                { href: "#vendidos", label: "Vendidos" },
+              ].map(({ href, label }) => (
+                <a key={label} href={href}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                    scrolled ? "text-gray-600 hover:text-red-600 hover:bg-red-50" : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`}>
+                  {label}
+                </a>
+              ))}
+            </nav>
 
-               <a
-                href="#nosotros"
-                className="text-gray-700 hover:text-red-600 font-medium transition-colors"
-              >
-                Nosotros
+            {/* Acciones */}
+            <div className="flex items-center gap-1.5">
+              <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" aria-label="Instagram"
+                className={`hidden sm:flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                  scrolled ? "text-gray-500 hover:text-red-600 hover:bg-red-50" : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}>
+                <FaInstagram className="h-4 w-4" />
               </a>
-
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href="https://www.instagram.com/ms.motorsquilmes/"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-700 hover:text-red-600 hover:bg-red-50"
-                >
-                  <FaInstagram className="h-5 w-5" />
-                </Button>
+              <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" aria-label="TikTok"
+                className={`hidden sm:flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                  scrolled ? "text-gray-500 hover:text-red-600 hover:bg-red-50" : "text-white/70 hover:text-white hover:bg-white/10"
+                }`}>
+                <FaTiktok className="h-4 w-4" />
               </a>
 
-              <a
-                href="https://www.tiktok.com/@msmotorsquilmes"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="TikTok"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-700 hover:text-red-600 hover:bg-red-50"
-                >
-                  <FaTiktok className="h-5 w-5" />
-                </Button>
+              {/* WhatsApp CTA */}
+              <a href="https://wa.me/5491159456142" target="_blank" rel="noopener noreferrer"
+                className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full transition-all hover:scale-[1.02] ${
+                  scrolled ? "bg-gray-900 hover:bg-gray-800 text-white" : "bg-white text-gray-900 hover:bg-white/90"
+                }`}>
+                <Phone className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Contactar</span>
               </a>
 
-              <div className="hidden items-center gap-4 md:flex">
-  <a
-    href="https://wa.me/5491159456142"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <Button className="font-body gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90">
-      <Phone className="h-4 w-4" />
-      Contactar
-    </Button>
-  </a>
-</div>
-
+              {/* Menú hamburguesa mobile */}
+              <button
+                onClick={() => setMobileMenuOpen((v) => !v)}
+                className={`flex md:hidden h-9 w-9 items-center justify-center rounded-full transition-all ${
+                  scrolled ? "text-gray-600 hover:bg-gray-100" : "text-white hover:bg-white/10"
+                }`}
+                aria-label="Menú"
+              >
+                {mobileMenuOpen ? (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
+
+          {/* Nav mobile desplegable */}
+          {mobileMenuOpen && (
+            <nav className="md:hidden border-t border-gray-100 py-3 flex flex-col gap-1">
+              {[
+                { href: "#", label: "Inicio" },
+                { href: "#catalog", label: "Catálogo" },
+                { href: "#nosotros", label: "Nosotros" },
+                { href: "#vendidos", label: "Vendidos" },
+              ].map(({ href, label }) => (
+                <a key={label} href={href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                  {label}
+                </a>
+              ))}
+              <div className="flex gap-3 px-4 pt-2 border-t border-gray-100 mt-1">
+                <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors">
+                  <FaInstagram className="h-4 w-4" /> Instagram
+                </a>
+                <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors">
+                  <FaTiktok className="h-4 w-4" /> TikTok
+                </a>
+              </div>
+            </nav>
+          )}
         </div>
       </header>
 
       {/* Hero Section */}
       <HeroSection />
 
-      <Features />
-
+      {/* Nosotros */}
+      <AboutSection />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <section id="catalog" className="scroll-mt-20">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Catálogo de Vehículos
-              </h2>
-              <p className="text-gray-600 mt-2">
-                {filteredCars.length} vehículo
-                {filteredCars.length !== 1 ? "s" : ""} encontrado
-                {filteredCars.length !== 1 ? "s" : ""}
-              </p>
-            </div>
 
-            <div className="w-full md:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar por marca o modelo..."
-                  className="pl-10 pr-4 py-2 w-full"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="whitespace-nowrap relative"
-                onClick={() => setIsFilterOpen(true)}
-              >
-                Filtros
-                {activeFiltersCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {activeFiltersCount}
+          {/* Encabezado + buscador */}
+          <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                  Catálogo de Vehículos
+                </h2>
+                <p className="text-gray-500 mt-1 text-sm">
+                  <span className={activeFiltersCount > 0 ? "text-red-600 font-semibold" : "text-gray-500"}>
+                    {filteredCars.length} vehículo{filteredCars.length !== 1 ? "s" : ""}{activeFiltersCount > 0 ? " encontrados" : " disponibles"}
                   </span>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Filtros activos con chips removibles */}
-          {activeChips.length > 0 && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-700">
-                  Filtros activos:
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearAllFilters}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  Limpiar todos los filtros
-                </Button>
+                </p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              {/* Búsqueda + Filtros — full width en mobile */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-64 sm:flex-none">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                  <Input
+                    placeholder="Buscar marca o modelo..."
+                    className="pl-9 pr-4 h-10 w-full rounded-xl border-gray-200 focus:border-gray-400 text-sm"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <button
+                  onClick={() => setIsFilterOpen(true)}
+                  className="relative flex items-center gap-2 h-10 px-4 rounded-xl border border-gray-200 hover:border-gray-400 bg-white text-sm font-medium text-gray-700 hover:text-gray-900 transition-all whitespace-nowrap shrink-0"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
+                  </svg>
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Ordenar */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  className="h-10 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 hover:border-gray-400 transition-all shrink-0 cursor-pointer focus:outline-none"
+                >
+                  <option value="default">Ordenar</option>
+                  <option value="price-asc">Precio: menor a mayor</option>
+                  <option value="price-desc">Precio: mayor a menor</option>
+                  <option value="year-desc">Año: más nuevo</option>
+                  <option value="mileage-asc">Kilometraje: menor</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Chips de filtros activos */}
+            {activeChips.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
                 {activeChips.map((chip) => (
                   <button
                     key={chip.key}
                     onClick={chip.onRemove}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition"
-                    title="Quitar filtro"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white border border-gray-200 text-gray-700 hover:border-red-300 hover:text-red-600 transition-all"
                   >
                     {chip.label}
-                    <span className="ml-1 text-gray-600">×</span>
+                    <span className="text-gray-400 hover:text-red-500">×</span>
                   </button>
                 ))}
+                <button
+                  onClick={clearAllFilters}
+                  className="ml-auto text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+                >
+                  Limpiar todo
+                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {filteredCars.length === 0 ? (
             <div className="text-center py-12">
@@ -488,177 +518,35 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredCars.map((car) => (
-                <CarCard
-                  key={car.id}
-                  car={car}
-                  onViewDetails={() => handleOpenModal(car)}
-                />
+              {[...filteredCars]
+                .sort((a, b) => {
+                  if (sortBy === "price-asc") return a.price - b.price;
+                  if (sortBy === "price-desc") return b.price - a.price;
+                  if (sortBy === "year-desc") return b.year - a.year;
+                  if (sortBy === "mileage-asc") return a.mileage - b.mileage;
+                  return 0;
+                })
+                .map((car, index) => (
+                <AnimateOnScroll key={car.id} delay={Math.min(index % 4 * 80, 240)}>
+                  <CarCard
+                    car={car}
+                    onViewDetails={() => handleOpenModal(car)}
+                  />
+                </AnimateOnScroll>
               ))}
             </div>
           )}
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <a href="#">
-                  <div className="relative h-10 w-10 bg-white rounded-full p-2 overflow-hidden cursor-pointer">
-                    <Image
-                      src="/logo-ms-motors.png"
-                      alt="MS Motors Logo"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </a>
+      {/* Reseñas */}
+      <ReviewsSection />
 
-                <span className="text-xl font-bold">
-                  MS<span className="text-red-500"> Motors</span>
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm">
-                Compra segura, atención personalizada y premium para todos
-                nuestros clientes.
-              </p>
-              <div className="flex space-x-4 mt-4">
-                <a
-                  href="https://wa.me/5491159456142"
-                  target="_blank"
-                  rel="noreferrer"
-                  title="WhatsApp"
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                  >
-                    <FaWhatsapp className="h-5 w-5" />
-                  </Button>
-                </a>
+      {/* Sección autos vendidos */}
+      <SoldCarsSection />
 
-                <a
-                  href="https://www.instagram.com/ms.motorsquilmes/"
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Instagram"
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                  >
-                    <FaInstagram className="h-5 w-5" />
-                  </Button>
-                </a>
-
-                <a
-                  href="https://www.tiktok.com/@msmotorsquilmes"
-                  target="_blank"
-                  rel="noreferrer"
-                  title="TikTok"
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:text-red-400 hover:bg-gray-800 rounded-full"
-                  >
-                    <FaTiktok className="h-5 w-5" />
-                  </Button>
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Enlaces Rápidos</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Inicio
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#catalog"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Catálogo
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://wa.me/5491159456142"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Contacto
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Servicios</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Compra de autos
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Venta de autos
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Seguros
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Consignación
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-lg mb-4">Contacto</h3>
-              <address className="not-italic text-gray-400">
-                <p className="mb-2">Quilmes. Buenos Aires</p>
-                <p className="mb-2">+54 11 5945-6142</p>
-              </address>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-            <p>
-              &copy; {new Date().getFullYear()} MS Motors. Todos los derechos
-              reservados.
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer con Google Maps */}
+      <Footer />
 
       {/* Car Details Modal */}
       {selectedCar && (
@@ -679,7 +567,7 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
       />
 
       {/* Botón flotante “Subir” */}
-<ScrollToTopButton hidden={!showScrollTop || isModalOpen || isFilterOpen} />
+      <WhatsAppButton />
     </div>
   );
 }

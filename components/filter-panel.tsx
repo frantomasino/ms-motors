@@ -1,16 +1,9 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ChevronDown } from "lucide-react";
+import { X, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { CarType, FilterState } from "@/types";
 
@@ -22,620 +15,294 @@ interface FilterPanelProps {
   cars: CarType[];
 }
 
-/** Sección colapsable con flecha */
-function FilterSection({
-  title,
-  children,
-  defaultOpen = false,
-  resetSignal = 0,
-}: {
-  title: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  resetSignal?: number;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
+// helpers fuera del componente para evitar loops
+const sameArr = (a: string[], b: string[]) =>
+  a.length === b.length && [...a].sort().every((v, i) => v === [...b].sort()[i]);
+const sameRange = (a: [number, number], b: [number, number]) => a[0] === b[0] && a[1] === b[1];
+const sameFilters = (a: FilterState, b: FilterState) =>
+  sameArr(a.brands, b.brands) && sameArr(a.models, b.models) &&
+  sameArr(a.transmissions, b.transmissions) && sameArr(a.colors, b.colors) &&
+  sameArr(a.fuelTypes, b.fuelTypes) && sameRange(a.priceRange, b.priceRange) &&
+  sameRange(a.yearRange, b.yearRange) && sameRange(a.mileageRange, b.mileageRange);
 
-  // ✅ cada vez que abrís el panel, se cierran todas las secciones
-  useEffect(() => {
-    setOpen(false);
-  }, [resetSignal]);
+const fmtUSD = (n: number) => "USD " + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+const fmtKM = (n: number) => n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " km";
 
+function Pill({ label, count, selected, onClick }: { label: string; count: number; selected: boolean; onClick: () => void }) {
   return (
-    <div className="border-b">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between py-4"
-        aria-expanded={open}
-      >
-        {/* ✅ tipografía/tamaño como VehicleFilters */}
-        <span className="font-title text-sm">{title}</span>
+    <button type="button" onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+        selected
+          ? "bg-gray-900 text-white border-gray-900"
+          : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900"
+      }`}>
+      {label}
+      <span className={`text-[10px] ${selected ? "text-white/50" : "text-gray-300"}`}>{count}</span>
+    </button>
+  );
+}
 
-        <ChevronDown
-          className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`}
-          aria-hidden="true"
-        />
+function Section({ title, children, badge }: { title: string; children: React.ReactNode; badge?: number }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="border-b border-gray-100 last:border-0">
+      <button type="button" onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between py-3.5 group">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-800">{title}</span>
+          {badge ? <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">{badge}</span> : null}
+        </div>
+        <ChevronDown className={`h-4 w-4 text-gray-300 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
-
       {open && <div className="pb-4">{children}</div>}
     </div>
   );
 }
 
-function FilterOption({
-  label,
-  count,
-  isSelected,
-  onClick,
-}: {
-  label: string;
-  count: number;
-  isSelected: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        // ✅ tipografía/tamaño/espaciado como VehicleFilters (más compacto)
-        "font-body flex w-full items-center justify-between py-1 text-left text-xs transition-colors",
-        isSelected ? "text-foreground" : "text-muted-foreground hover:text-foreground",
-      ].join(" ")}
-    >
-      <span>{label}</span>
-      <span className="text-xs text-muted-foreground">({count})</span>
-    </button>
-  );
-}
-
-// ✅ Funciones de formato unificadas
-const fmtUSD = (n: number) => {
-  const formatted = n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${formatted} USD`;
-};
-
-const fmtKM = (n: number) => {
-  const formatted = n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  return `${formatted} KM`;
-};
-
-export default function FilterPanel({
-  isOpen,
-  onClose,
-  filters,
-  onFiltersChange,
-  cars,
-}: FilterPanelProps) {
+export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange, cars }: FilterPanelProps) {
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
 
-  // ✅ señal para resetear (cerrar) secciones al abrir
-  const [resetSignal, setResetSignal] = useState(0);
+  useEffect(() => { setLocalFilters(filters); }, [filters, isOpen]);
 
-  // Mantener sync cuando se abre/cierra o cambian filtros externos
-  useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters, isOpen]);
-
-  // ✅ cada vez que se abre el panel, incrementa señal (cierra todo)
-  useEffect(() => {
-    if (isOpen) setResetSignal((s) => s + 1);
-  }, [isOpen]);
-
-  // Derivados (límites + opciones)
-  const {
-    maxPrice,
-    minYear,
-    maxYear,
-    maxMileage,
-    brands,
-    transmissions,
-    colors,
-    fuels,
-    years,
-    allModels,
-  } = useMemo(() => {
-    const brands = Array.from(new Set(cars.map((c) => c.brand))).sort();
-    const transmissions = Array.from(
-      new Set(cars.map((c) => c.transmission))
-    ).sort();
-    const colors = Array.from(new Set(cars.map((c) => c.color))).sort();
-    const fuels = Array.from(new Set(cars.map((c) => c.fuelType))).sort();
-    const years = Array.from(new Set(cars.map((c) => c.year))).sort(
-      (a, b) => b - a
-    );
-    const allModels = Array.from(new Set(cars.map((c) => c.model))).sort();
-
-    const maxPrice = Math.max(...cars.map((c) => c.price), 50000);
-    const minYear = Math.min(...cars.map((c) => c.year), 2000);
-    const maxYear = Math.max(...cars.map((c) => c.year), 2025);
-    const maxMileage = Math.max(...cars.map((c) => c.mileage), 300000);
-
+  const { maxPrice, minYear, maxYear, maxMileage, brands, transmissions, colors, fuels, years, allModels } = useMemo(() => {
+    const brands = Array.from(new Set(cars.map(c => c.brand))).sort();
+    const transmissions = Array.from(new Set(cars.map(c => c.transmission))).sort();
+    const colors = Array.from(new Set(cars.map(c => c.color))).sort();
+    const fuels = Array.from(new Set(cars.map(c => c.fuelType))).sort();
+    const years = Array.from(new Set(cars.map(c => c.year))).sort((a, b) => b - a);
+    const allModels = Array.from(new Set(cars.map(c => c.model))).sort();
     return {
-      maxPrice,
-      minYear,
-      maxYear,
-      maxMileage,
-      brands,
-      transmissions,
-      colors,
-      fuels,
-      years,
-      allModels,
+      maxPrice: Math.max(...cars.map(c => c.price), 50000),
+      minYear: Math.min(...cars.map(c => c.year), 2000),
+      maxYear: Math.max(...cars.map(c => c.year), 2025),
+      maxMileage: Math.max(...cars.map(c => c.mileage), 300000),
+      brands, transmissions, colors, fuels, years, allModels,
     };
   }, [cars]);
 
-  // ====== Estado estilo "lista con conteo" (single select) ======
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [selectedFuelType, setSelectedFuelType] = useState<string | null>(null);
-  const [selectedTransmission, setSelectedTransmission] = useState<string | null>(
-    null
-  );
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-
+  const [selBrand, setSelBrand] = useState<string | null>(null);
+  const [selModel, setSelModel] = useState<string | null>(null);
+  const [selFuel, setSelFuel] = useState<string | null>(null);
+  const [selTrans, setSelTrans] = useState<string | null>(null);
+  const [selYear, setSelYear] = useState<number | null>(null);
+  const [selColor, setSelColor] = useState<string | null>(null);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+  const [mileageRange, setMileageRange] = useState<[number, number]>([0, maxMileage]);
   const [minPriceInput, setMinPriceInput] = useState("");
   const [maxPriceInput, setMaxPriceInput] = useState("");
+  const [minKmInput, setMinKmInput] = useState("");
+  const [maxKmInput, setMaxKmInput] = useState("");
 
-  const priceRanges = useMemo(
-    () => [
-      { label: "Hasta USD 10.000", min: 0, max: 10000 },
-      { label: "USD 10.000 – 20.000", min: 10000, max: 20000 },
-      { label: "USD 20.000 – 30.000", min: 20000, max: 30000 },
-      { label: "USD 30.000 – 40.000", min: 30000, max: 40000 },
-      { label: "Más de USD 40.000", min: 40000, max: maxPrice },
-    ],
-    [maxPrice]
-  );
+  const priceRanges = useMemo(() => [
+    { label: "Hasta 10k", min: 0, max: 10000 },
+    { label: "10k – 20k", min: 10000, max: 20000 },
+    { label: "20k – 30k", min: 20000, max: 30000 },
+    { label: "30k – 40k", min: 30000, max: 40000 },
+    { label: "+ 40k", min: 40000, max: maxPrice },
+  ], [maxPrice]);
 
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
+  const mileageRanges = useMemo(() => [
+    { label: "– 50k km", min: 0, max: 50000 },
+    { label: "50 – 100k", min: 50000, max: 100000 },
+    { label: "100 – 150k", min: 100000, max: 150000 },
+    { label: "150 – 200k", min: 150000, max: 200000 },
+    { label: "+ 200k km", min: 200000, max: maxMileage },
+  ], [maxMileage]);
 
-  // ✅ Kilometraje igual que Precio (rangos + inputs)
-  const mileageRanges = useMemo(
-    () => [
-      { label: "Hasta 50.000 km", min: 0, max: 50000 },
-      { label: "50.000 – 100.000 km", min: 50000, max: 100000 },
-      { label: "100.000 – 150.000 km", min: 100000, max: 150000 },
-      { label: "150.000 – 200.000 km", min: 150000, max: 200000 },
-      { label: "Más de 200.000 km", min: 200000, max: maxMileage },
-    ],
-    [maxMileage]
-  );
-
-  const [mileageRange, setMileageRange] = useState<[number, number]>([
-    0,
-    maxMileage,
-  ]);
-  const [minMileageInput, setMinMileageInput] = useState("");
-  const [maxMileageInput, setMaxMileageInput] = useState("");
-
-  // modelos dependen de la marca seleccionada (para parecerse a tu ejemplo)
-  const models = useMemo(() => {
-    if (!selectedBrand) return allModels;
-    return Array.from(
-      new Set(cars.filter((c) => c.brand === selectedBrand).map((c) => c.model))
-    ).sort();
-  }, [cars, allModels, selectedBrand]);
-
-  // Conteos (globales)
-  const vehicleCounts = useMemo(() => {
-    const counts = {
-      brands: {} as Record<string, number>,
-      models: {} as Record<string, number>,
-      fuelTypes: {} as Record<string, number>,
-      transmissions: {} as Record<string, number>,
-      years: {} as Record<number, number>,
-      colors: {} as Record<string, number>,
-      priceRanges: {} as Record<string, number>,
-      mileageRanges: {} as Record<string, number>,
-    };
-
+  const counts = useMemo(() => {
+    const c = { brands: {} as Record<string, number>, models: {} as Record<string, number>, fuels: {} as Record<string, number>, trans: {} as Record<string, number>, years: {} as Record<number, number>, colors: {} as Record<string, number> };
     for (const car of cars) {
-      counts.brands[car.brand] = (counts.brands[car.brand] || 0) + 1;
-      counts.models[car.model] = (counts.models[car.model] || 0) + 1;
-      counts.fuelTypes[car.fuelType] =
-        (counts.fuelTypes[car.fuelType] || 0) + 1;
-      counts.transmissions[car.transmission] =
-        (counts.transmissions[car.transmission] || 0) + 1;
-      counts.years[car.year] = (counts.years[car.year] || 0) + 1;
-      counts.colors[car.color] = (counts.colors[car.color] || 0) + 1;
+      c.brands[car.brand] = (c.brands[car.brand] || 0) + 1;
+      c.models[car.model] = (c.models[car.model] || 0) + 1;
+      c.fuels[car.fuelType] = (c.fuels[car.fuelType] || 0) + 1;
+      c.trans[car.transmission] = (c.trans[car.transmission] || 0) + 1;
+      c.years[car.year] = (c.years[car.year] || 0) + 1;
+      c.colors[car.color] = (c.colors[car.color] || 0) + 1;
     }
+    return c;
+  }, [cars]);
 
-    for (const r of priceRanges) {
-      counts.priceRanges[r.label] = cars.filter(
-        (c) => c.price >= r.min && c.price <= r.max
-      ).length;
-    }
+  const models = useMemo(() =>
+    selBrand ? Array.from(new Set(cars.filter(c => c.brand === selBrand).map(c => c.model))).sort() : allModels,
+    [cars, allModels, selBrand]);
 
-    for (const r of mileageRanges) {
-      counts.mileageRanges[r.label] = cars.filter(
-        (c) => c.mileage >= r.min && c.mileage <= r.max
-      ).length;
-    }
+  const activeCount = [selBrand, selModel, selFuel, selTrans, selColor].filter(Boolean).length +
+    (selYear ? 1 : 0) +
+    (priceRange[0] !== 0 || priceRange[1] !== maxPrice ? 1 : 0) +
+    (mileageRange[0] !== 0 || mileageRange[1] !== maxMileage ? 1 : 0);
 
-    return counts;
-  }, [cars, priceRanges, mileageRanges]);
-
-  // ====== Sincronizar selections -> localFilters ======
   useEffect(() => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      brands: selectedBrand ? [selectedBrand] : [],
-      models: selectedModel ? [selectedModel] : [],
-      fuelTypes: selectedFuelType ? [selectedFuelType] : [],
-      transmissions: selectedTransmission ? [selectedTransmission] : [],
-      colors: selectedColor ? [selectedColor] : [],
-      yearRange: selectedYear ? [selectedYear, selectedYear] : [minYear, maxYear],
-      priceRange: priceRange,
-      mileageRange: mileageRange,
-    }));
-  }, [
-    selectedBrand,
-    selectedModel,
-    selectedFuelType,
-    selectedTransmission,
-    selectedYear,
-    selectedColor,
-    priceRange,
-    mileageRange,
-    minYear,
-    maxYear,
-  ]);
-
-  // ====== helpers para evitar loop infinito (React error #185) ======
-  const sameArr = (a: string[], b: string[]) => {
-    if (a === b) return true;
-    if (a.length !== b.length) return false;
-    const aa = [...a].sort();
-    const bb = [...b].sort();
-    return aa.every((v, i) => v === bb[i]);
-  };
-
-  const sameRange = (a: [number, number], b: [number, number]) =>
-    a[0] === b[0] && a[1] === b[1];
-
-  const sameFilters = (a: FilterState, b: FilterState) => {
-    return (
-      sameArr(a.brands, b.brands) &&
-      sameArr(a.models, b.models) &&
-      sameArr(a.transmissions, b.transmissions) &&
-      sameArr(a.colors, b.colors) &&
-      sameArr(a.fuelTypes, b.fuelTypes) &&
-      sameRange(a.priceRange, b.priceRange) &&
-      sameRange(a.yearRange, b.yearRange) &&
-      sameRange(a.mileageRange, b.mileageRange)
-    );
-  };
-
-  // ✅ LIVE: mientras filtrás, se actualiza el catálogo sin esperar "Aplicar"
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // ✅ evita loop infinito
-    if (sameFilters(localFilters, filters)) return;
-
-    onFiltersChange(localFilters);
-  }, [localFilters, isOpen, onFiltersChange, filters]);
-
-  // Precio custom
-  const handlePriceRangeClick = (min: number, max: number) => {
-    setPriceRange([min, max]);
-    setMinPriceInput(String(min));
-    setMaxPriceInput(String(max));
-  };
-
-  const handleCustomPriceRange = () => {
-    const min = Number(minPriceInput || 0);
-    const max = Number(maxPriceInput || maxPrice);
-    const clampedMin = Math.max(0, min);
-    const clampedMax = Math.min(maxPrice, max);
-    setPriceRange([clampedMin, clampedMax]);
-  };
-
-  // ✅ Km custom
-  const handleMileageRangeClick = (min: number, max: number) => {
-    setMileageRange([min, max]);
-    setMinMileageInput(String(min));
-    setMaxMileageInput(String(max));
-  };
-
-  const handleCustomMileageRange = () => {
-    const min = Number(minMileageInput || 0);
-    const max = Number(maxMileageInput || maxMileage);
-    const clampedMin = Math.max(0, min);
-    const clampedMax = Math.min(maxMileage, max);
-    setMileageRange([clampedMin, clampedMax]);
-  };
-
-  // ✅ "Aplicar" se mantiene: ya aplicó en vivo, esto solo cierra
-  const applyFilters = () => {
-    onClose();
-  };
-
-  const clearFilters = () => {
-    setSelectedBrand(null);
-    setSelectedModel(null);
-    setSelectedFuelType(null);
-    setSelectedTransmission(null);
-    setSelectedYear(null);
-    setSelectedColor(null);
-    setMinPriceInput("");
-    setMaxPriceInput("");
-    setPriceRange([0, maxPrice]);
-
-    // ✅ reset km
-    setMinMileageInput("");
-    setMaxMileageInput("");
-    setMileageRange([0, maxMileage]);
-
-    const cleared: FilterState = {
-      brands: [],
-      models: [],
-      transmissions: [],
-      priceRange: [0, maxPrice],
-      yearRange: [minYear, maxYear],
-      mileageRange: [0, maxMileage],
-      colors: [],
-      fuelTypes: [],
+    const next: FilterState = {
+      brands: selBrand ? [selBrand] : [],
+      models: selModel ? [selModel] : [],
+      fuelTypes: selFuel ? [selFuel] : [],
+      transmissions: selTrans ? [selTrans] : [],
+      colors: selColor ? [selColor] : [],
+      yearRange: selYear ? [selYear, selYear] : [minYear, maxYear],
+      priceRange,
+      mileageRange,
     };
+    if (isOpen && !sameFilters(next, filters)) onFiltersChange(next);
+    setLocalFilters(next);
+  }, [selBrand, selModel, selFuel, selTrans, selYear, selColor, priceRange, mileageRange, minYear, maxYear, isOpen]);
 
-    setLocalFilters(cleared);
-    onFiltersChange(cleared);
-    onClose();
+  const clearAll = () => {
+    setSelBrand(null); setSelModel(null); setSelFuel(null); setSelTrans(null); setSelYear(null); setSelColor(null);
+    setMinPriceInput(""); setMaxPriceInput(""); setPriceRange([0, maxPrice]);
+    setMinKmInput(""); setMaxKmInput(""); setMileageRange([0, maxMileage]);
+    const cleared: FilterState = { brands: [], models: [], transmissions: [], priceRange: [0, maxPrice], yearRange: [minYear, maxYear], mileageRange: [0, maxMileage], colors: [], fuelTypes: [] };
+    setLocalFilters(cleared); onFiltersChange(cleared); onClose();
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto" side="right">
-        {/* <SheetHeader>
-  <SheetTitle>Filtros</SheetTitle>
-  <SheetDescription>
-    Refina tu búsqueda para encontrar el vehículo perfecto
-  </SheetDescription>
-</SheetHeader> */}
+    <Sheet open={isOpen} onOpenChange={open => !open && onClose()}>
+      <SheetContent className="w-full sm:w-[400px] flex flex-col p-0 gap-0 bg-white" side="right">
+        <SheetTitle className="sr-only">Filtros</SheetTitle>
 
-        <div className="mt-6 space-y-2">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
+            </svg>
+            <span className="text-sm font-bold text-gray-900">Filtrar</span>
+            {activeCount > 0 && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">{activeCount}</span>
+            )}
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Contenido scrolleable */}
+        <div className="flex-1 overflow-y-auto px-5 py-2">
+
           {/* Marca */}
-          <FilterSection title="Marca" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todas las marcas"
-                count={Object.values(vehicleCounts.brands).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedBrand}
-                onClick={() => {
-                  setSelectedBrand(null);
-                  setSelectedModel(null);
-                }}
-              />
-              {brands.map((brand) => (
-                <FilterOption
-                  key={brand}
-                  label={brand}
-                  count={vehicleCounts.brands[brand] || 0}
-                  isSelected={selectedBrand === brand}
-                  onClick={() => {
-                    setSelectedBrand(selectedBrand === brand ? null : brand);
-                    setSelectedModel(null);
-                  }}
-                />
+          <Section title="Marca" badge={selBrand ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todas" count={cars.length} selected={!selBrand} onClick={() => { setSelBrand(null); setSelModel(null); }} />
+              {brands.map(b => (
+                <Pill key={b} label={b} count={counts.brands[b] || 0} selected={selBrand === b}
+                  onClick={() => { setSelBrand(selBrand === b ? null : b); setSelModel(null); }} />
               ))}
             </div>
-          </FilterSection>
+          </Section>
 
           {/* Modelo */}
-          <FilterSection title="Modelo" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todos los modelos"
-                count={Object.values(vehicleCounts.models).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedModel}
-                onClick={() => setSelectedModel(null)}
-              />
-              {models.map((model) => (
-                <FilterOption
-                  key={model}
-                  label={model}
-                  count={vehicleCounts.models[model] || 0}
-                  isSelected={selectedModel === model}
-                  onClick={() => setSelectedModel(selectedModel === model ? null : model)}
-                />
+          <Section title="Modelo" badge={selModel ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todos" count={cars.length} selected={!selModel} onClick={() => setSelModel(null)} />
+              {models.map(m => (
+                <Pill key={m} label={m} count={counts.models[m] || 0} selected={selModel === m}
+                  onClick={() => setSelModel(selModel === m ? null : m)} />
               ))}
             </div>
-          </FilterSection>
-
-          {/* Combustible */}
-          <FilterSection title="Combustible" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todos"
-                count={Object.values(vehicleCounts.fuelTypes).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedFuelType}
-                onClick={() => setSelectedFuelType(null)}
-              />
-              {fuels.map((fuel) => (
-                <FilterOption
-                  key={fuel}
-                  label={fuel}
-                  count={vehicleCounts.fuelTypes[fuel] || 0}
-                  isSelected={selectedFuelType === fuel}
-                  onClick={() => setSelectedFuelType(selectedFuelType === fuel ? null : fuel)}
-                />
-              ))}
-            </div>
-          </FilterSection>
-
-          {/* Transmisión */}
-          <FilterSection title="Transmisión" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todas"
-                count={Object.values(vehicleCounts.transmissions).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedTransmission}
-                onClick={() => setSelectedTransmission(null)}
-              />
-              {transmissions.map((trans) => (
-                <FilterOption
-                  key={trans}
-                  label={trans}
-                  count={vehicleCounts.transmissions[trans] || 0}
-                  isSelected={selectedTransmission === trans}
-                  onClick={() =>
-                    setSelectedTransmission(selectedTransmission === trans ? null : trans)
-                  }
-                />
-              ))}
-            </div>
-          </FilterSection>
+          </Section>
 
           {/* Año */}
-          <FilterSection title="Año" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todos los años"
-                count={Object.values(vehicleCounts.years).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedYear}
-                onClick={() => setSelectedYear(null)}
-              />
-              {years.map((year) => (
-                <FilterOption
-                  key={year}
-                  label={String(year)}
-                  count={vehicleCounts.years[year] || 0}
-                  isSelected={selectedYear === year}
-                  onClick={() => setSelectedYear(selectedYear === year ? null : year)}
-                />
+          <Section title="Año" badge={selYear ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todos" count={cars.length} selected={!selYear} onClick={() => setSelYear(null)} />
+              {years.map(y => (
+                <Pill key={y} label={String(y)} count={counts.years[y] || 0} selected={selYear === y}
+                  onClick={() => setSelYear(selYear === y ? null : y)} />
               ))}
             </div>
-          </FilterSection>
+          </Section>
 
-          {/* Precio */}
-          <FilterSection title="Precio" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              {priceRanges.map((range) => (
-                <FilterOption
-                  key={range.label}
-                  label={range.label}
-                  count={vehicleCounts.priceRanges[range.label] || 0}
-                  isSelected={priceRange[0] === range.min && priceRange[1] === range.max}
-                  onClick={() => handlePriceRangeClick(range.min, range.max)}
-                />
+          {/* Combustible */}
+          <Section title="Combustible" badge={selFuel ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todos" count={cars.length} selected={!selFuel} onClick={() => setSelFuel(null)} />
+              {fuels.map(f => (
+                <Pill key={f} label={f} count={counts.fuels[f] || 0} selected={selFuel === f}
+                  onClick={() => setSelFuel(selFuel === f ? null : f)} />
               ))}
             </div>
+          </Section>
 
-            <div className="mt-3 flex items-center gap-2">
-              <Input
-                type="number"
-                placeholder="Mínimo"
-                value={minPriceInput}
-                onChange={(e) => setMinPriceInput(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <span className="text-gray-500">—</span>
-              <Input
-                type="number"
-                placeholder="Máximo"
-                value={maxPriceInput}
-                onChange={(e) => setMaxPriceInput(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleCustomPriceRange}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-900 hover:text-white"
-                aria-label="Aplicar rango personalizado"
-              >
-                <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
-              </button>
+          {/* Transmisión */}
+          <Section title="Transmisión" badge={selTrans ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todas" count={cars.length} selected={!selTrans} onClick={() => setSelTrans(null)} />
+              {transmissions.map(t => (
+                <Pill key={t} label={t} count={counts.trans[t] || 0} selected={selTrans === t}
+                  onClick={() => setSelTrans(selTrans === t ? null : t)} />
+              ))}
             </div>
-
-            <div className="mt-3 flex justify-between text-sm text-gray-600">
-              <span>{fmtUSD(priceRange[0])}</span>
-              <span>{fmtUSD(priceRange[1])}</span>
-            </div>
-          </FilterSection>
+          </Section>
 
           {/* Color */}
-          <FilterSection title="Color" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              <FilterOption
-                label="Todos los colores"
-                count={Object.values(vehicleCounts.colors).reduce((a, b) => a + b, 0)}
-                isSelected={!selectedColor}
-                onClick={() => setSelectedColor(null)}
-              />
-              {colors.map((color) => (
-                <FilterOption
-                  key={color}
-                  label={color}
-                  count={vehicleCounts.colors[color] || 0}
-                  isSelected={selectedColor === color}
-                  onClick={() => setSelectedColor(selectedColor === color ? null : color)}
-                />
+          <Section title="Color" badge={selColor ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5">
+              <Pill label="Todos" count={cars.length} selected={!selColor} onClick={() => setSelColor(null)} />
+              {colors.map(c => (
+                <Pill key={c} label={c} count={counts.colors[c] || 0} selected={selColor === c}
+                  onClick={() => setSelColor(selColor === c ? null : c)} />
               ))}
             </div>
-          </FilterSection>
+          </Section>
 
-          {/* Kilometraje */}
-          <FilterSection title="Kilometraje" defaultOpen={false} resetSignal={resetSignal}>
-            <div className="space-y-1">
-              {mileageRanges.map((range) => (
-                <FilterOption
-                  key={range.label}
-                  label={range.label}
-                  count={vehicleCounts.mileageRanges[range.label] || 0}
-                  isSelected={
-                    mileageRange[0] === range.min && mileageRange[1] === range.max
-                  }
-                  onClick={() => handleMileageRangeClick(range.min, range.max)}
-                />
+          {/* Precio */}
+          <Section title="Precio" badge={priceRange[0] !== 0 || priceRange[1] !== maxPrice ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {priceRanges.map(r => (
+                <Pill key={r.label} label={r.label} count={cars.filter(c => c.price >= r.min && c.price <= r.max).length}
+                  selected={priceRange[0] === r.min && priceRange[1] === r.max}
+                  onClick={() => { setPriceRange([r.min, r.max]); setMinPriceInput(String(r.min)); setMaxPriceInput(String(r.max)); }} />
               ))}
             </div>
-
-            <div className="mt-3 flex items-center gap-2">
-              <Input
-                type="number"
-                placeholder="Mínimo"
-                value={minMileageInput}
-                onChange={(e) => setMinMileageInput(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <span className="text-gray-500">—</span>
-              <Input
-                type="number"
-                placeholder="Máximo"
-                value={maxMileageInput}
-                onChange={(e) => setMaxMileageInput(e.target.value)}
-                className="h-9 text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleCustomMileageRange}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-900 hover:text-white"
-                aria-label="Aplicar rango de km personalizado"
-              >
-                <ChevronDown className="h-4 w-4 rotate-[-90deg]" />
+            <div className="flex items-center gap-2">
+              <Input type="number" placeholder="Mín" value={minPriceInput} onChange={e => setMinPriceInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <span className="text-gray-300 text-sm shrink-0">–</span>
+              <Input type="number" placeholder="Máx" value={maxPriceInput} onChange={e => setMaxPriceInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <button type="button" onClick={() => setPriceRange([Math.max(0, Number(minPriceInput || 0)), Math.min(maxPrice, Number(maxPriceInput || maxPrice))])}
+                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
+                <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
               </button>
             </div>
-
-            <div className="mt-3 flex justify-between text-sm text-gray-600">
-              <span>{fmtKM(mileageRange[0])}</span>
-              <span>{fmtKM(mileageRange[1])}</span>
+            <div className="flex justify-between text-[11px] text-gray-400 mt-2">
+              <span>{fmtUSD(priceRange[0])}</span><span>{fmtUSD(priceRange[1])}</span>
             </div>
-          </FilterSection>
+          </Section>
 
-          <div className="flex gap-2 mt-6 pt-4">
-            <Button variant="outline" onClick={clearFilters} className="flex-1">
-              Limpiar
-            </Button>
-            <Button
-              onClick={applyFilters}
-              className="flex-1 bg-red-600 hover:bg-red-700"
-            >
-              Aplicar filtros
-            </Button>
-          </div>
+          {/* Kilometraje */}
+          <Section title="Kilometraje" badge={mileageRange[0] !== 0 || mileageRange[1] !== maxMileage ? 1 : 0}>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {mileageRanges.map(r => (
+                <Pill key={r.label} label={r.label} count={cars.filter(c => c.mileage >= r.min && c.mileage <= r.max).length}
+                  selected={mileageRange[0] === r.min && mileageRange[1] === r.max}
+                  onClick={() => { setMileageRange([r.min, r.max]); setMinKmInput(String(r.min)); setMaxKmInput(String(r.max)); }} />
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Input type="number" placeholder="Mín" value={minKmInput} onChange={e => setMinKmInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <span className="text-gray-300 text-sm shrink-0">–</span>
+              <Input type="number" placeholder="Máx" value={maxKmInput} onChange={e => setMaxKmInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <button type="button" onClick={() => setMileageRange([Math.max(0, Number(minKmInput || 0)), Math.min(maxMileage, Number(maxKmInput || maxMileage))])}
+                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
+                <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+              </button>
+            </div>
+            <div className="flex justify-between text-[11px] text-gray-400 mt-2">
+              <span>{fmtKM(mileageRange[0])}</span><span>{fmtKM(mileageRange[1])}</span>
+            </div>
+          </Section>
+
+          <div className="h-4" />
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 px-5 py-4 flex gap-2.5 bg-white">
+          <Button variant="outline" onClick={clearAll}
+            className="flex-1 rounded-xl h-11 text-sm font-medium border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400">
+            {activeCount > 0 ? `Limpiar (${activeCount})` : "Limpiar"}
+          </Button>
+          <Button onClick={onClose}
+            className="flex-1 rounded-xl h-11 bg-gray-900 hover:bg-black text-white text-sm font-semibold">
+            Ver resultados
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

@@ -1,108 +1,89 @@
 "use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import type { Car } from "@/types";
 import Image from "next/image";
-import { Calendar, Circle, Gauge, MessageCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import type { CarType } from "@/types";
+import { Calendar, Gauge, Fuel, Settings2, MessageCircle } from "lucide-react";
 
 interface CarCardProps {
-  car: Car;
+  car: CarType;
   onViewDetails: () => void;
 }
 
 export default function CarCard({ car, onViewDetails }: CarCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const formatPrice = (price: number) => {
-    return `${new Intl.NumberFormat("es-AR").format(price)} USD`;
-  };
-
-  const formatMileage = (mileage: number) => {
-    return new Intl.NumberFormat("es-AR").format(mileage);
-  };
-
-  const firstValidImage =
-    car.images.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg";
+  const firstValidImage = car.images?.find((img) => img && !img.includes(".mp4")) || "/placeholder.svg";
+  const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
+  const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
   return (
-    <Card
-      className="overflow-hidden transition-all duration-300 hover:shadow-lg group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="relative h-48 w-full overflow-hidden">
+    <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+
+      {/* Imagen — clickeable para ver detalles */}
+      <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100" onClick={onViewDetails}>
         <Image
           src={firstValidImage}
-          alt={car.model}
+          alt={`${car.brand} ${car.model}`}
           fill
-          className={`object-cover transition-transform duration-500 ${
-            isHovered ? "scale-110" : "scale-100"
-          }`}
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-<Badge className="absolute top-2 right-2 bg-[#1A2937] hover:bg-[#14212A] text-white">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+        {/* Precio — esquina superior derecha */}
+        <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-xl tracking-tight">
           {formatPrice(car.price)}
-        </Badge>
+        </div>
+
+        {/* Año — esquina superior izquierda */}
+        <div className="absolute top-3 left-3 bg-white/15 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg">
+          {car.year}
+        </div>
       </div>
 
-      <CardContent className="p-4">
-<h3 className="font-bold text-lg mb-2 text-gray-800">
-  {car.brand} {car.model}
-</h3>
-        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1 text-gray-500" />
-            <span>{car.year}</span>
-          </div>
-          <div className="flex items-center">
-            <Circle className="h-4 w-4 mr-1 text-gray-500" />
-            <span>{car.color}</span>
-          </div>
-          <div className="flex items-center">
-            <Gauge className="h-4 w-4 mr-1 text-gray-500" />
-            <span>{formatMileage(car.mileage)} km</span>
-          </div>
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-1 text-gray-500"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-              <line x1="12" y1="18" x2="12" y2="18"></line>
-            </svg>
-            <span>{car.transmission}</span>
-          </div>
+      {/* Contenido */}
+      <div className="flex flex-col flex-1 p-4 gap-3">
+
+        {/* Marca + Modelo */}
+        <div onClick={onViewDetails}>
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
+          <h3 className="text-base font-bold text-gray-900 leading-tight mt-0.5">{car.model}</h3>
         </div>
-      </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button variant="outline" className="flex-1 text-sm" onClick={onViewDetails}>
-          Ver Detalles
-        </Button>
+        {/* Specs — 2 columnas */}
+        <div className="grid grid-cols-2 gap-y-1.5 gap-x-2">
+          {[
+            { icon: Gauge, value: formatMileage(car.mileage) },
+            { icon: Fuel, value: car.fuelType },
+            { icon: Settings2, value: car.transmission },
+            { icon: Calendar, value: car.color },
+          ].map(({ icon: Icon, value }, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <Icon className="h-3.5 w-3.5 text-gray-300 shrink-0" />
+              <span className="text-xs text-gray-500 truncate">{value}</span>
+            </div>
+          ))}
+        </div>
 
-        <a
-          href={`https://wa.me/5491159456142?text=${encodeURIComponent(
-            `Hola! Estoy interesado en el ${car.brand} ${car.model}`
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="WhatsApp"
-        >
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
-            <MessageCircle className="h-4 w-4 mr-1" />
+        {/* Divider */}
+        <div className="h-px bg-gray-100" />
+
+        {/* Botones */}
+        <div className="flex gap-2">
+          <button
+            onClick={onViewDetails}
+            className="flex-1 text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-900 hover:text-gray-900 rounded-xl py-2.5 transition-all duration-200"
+          >
+            Ver detalles
+          </button>
+          <a
+            href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Me interesa el ${car.brand} ${car.model} ${car.year}`)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] rounded-xl py-2.5 transition-all duration-200"
+          >
+            <MessageCircle className="h-4 w-4" />
             WhatsApp
-          </Button>
-        </a>
-      </CardFooter>
-    </Card>
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }
