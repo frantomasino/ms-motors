@@ -35,7 +35,7 @@ export default function AboutSection() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-3">Quiénes somos</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-6">
-              Más de 10 años<br />
+              Más de 5 años<br />
               vendiendo con confianza
             </h2>
             <p className="text-gray-500 leading-relaxed mb-6">
