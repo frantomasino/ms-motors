@@ -34,7 +34,7 @@ export default function HeroSection() {
           </h1>
 
           <p className="font-body mb-7 max-w-md text-sm sm:text-base text-white/50 leading-relaxed">
-            Comprá con confianza. Vehículos verificados, atención personalizada y financiación disponible.
+            Comprá con confianza. Vehículos verificados, atención personalizada.
           </p>
 
           {/* CTAs */}
