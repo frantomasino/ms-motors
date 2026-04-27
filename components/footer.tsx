@@ -42,7 +42,17 @@ export default function Footer() {
                   </div>
                   <div>
                     <p className="text-[10px] text-white/30 uppercase tracking-widest">Ubicación</p>
-                    <p className="text-sm text-white/60 group-hover:text-white transition-colors">Quilmes, Buenos Aires</p>
+                    <p className="text-sm text-white/60 group-hover:text-white transition-colors">Av. Mitre 2274, Quilmes</p>
+                  </div>
+                </a>
+                <a href="tel:+5491159456142"
+                  className="flex items-center gap-3 group">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/5 group-hover:bg-green-500/20 transition-colors">
+                    <Phone className="h-3.5 w-3.5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-white/30 uppercase tracking-widest">Teléfono</p>
+                    <p className="text-sm text-white/60 group-hover:text-white transition-colors">+54 11 5945-6142</p>
                   </div>
                 </a>
                 <a href="https://wa.me/5491159456142" target="_blank" rel="noreferrer"
@@ -107,6 +117,8 @@ export default function Footer() {
                   rel={href.startsWith("http") ? "noreferrer" : undefined}
                   className="hover:text-white/60 transition-colors">{label}</a>
               ))}
+              <span className="text-white/10">·</span>
+              <span className="text-white/20">Este sitio no recopila datos personales sin consentimiento.</span>
             </nav>
           </div>
         </div>

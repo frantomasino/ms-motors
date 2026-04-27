@@ -1,7 +1,6 @@
 import { fetchAutos } from "@/services/autosService";
 import { Auto } from "@/types";
 
-// This function converts the Auto type from the service to the car type used in the UI
 function mapAutosToCarFormat(autos: Auto[]) {
   return autos.map((auto, index) => ({
     id: index + 1,
@@ -14,12 +13,11 @@ function mapAutosToCarFormat(autos: Auto[]) {
     transmission: auto.Transmisión,
     fuelType: auto.Combustible,
     description: auto.Descripción || `${auto.Marca} ${auto.Modelo} ${auto.Año}`,
-    images: auto.imagenes.length > 0 
-      ? auto.imagenes 
-      : [
-          "/placeholder.svg?height=600&width=800",
-          "/placeholder.svg?height=600&width=800&text=Interior",
-        ],
+    estado: (auto as any).Estado?.toLowerCase().trim() || "disponible",
+    fotos: (auto as any).fotos || "",
+    images: auto.imagenes.length > 0
+      ? auto.imagenes
+      : ["/placeholder.svg?height=600&width=800"],
   }));
 }
 
@@ -31,4 +29,16 @@ export async function getCarsData() {
     console.error("Error fetching cars data:", error);
     return [];
   }
+}
+
+// Solo los disponibles para el catálogo
+export async function getDisponibles() {
+  const cars = await getCarsData();
+  return cars.filter(c => c.estado !== "vendido");
+}
+
+// Solo los vendidos para la sección historial
+export async function getVendidos() {
+  const cars = await getCarsData();
+  return cars.filter(c => c.estado === "vendido");
 }

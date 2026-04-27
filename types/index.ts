@@ -10,6 +10,8 @@ export interface CarType {
   fuelType: string
   description: string
   images: string[]
+  estado?: string
+  fotos?: string
   score?: number
   reasons?: string[]
 }

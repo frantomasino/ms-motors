@@ -1,10 +1,11 @@
 import { getCarsData } from "./cars-data-provider";
 import ClientPage from "./page.client";
 
+export const revalidate = 60; // revalida cada 60 segundos
+
 export default async function Home() {
-  // Fetch cars data on the server
-  const cars = await getCarsData();
-  
-  // Pass the data to the client component
-  return <ClientPage initialCars={cars} />;
+  const allCars = await getCarsData();
+  const disponibles = allCars.filter(c => c.estado !== "vendido");
+  const vendidos = allCars.filter(c => c.estado === "vendido");
+  return <ClientPage initialCars={disponibles} soldCars={vendidos} />;
 }

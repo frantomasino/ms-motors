@@ -3,33 +3,21 @@
 import { useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, Calendar, Gauge, ChevronLeft, ChevronRight } from "lucide-react";
+import type { CarType } from "@/types";
 
-interface SoldCar {
-  id: number;
-  brand: string;
-  model: string;
-  year: number;
-  mileage: number;
-  image: string;
+interface SoldCarsSectionProps {
+  soldCars: CarType[];
 }
 
-// Usá imágenes reales de tu Supabase cuando quieras conectarlo
-const SOLD_CARS: SoldCar[] = [
-  { id: 1, brand: "Chevrolet", model: "Celta", year: 2012, mileage: 87000, image: "/placeholder.svg" },
-  { id: 2, brand: "Ford", model: "Ka", year: 2018, mileage: 52000, image: "/208-1.webp" },
-  { id: 3, brand: "Peugeot", model: "208", year: 2020, mileage: 38000, image: "/placeholder.svg" },
-  { id: 4, brand: "Toyota", model: "Hilux", year: 2019, mileage: 70000, image: "/placeholder.svg" },
-  { id: 5, brand: "Volkswagen", model: "Fox", year: 2016, mileage: 110000, image: "/placeholder.svg" },
-  { id: 6, brand: "Nissan", model: "Kicks", year: 2021, mileage: 29000, image: "/placeholder.svg" },
-];
-
-function SoldCarCard({ car }: { car: SoldCar }) {
+function SoldCarCard({ car }: { car: CarType }) {
   const fmt = (m: number) => new Intl.NumberFormat("es-AR").format(m);
+  const firstImage = car.images?.find(img => img && !img.includes(".mp4")) || "/placeholder.svg";
+
   return (
     <div className="group relative flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative h-44 overflow-hidden bg-gray-100">
         <Image
-          src={car.image}
+          src={firstImage}
           alt={`${car.brand} ${car.model}`}
           fill
           className="object-cover group-hover:scale-105 transition-all duration-500"
@@ -56,11 +44,13 @@ function SoldCarCard({ car }: { car: SoldCar }) {
   );
 }
 
-export default function SoldCarsSection() {
+export default function SoldCarsSection({ soldCars }: SoldCarsSectionProps) {
   const [page, setPage] = useState(0);
   const perPage = 3;
-  const totalPages = Math.ceil(SOLD_CARS.length / perPage);
-  const visible = SOLD_CARS.slice(page * perPage, page * perPage + perPage);
+  const totalPages = Math.ceil(soldCars.length / perPage);
+  const visible = soldCars.slice(page * perPage, page * perPage + perPage);
+
+  if (soldCars.length === 0) return null;
 
   return (
     <section id="vendidos" className="bg-gray-50 border-t border-gray-100 py-20 scroll-mt-20">
@@ -74,12 +64,12 @@ export default function SoldCarsSection() {
           </div>
           {totalPages > 1 && (
             <div className="flex items-center gap-2">
-              <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
+              <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-900 hover:text-gray-900 disabled:opacity-25 transition-all">
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <span className="text-sm text-gray-400 tabular-nums">{page + 1} / {totalPages}</span>
-              <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
+              <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-gray-900 hover:text-gray-900 disabled:opacity-25 transition-all">
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -88,11 +78,11 @@ export default function SoldCarsSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {visible.map((car) => <SoldCarCard key={car.id} car={car} />)}
+          {visible.map(car => <SoldCarCard key={car.id} car={car} />)}
         </div>
 
         <p className="text-center mt-10 text-sm text-gray-400">
-          +{SOLD_CARS.length} vehículos vendidos con éxito
+          +{soldCars.length} vehículos vendidos con éxito
         </p>
       </div>
     </section>

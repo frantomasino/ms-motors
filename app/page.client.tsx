@@ -20,9 +20,10 @@ import AnimateOnScroll from "@/components/animate-on-scroll";
 
 interface ClientPageProps {
   initialCars: CarType[];
+  soldCars: CarType[];
 }
 
-export default function ClientPage({ initialCars }: ClientPageProps) {
+export default function ClientPage({ initialCars, soldCars }: ClientPageProps) {
   const [selectedCar, setSelectedCar] = useState<CarType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -547,7 +548,7 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
       <ReviewsSection />
 
       {/* Sección autos vendidos */}
-      <SoldCarsSection />
+      <SoldCarsSection soldCars={soldCars} />
 
       {/* Footer con Google Maps */}
       <Footer />
