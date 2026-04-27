@@ -308,8 +308,8 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled ? "bg-white/95 backdrop-blur-md border-b border-gray-100/80 shadow-sm" : "bg-white/10 backdrop-blur-sm border-b border-transparent"
       }`}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl">
+          <div className="flex items-center justify-between h-14 sm:h-16">
 
             {/* Logo */}
             <a href="#" className="flex items-center gap-2.5 shrink-0">
@@ -420,7 +420,7 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
       <AboutSection />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+      <main className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl py-10 sm:py-16">
         <section id="catalog" className="scroll-mt-20">
 
           {/* Encabezado + buscador */}
@@ -437,9 +437,10 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
                 </p>
               </div>
 
-              {/* Búsqueda + Filtros — full width en mobile */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:w-64 sm:flex-none">
+              {/* Búsqueda + Filtros + Ordenar */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                {/* Búsqueda */}
+                <div className="relative w-full sm:w-56">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
                   <Input
                     placeholder="Buscar marca o modelo..."
@@ -448,33 +449,36 @@ if (filters.models.length > 0 && !filters.models.includes(car.model)) {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <button
-                  onClick={() => setIsFilterOpen(true)}
-                  className="relative flex items-center gap-2 h-10 px-4 rounded-xl border border-gray-200 hover:border-gray-400 bg-white text-sm font-medium text-gray-700 hover:text-gray-900 transition-all whitespace-nowrap shrink-0"
-                >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
-                  </svg>
-                  Filtros
-                  {activeFiltersCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-bold">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
 
-                {/* Ordenar */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                  className="h-10 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 hover:border-gray-400 transition-all shrink-0 cursor-pointer focus:outline-none"
-                >
-                  <option value="default">Ordenar</option>
-                  <option value="price-asc">Precio: menor a mayor</option>
-                  <option value="price-desc">Precio: mayor a menor</option>
-                  <option value="year-desc">Año: más nuevo</option>
-                  <option value="mileage-asc">Kilometraje: menor</option>
-                </select>
+                {/* Filtros + Ordenar en fila */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsFilterOpen(true)}
+                    className="relative flex flex-1 sm:flex-none items-center justify-center gap-2 h-10 px-4 rounded-xl border border-gray-200 hover:border-gray-400 bg-white text-sm font-medium text-gray-700 hover:text-gray-900 transition-all"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
+                    </svg>
+                    Filtros
+                    {activeFiltersCount > 0 && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white text-[10px] font-bold">
+                        {activeFiltersCount}
+                      </span>
+                    )}
+                  </button>
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                    className="flex-1 sm:flex-none h-10 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 hover:border-gray-400 transition-all cursor-pointer focus:outline-none"
+                  >
+                    <option value="default">Ordenar</option>
+                    <option value="price-asc">Precio ↑</option>
+                    <option value="price-desc">Precio ↓</option>
+                    <option value="year-desc">Más nuevo</option>
+                    <option value="mileage-asc">Menos km</option>
+                  </select>
+                </div>
               </div>
             </div>
 
