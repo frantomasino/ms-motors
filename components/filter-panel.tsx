@@ -156,7 +156,7 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
 
   return (
     <Sheet open={isOpen} onOpenChange={open => !open && onClose()}>
-      <SheetContent className="w-full sm:w-[400px] flex flex-col p-0 gap-0 bg-white" side="right">
+      <SheetContent className="w-full sm:w-[400px] flex flex-col p-0 gap-0 bg-white [&>button]:hidden" side="right">
         <SheetTitle className="sr-only">Filtros</SheetTitle>
 
         {/* Header */}
