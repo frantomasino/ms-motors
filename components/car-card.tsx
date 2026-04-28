@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CarType } from "@/types";
-import { Gauge, Fuel, Settings2, MessageCircle, Images, BadgeCheck, Palette } from "lucide-react";
+import { Gauge, Fuel, Settings2, MessageCircle, Images, BadgeCheck, Palette, Share2 } from "lucide-react";
 
 interface CarCardProps {
   car: CarType;
@@ -28,6 +28,16 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
   const slug = slugify(car.brand, car.model, car.year);
+
+  const handleShare = () => {
+    const url = `${typeof window !== "undefined" ? window.location.origin : ""}/autos/${slug}`;
+    const text = `Mirá este ${car.brand} ${car.model} ${car.year} en MS Motors: ${url}`;
+    if (navigator.share) {
+      navigator.share({ title: `${car.brand} ${car.model} ${car.year}`, url });
+    } else {
+      navigator.clipboard.writeText(url);
+    }
+  };
 
   return (
     <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
@@ -101,6 +111,13 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
             className="flex-1 flex items-center justify-center text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-900 hover:text-gray-900 rounded-xl py-2.5 transition-all duration-200">
             Ver detalles
           </Link>
+          <button
+            onClick={handleShare}
+            className="flex items-center justify-center h-10 w-10 rounded-xl border border-gray-200 hover:border-gray-900 text-gray-400 hover:text-gray-900 transition-all duration-200 shrink-0"
+            title="Compartir"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
           <a
             href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible?`)}`}
             target="_blank"

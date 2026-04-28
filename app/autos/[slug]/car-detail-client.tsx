@@ -59,14 +59,14 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
           </Link>
           <div className="flex items-center gap-2">
             <button onClick={handleCopy}
-              className="flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-full transition-all">
+              className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-full transition-all">
               {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? "¡Copiado!" : "Copiar link"}
             </button>
             <button onClick={handleShare}
-              className="flex items-center gap-1.5 text-xs text-white bg-gray-900 hover:bg-gray-800 px-3 py-1.5 rounded-full transition-all">
-              <Share2 className="h-3.5 w-3.5" />
-              Compartir
+              className="flex items-center gap-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-full transition-all">
+              <Share2 className="h-4 w-4" />
+              <span>Compartir</span>
             </button>
           </div>
         </div>

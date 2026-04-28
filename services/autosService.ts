@@ -1,15 +1,11 @@
 // services/autosService.ts
 import Papa from "papaparse";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import type { Auto } from "../types";
 
 // ====== ENV ======
 const URL_CSV = process.env.NEXT_PUBLIC_CSV_URL || "";
 const BUCKET = process.env.NEXT_PUBLIC_SUPABASE_BUCKET!;
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(URL, KEY);
 
 // Lee la carpeta desde distintos headers (incluye tu typo) y limpia prefijos viejos
 function getCarpetaDesdeCSV(row: any): string {

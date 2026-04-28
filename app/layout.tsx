@@ -9,6 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.msmotors.com.ar"),
   title: "MS Motors | Autos usados en Quilmes, Buenos Aires",
   description: "Comprá tu próximo auto con confianza. MS Motors ofrece vehículos usados verificados en Quilmes, Buenos Aires. Atención personalizada, permutas y financiación disponible.",
   keywords: "autos usados Quilmes, venta de autos Buenos Aires, MS Motors, comprar auto usado, permuta autos, financiación autos",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
     description: "Vehículos verificados, atención premium y los mejores precios del sur del Gran Buenos Aires.",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://ms-motors.vercel.app" },
+  alternates: { canonical: "https://www.msmotors.com.ar" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

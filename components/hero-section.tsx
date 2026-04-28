@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle, Shield, Repeat2, Star } from "lucide-react";
 
+import AnimatedCounter from "@/components/animated-counter";
+
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-[#0c0e12] text-white min-h-[100svh] flex flex-col justify-end">
@@ -34,7 +36,7 @@ export default function HeroSection() {
           </h1>
 
           <p className="font-body mb-7 max-w-md text-sm sm:text-base text-white/50 leading-relaxed">
-            Comprá con confianza. Vehículos verificados, atención personalizada.
+            Comprá con confianza. Vehículos verificados, atención personalizada y financiación disponible.
           </p>
 
           {/* CTAs */}
@@ -57,16 +59,24 @@ export default function HeroSection() {
 
           {/* Stats — más compactos en mobile */}
           <div className="flex flex-wrap gap-6 pb-8">
-            {[
-              { value: "100+", label: "Autos vendidos" },
-              { value: "5.0 ★", label: "En Google" },
-              { value: "5+", label: "Años" },
-            ].map((s, i) => (
-              <div key={i}>
-                <p className="text-xl sm:text-2xl font-bold text-white">{s.value}</p>
-                <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">{s.label}</p>
-              </div>
-            ))}
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-white">
+                +<AnimatedCounter target={200} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">Autos vendidos</p>
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-white">
+                <AnimatedCounter target={5} suffix=".0 ★" />
+              </p>
+              <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">En Google</p>
+            </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-white">
+                +<AnimatedCounter target={10} suffix=" años" />
+              </p>
+              <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">De experiencia</p>
+            </div>
           </div>
         </div>
 

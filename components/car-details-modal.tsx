@@ -20,12 +20,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { CarType } from "@/types";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+
 
 const VALID_MEDIA = /\.(jpe?g|png|webp|gif|mp4|mov|webm|m4v)$/i;
 
