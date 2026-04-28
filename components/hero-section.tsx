@@ -61,7 +61,7 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-6 pb-8">
             <div>
               <p className="text-xl sm:text-2xl font-bold text-white">
-                +<AnimatedCounter target={200} />
+                +<AnimatedCounter target={100} />
               </p>
               <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">Autos vendidos</p>
             </div>
@@ -73,7 +73,7 @@ export default function HeroSection() {
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-white">
-                +<AnimatedCounter target={10} suffix=" años" />
+                +<AnimatedCounter target={5} suffix=" años" />
               </p>
               <p className="text-[10px] sm:text-xs text-white/35 uppercase tracking-wider mt-0.5">De experiencia</p>
             </div>
