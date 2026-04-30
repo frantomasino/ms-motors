@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, MessageCircle, Share2, Copy, Check, ArrowLeft, Calendar, Gauge, Fuel, Settings2, Palette, BadgeCheck } from "lucide-react";
+import {
+  ChevronLeft, ChevronRight, MessageCircle,
+  Share2, Check, ArrowLeft,
+  Calendar, Gauge, Fuel, Settings2, Palette, BadgeCheck
+} from "lucide-react";
 import type { CarType } from "@/types";
 
 function isVideo(u?: string) {
@@ -24,56 +28,48 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const waText = `Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible? ${shareUrl}`;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({ title: `${car.brand} ${car.model} ${car.year}`, url: shareUrl });
     } else {
-      handleCopy();
+      navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const specs = [
-    { icon: Calendar, label: "Año", value: String(car.year) },
-    { icon: Gauge, label: "Kilometraje", value: formatMileage(car.mileage) },
-    { icon: Fuel, label: "Combustible", value: car.fuelType },
+    { icon: Calendar,  label: "Año",        value: String(car.year) },
+    { icon: Gauge,     label: "Kilometraje", value: formatMileage(car.mileage) },
+    { icon: Fuel,      label: "Combustible", value: car.fuelType },
     { icon: Settings2, label: "Transmisión", value: car.transmission },
-    { icon: Palette, label: "Color", value: car.color },
+    { icon: Palette,   label: "Color",       value: car.color },
   ];
 
   const currentMedia = mediaList[current] ?? "";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-28 lg:pb-0">
+
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/#catalog" className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/#catalog"
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
             <ArrowLeft className="h-4 w-4" />
-            Volver al catálogo
+            <span className="hidden sm:inline">Volver al catálogo</span>
+            <span className="sm:hidden">Volver</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <button onClick={handleCopy}
-              className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 hover:border-gray-400 px-3 py-1.5 rounded-full transition-all">
-              {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "¡Copiado!" : "Copiar link"}
-            </button>
-            <button onClick={handleShare}
-              className="flex items-center gap-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-full transition-all">
-              <Share2 className="h-4 w-4" />
-              <span>Compartir</span>
-            </button>
-          </div>
+          <button onClick={handleShare}
+            className="flex items-center gap-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-3 sm:px-4 py-2 rounded-full transition-all">
+            {copied ? <Check className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
+            <span className="hidden sm:inline">{copied ? "¡Copiado!" : "Compartir"}</span>
+          </button>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="container mx-auto px-4 py-5 sm:py-8 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
 
           {/* Galería */}
           <div>
@@ -96,11 +92,13 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
 
               {mediaList.length > 1 && (
                 <>
-                  <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
-                    <ChevronLeft className="h-5 w-5" />
+                  <button onClick={prev}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
+                    <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
-                  <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
-                    <ChevronRight className="h-5 w-5" />
+                  <button onClick={next}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
+                    <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </button>
                   <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm">
                     {current + 1} / {mediaList.length}
@@ -111,10 +109,12 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
 
             {/* Thumbnails */}
             {mediaList.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+              <div className="flex gap-2 mt-2.5 overflow-x-auto pb-1">
                 {mediaList.map((m, i) => (
                   <button key={i} onClick={() => setCurrent(i)}
-                    className={`relative h-16 w-20 shrink-0 rounded-xl overflow-hidden transition-all ${i === current ? "ring-2 ring-gray-900" : "opacity-60 hover:opacity-100"}`}>
+                    className={`relative h-14 w-20 sm:h-16 sm:w-24 shrink-0 rounded-xl overflow-hidden transition-all ${
+                      i === current ? "ring-2 ring-gray-900" : "opacity-50 hover:opacity-80"
+                    }`}>
                     {isVideo(m) ? (
                       <video src={m} muted preload="metadata" className="w-full h-full object-cover" />
                     ) : (
@@ -127,41 +127,41 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
           </div>
 
           {/* Info */}
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{car.brand}</p>
-              <h1 className="text-3xl font-bold text-gray-900 mt-1">{car.model}</h1>
-              <p className="text-3xl font-bold text-red-600 mt-2">{formatPrice(car.price)}</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-0.5">{car.model}</h1>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-1.5">{formatPrice(car.price)}</p>
             </div>
 
-            {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-100 rounded-full w-fit">
               <BadgeCheck className="h-4 w-4 text-green-500" />
               <span className="text-xs font-semibold text-green-700">Documentación en orden</span>
             </div>
 
-            {/* Specs */}
-            <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
+            {/* Specs — grid 2 col en mobile, lista en desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-0 sm:bg-white sm:rounded-2xl sm:border sm:border-gray-100 sm:divide-y sm:divide-gray-50">
               {specs.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center justify-between px-5 py-3.5">
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
-                    <Icon className="h-4 w-4 text-gray-300" />{label}
+                <div key={label}
+                  className="flex flex-col gap-0.5 bg-white rounded-xl border border-gray-100 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:rounded-none sm:border-0 sm:px-5 sm:py-3.5">
+                  <div className="flex items-center gap-1.5 text-gray-400 text-xs sm:text-sm">
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-300 shrink-0" />
+                    {label}
                   </div>
                   <span className="text-sm font-semibold text-gray-900">{value}</span>
                 </div>
               ))}
             </div>
 
-            {/* Descripción */}
             {car.description && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5">
                 <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">Descripción</p>
                 <p className="text-sm text-gray-600 leading-relaxed">{car.description}</p>
               </div>
             )}
 
-            {/* CTA */}
-            <div className="flex flex-col gap-2">
+            {/* CTA desktop */}
+            <div className="hidden lg:flex flex-col gap-2">
               <a href={`https://wa.me/5491159456142?text=${encodeURIComponent(waText)}`}
                 target="_blank" rel="noreferrer"
                 className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-4 rounded-2xl transition-all hover:scale-[1.01] shadow-lg shadow-green-100 text-sm">
@@ -172,6 +172,16 @@ export default function CarDetailClient({ car, mediaList }: { car: CarType; medi
             </div>
           </div>
         </div>
+      </div>
+
+      {/* CTA sticky mobile */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-4 py-3 shadow-lg">
+        <a href={`https://wa.me/5491159456142?text=${encodeURIComponent(waText)}`}
+          target="_blank" rel="noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 rounded-2xl transition-all text-sm shadow-md shadow-green-100">
+          <MessageCircle className="h-5 w-5" />
+          Consultar por WhatsApp
+        </a>
       </div>
     </div>
   );

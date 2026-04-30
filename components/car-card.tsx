@@ -29,9 +29,9 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
 
   const slug = slugify(car.brand, car.model, car.year);
 
-  const handleShare = () => {
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
     const url = `${typeof window !== "undefined" ? window.location.origin : ""}/autos/${slug}`;
-    const text = `Mirá este ${car.brand} ${car.model} ${car.year} en MS Motors: ${url}`;
     if (navigator.share) {
       navigator.share({ title: `${car.brand} ${car.model} ${car.year}`, url });
     } else {
@@ -42,7 +42,7 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   return (
     <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
 
-      {/* Imagen — lleva a la página del auto */}
+      {/* Imagen */}
       <Link href={`/autos/${slug}`} className="relative h-48 sm:h-52 overflow-hidden bg-gray-100 block">
         <Image
           src={firstValidImage}
@@ -52,17 +52,17 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
 
-        {/* Precio */}
+        {/* Precio — arriba derecha */}
         <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-xl tracking-tight">
           {formatPrice(car.price)}
         </div>
 
-        {/* Año */}
+        {/* Año — arriba izquierda */}
         <div className="absolute top-3 left-3 bg-white/15 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-lg">
           {car.year}
         </div>
 
-        {/* Fotos */}
+        {/* Fotos — abajo izquierda */}
         {photoCount > 0 && (
           <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg">
             <Images className="h-3 w-3" />
@@ -74,16 +74,26 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
       {/* Contenido */}
       <div className="flex flex-col flex-1 p-4 gap-3">
 
-        {/* Marca + Modelo + Sello */}
+        {/* Marca + Modelo + Docs OK + Compartir */}
         <Link href={`/autos/${slug}`} className="block">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
               <h3 className="text-base font-bold text-gray-900 leading-tight mt-0.5 group-hover:text-red-600 transition-colors">{car.model}</h3>
             </div>
-            <div className="flex items-center gap-1 shrink-0 mt-0.5 bg-green-50 border border-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              <BadgeCheck className="h-3 w-3" />
-              Docs OK
+            {/* Docs OK + compartir juntos */}
+            <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+              <div className="flex items-center gap-1 bg-green-50 border border-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                <BadgeCheck className="h-3 w-3" />
+                Docs OK
+              </div>
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center text-gray-300 hover:text-gray-600 transition-colors duration-200"
+                title="Compartir"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
         </Link>
@@ -91,10 +101,10 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         {/* Specs */}
         <div className="grid grid-cols-2 gap-y-1.5 gap-x-2">
           {[
-            { icon: Gauge, value: formatMileage(car.mileage) },
-            { icon: Fuel, value: car.fuelType },
+            { icon: Gauge,    value: formatMileage(car.mileage) },
+            { icon: Fuel,     value: car.fuelType },
             { icon: Settings2, value: car.transmission },
-            { icon: Palette, value: car.color },
+            { icon: Palette,  value: car.color },
           ].map(({ icon: Icon, value }, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <Icon className="h-3.5 w-3.5 text-gray-300 shrink-0" />
@@ -107,17 +117,12 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
 
         {/* Botones */}
         <div className="flex gap-2">
-          <Link href={`/autos/${slug}`}
-            className="flex-1 flex items-center justify-center text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-900 hover:text-gray-900 rounded-xl py-2.5 transition-all duration-200">
+          <Link
+            href={`/autos/${slug}`}
+            className="flex-1 flex items-center justify-center text-sm font-medium text-gray-600 border border-gray-200 hover:border-gray-900 hover:text-gray-900 rounded-xl py-2.5 transition-all duration-200"
+          >
             Ver detalles
           </Link>
-          <button
-            onClick={handleShare}
-            className="flex items-center justify-center h-10 w-10 rounded-xl border border-gray-200 hover:border-gray-900 text-gray-400 hover:text-gray-900 transition-all duration-200 shrink-0"
-            title="Compartir"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
           <a
             href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible?`)}`}
             target="_blank"
