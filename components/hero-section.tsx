@@ -10,13 +10,13 @@ export default function HeroSection() {
       {/* Imagen mobile — se muestra solo en pantallas chicas */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden"
-        style={{ backgroundImage: "url('/banner-mobile.webp')" }}
+        style={{ backgroundImage: "url('/banners-mobile-2.webp')" }}
       />
 
       {/* Imagen desktop — se muestra en sm en adelante */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat hidden sm:block"
-        style={{ backgroundImage: "url('/bannersc:\Users\frant\Downloads\banner-mobile.webp-3.webp')" }}
+        style={{ backgroundImage: "url('/banners-3.webp')" }}
       />
 
       {/* Overlays */}
