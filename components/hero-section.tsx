@@ -5,7 +5,8 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#0c0e12] text-white min-h-[100svh] flex flex-col justify-center">
+    <section className="relative bg-[#0c0e12] text-white min-h-[100svh] flex flex-col justify-end">
+
 
       {/* Imagen mobile — se muestra solo en pantallas chicas */}
       <div
@@ -25,7 +26,9 @@ export default function HeroSection() {
       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-transparent via-red-600 to-transparent opacity-60" />
 
       {/* Contenido */}
-      <div className="relative px-5 sm:px-10 lg:px-16 py-16 sm:py-24 max-w-2xl">
+      <div className="relative px-5 sm:px-10 lg:px-16 pt-16 pb-24 sm:pb-20 max-w-2xl">
+
+
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-white/50 uppercase tracking-widest">

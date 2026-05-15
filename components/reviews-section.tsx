@@ -121,7 +121,7 @@ export default function ReviewsSection() {
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-gray-400">13 reseñas en Google</p>
+              <p className="text-xs text-gray-400">17 reseñas en Google</p>
             </div>
           </a>
         </div>

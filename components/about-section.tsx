@@ -43,7 +43,8 @@ export default function AboutSection() {
             </p>
 
             {/* Stats — más espacio entre items en mobile */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-6 sm:pt-8 border-t border-gray-100">
+            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-6 sm:pt-8 border-t border-gray-100 text-center">
+
               {[
                 { value: "100+", label: "Autos vendidos" },
                 { value: "5.0★", label: "En Google" },

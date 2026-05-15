@@ -13,9 +13,10 @@ export function slugify(brand: string, model: string, year: number) {
     .replace(/^-|-$/g, "");
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
   const cars = await getCarsData();
-  const car = cars.find(c => slugify(c.brand, c.model, c.year) === params.slug);
+  const car = cars.find(c => slugify(c.brand, c.model, c.year) === slug);
   if (!car) return { title: "Auto no encontrado" };
   return {
     title: `${car.brand} ${car.model} ${car.year} | MS Motors`,
@@ -35,19 +36,16 @@ export async function generateStaticParams() {
 
 export const revalidate = 60;
 
-// Fetch de fotos extra desde Supabase — en servidor, no en cliente
 async function fetchSupabaseMedia(fotos: string): Promise<string[]> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
   if (!url || !key || !bucket || !fotos) return [];
-
   try {
     const supabase = createClient(url, key);
     const folder = fotos.trim().replace(/^\/+|\/+$/g, "");
     const { data, error } = await supabase.storage.from(bucket).list(folder, { limit: 200 });
     if (error || !data) return [];
-
     const VALID = /\.(jpe?g|png|webp|gif|mp4|mov|webm|m4v)$/i;
     return data
       .filter(f => VALID.test(f.name))
@@ -58,28 +56,42 @@ async function fetchSupabaseMedia(fotos: string): Promise<string[]> {
   }
 }
 
-export default async function CarDetailPage({ params }: { params: { slug: string } }) {
+export default async function CarDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const cars = await getCarsData();
-  const car = cars.find(c => slugify(c.brand, c.model, c.year) === params.slug);
+  const car = cars.find(c => slugify(c.brand, c.model, c.year) === slug);
   if (!car) notFound();
 
-  // Fotos del CSV
   const csvImages = car!.images?.filter(
     img => img && img !== "/placeholder.svg?height=600&width=800"
   ) || [];
 
-  // Fotos extra de Supabase — en servidor, sin demora en cliente
   const fotos = (car as any).fotos as string | undefined;
   const supabaseMedia = fotos ? await fetchSupabaseMedia(fotos) : [];
 
-  // Merge sin duplicados — Supabase gana (más fotos, mejor calidad)
   const allMedia = Array.from(new Set([
-    ...supabaseMedia.filter(u => !/\.(mp4|mov|webm|m4v)$/i.test(u)), // fotos primero
-    ...supabaseMedia.filter(u => /\.(mp4|mov|webm|m4v)$/i.test(u)),  // videos al final
+    ...supabaseMedia.filter(u => !/\.(mp4|mov|webm|m4v)$/i.test(u)),
+    ...supabaseMedia.filter(u => /\.(mp4|mov|webm|m4v)$/i.test(u)),
     ...csvImages,
   ]));
 
   const mediaList = allMedia.length > 0 ? allMedia : csvImages;
 
-  return <CarDetailClient car={car!} mediaList={mediaList} />;
+  const available = cars.filter(c => (c as any).estado !== "vendido");
+
+  const sameBrand = available
+    .filter(c => c.id !== car!.id && c.brand === car!.brand)
+    .slice(0, 3);
+
+  const related = sameBrand.length >= 2
+    ? sameBrand
+    : [
+        ...sameBrand,
+        ...available
+          .filter(c => c.id !== car!.id && c.brand !== car!.brand)
+          .sort((a, b) => Math.abs(a.price - car!.price) - Math.abs(b.price - car!.price))
+          .slice(0, 3 - sameBrand.length),
+      ].slice(0, 3);
+
+  return <CarDetailClient car={car!} mediaList={mediaList} relatedCars={related} />;
 }
