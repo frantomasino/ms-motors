@@ -73,8 +73,7 @@ export const metadata: Metadata = {
       "Vehículos verificados, atención premium y los mejores precios del sur del Gran Buenos Aires.",
     images: ["/banner-2.jpg"],
   },
- manifest: "/site.webmanifest",
-  category: "automotive",
+   category: "automotive",
   verification: {
     google: "UsX8QnChnimUNbESC4SczMi_WvsZlgDMQ8S77rwaguQ",
   },
