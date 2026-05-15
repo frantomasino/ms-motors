@@ -79,19 +79,23 @@ export default async function CarDetailPage({ params }: { params: Promise<{ slug
 
   const available = cars.filter(c => (c as any).estado !== "vendido");
 
-  const sameBrand = available
-    .filter(c => c.id !== car!.id && c.brand === car!.brand)
-    .slice(0, 3);
+  // Mezcla aleatoria
+const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
-  const related = sameBrand.length >= 2
-    ? sameBrand
-    : [
-        ...sameBrand,
-        ...available
-          .filter(c => c.id !== car!.id && c.brand !== car!.brand)
-          .sort((a, b) => Math.abs(a.price - car!.price) - Math.abs(b.price - car!.price))
-          .slice(0, 3 - sameBrand.length),
-      ].slice(0, 3);
+const sameBrand = shuffle(
+  available.filter(c => c.id !== car!.id && c.brand === car!.brand)
+).slice(0, 3);
+
+const related = sameBrand.length >= 2
+  ? sameBrand
+  : [
+      ...sameBrand,
+      ...shuffle(
+        available.filter(c => c.id !== car!.id && c.brand !== car!.brand)
+      )
+        .sort((a, b) => Math.abs(a.price - car!.price) - Math.abs(b.price - car!.price))
+        .slice(0, 3 - sameBrand.length),
+    ].slice(0, 3);
 
   return <CarDetailClient car={car!} mediaList={mediaList} relatedCars={related} />;
 }
