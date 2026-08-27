@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { CarType } from "@/types";
-import { Fuel, Settings2, MessageCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Fuel, Settings2, MessageCircle } from "lucide-react";
 import { carSlug } from "@/lib/slug";
 import { usableCarPhotos } from "@/lib/photo-config";
 
