@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidateCatalog } from "@/lib/revalidate-catalog";
+import { nextFrontSortOrder } from "@/lib/autos-order";
 import type { AutoRow } from "@/types";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -13,6 +14,8 @@ export async function POST(_request: Request, ctx: Ctx) {
     if (readError || !row) {
       return NextResponse.json({ error: "Auto no encontrado" }, { status: 404 });
     }
+
+    const sort_order = await nextFrontSortOrder(supabase);
 
     const { data, error } = await supabase
       .from("autos")
@@ -28,6 +31,7 @@ export async function POST(_request: Request, ctx: Ctx) {
         description: row.description,
         estado: "disponible",
         images: [],
+        sort_order,
       })
       .select("*")
       .single();

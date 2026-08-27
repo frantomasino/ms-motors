@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Pencil, Trash2 } from "lucide-react";
+import { Copy, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUp } from "lucide-react";
 import type { AutoRow } from "@/types";
+import { bySortOrder } from "@/lib/autos-order";
 
 function formatPrice(n: number) {
   return `USD ${new Intl.NumberFormat("es-AR").format(n)}`;
@@ -17,7 +18,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   const [message, setMessage] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [coverCar, setCoverCar] = useState<AutoRow | null>(null);
 
   async function importCsv() {
     if (!confirm("Esto copia el catálogo actual del Sheet a este panel. Los que ya estén no se duplican.")) return;
@@ -71,6 +72,25 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
     setCars((prev) => prev.map((c) => (c.id === car.id ? data.car : c)));
   }
 
+  async function setCoverPhoto(car: AutoRow, url: string) {
+    const rest = (car.images ?? []).filter((u) => u !== url);
+    const images = [url, ...rest];
+    setBusyId(car.id);
+    const res = await fetch(`/api/admin/autos/${car.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ images }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusyId(null);
+    if (!res.ok) {
+      setMessage(data.error || "No se pudo cambiar la foto");
+      return;
+    }
+    setCars((prev) => prev.map((c) => (c.id === car.id ? data.car : c)));
+    setCoverCar(null);
+  }
+
   async function duplicate(car: AutoRow) {
     setBusyId(car.id);
     const res = await fetch(`/api/admin/autos/${car.id}/duplicate`, { method: "POST" });
@@ -96,7 +116,44 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
     setCars((prev) => prev.filter((c) => c.id !== car.id));
   }
 
-  const disponibles = cars.filter((c) => c.estado !== "vendido").length;
+  const [tab, setTab] = useState<"activos" | "vendidos">("activos");
+  const activos = cars.filter((c) => c.estado !== "vendido").sort(bySortOrder);
+  const vendidos = cars.filter((c) => c.estado === "vendido").sort(bySortOrder);
+  const visible = tab === "activos" ? activos : vendidos;
+
+  async function persistOrder(nextVisible: AutoRow[]) {
+    const ids = nextVisible.map((c) => c.id);
+    const orderById = new Map(ids.map((id, i) => [id, i + 1]));
+    setCars((prev) => prev.map((c) => (orderById.has(c.id) ? { ...c, sort_order: orderById.get(c.id) } : c)));
+    setBusyId("order");
+    try {
+      const res = await fetch("/api/admin/autos/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) setMessage(data.error || "No se pudo guardar el orden");
+    } catch {
+      setMessage("No se pudo guardar el orden");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function moveCar(index: number, dir: "up" | "down" | "first") {
+    const list = [...visible];
+    if (dir === "first") {
+      if (index === 0) return;
+      const [item] = list.splice(index, 1);
+      list.unshift(item);
+    } else {
+      const j = dir === "up" ? index - 1 : index + 1;
+      if (j < 0 || j >= list.length) return;
+      [list[index], list[j]] = [list[j], list[index]];
+    }
+    persistOrder(list);
+  }
 
   return (
     <div className="space-y-5">
@@ -126,25 +183,102 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
 
       {message && <p className="text-sm text-gray-600">{message}</p>}
 
-      <p className="text-xs text-gray-400">
-        {cars.length} en el panel · {disponibles} publicados
-      </p>
+      {cars.length > 0 && (
+        <div className="flex items-center gap-1 p-1 bg-white border border-gray-100 rounded-xl shadow-sm w-fit">
+          <button
+            type="button"
+            onClick={() => setTab("activos")}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+              tab === "activos" ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            Activos
+            <span className={`ml-1.5 text-xs ${tab === "activos" ? "text-white/60" : "text-gray-300"}`}>
+              {activos.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("vendidos")}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+              tab === "vendidos" ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            Vendidos
+            <span className={`ml-1.5 text-xs ${tab === "vendidos" ? "text-white/60" : "text-gray-300"}`}>
+              {vendidos.length}
+            </span>
+          </button>
+        </div>
+      )}
+
+      {cars.length > 0 && (
+        <p className="text-xs text-gray-400">
+          Las flechas mueven el auto. Tocá la miniatura para elegir qué foto se ve primero.
+        </p>
+      )}
 
       <div className="flex flex-col gap-3">
-        {cars.map((car) => {
+        {cars.length > 0 && visible.length === 0 && (
+          <p className="text-sm text-gray-400 py-8 text-center">
+            {tab === "activos" ? "No hay autos activos." : "No hay autos vendidos."}
+          </p>
+        )}
+        {visible.map((car, index) => {
           const cover = car.images?.[0];
           const sold = car.estado === "vendido";
+          const isFirst = index === 0;
+          const isLast = index === visible.length - 1;
           return (
             <article key={car.id} className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-              <div className="flex gap-3 p-3">
-                <div className="relative h-20 w-[6.5rem] shrink-0 rounded-xl overflow-hidden bg-gray-100">
+              <div className="flex gap-2 p-3">
+                <div className="flex flex-col justify-center gap-0.5 shrink-0">
+                  <button
+                    type="button"
+                    disabled={isFirst || busyId === "order"}
+                    onClick={() => moveCar(index, "first")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Poner primero"
+                  >
+                    <ChevronsUp className="h-4 w-4 mx-auto" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isFirst || busyId === "order"}
+                    onClick={() => moveCar(index, "up")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Subir"
+                  >
+                    <ChevronUp className="h-4 w-4 mx-auto" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLast || busyId === "order"}
+                    onClick={() => moveCar(index, "down")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Bajar"
+                  >
+                    <ChevronDown className="h-4 w-4 mx-auto" />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => (car.images?.length ?? 0) > 1 ? setCoverCar(car) : undefined}
+                  className="relative h-20 w-[6.5rem] shrink-0 rounded-xl overflow-hidden bg-gray-100"
+                  title={(car.images?.length ?? 0) > 1 ? "Elegir foto de portada" : undefined}
+                >
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cover} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-[10px] text-gray-400">Sin foto</div>
                   )}
-                </div>
+                  {(car.images?.length ?? 0) > 1 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-semibold py-0.5">
+                      Elegir foto
+                    </span>
+                  )}
+                </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -222,6 +356,50 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
           );
         })}
       </div>
+
+      {coverCar && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center p-4"
+          onClick={() => setCoverCar(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-md p-4 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm font-bold text-gray-900 mb-1">¿Cuál se ve primero?</p>
+            <p className="text-xs text-gray-400 mb-3">
+              {coverCar.brand} {coverCar.model} · tocá la foto de portada
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {(coverCar.images ?? []).map((url, i) => (
+                <button
+                  key={url + i}
+                  type="button"
+                  onClick={() => setCoverPhoto(coverCar, url)}
+                  className={`relative aspect-[4/3] rounded-xl overflow-hidden ${
+                    i === 0 ? "ring-2 ring-red-600" : ""
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  {i === 0 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-red-600 text-white text-[9px] font-bold py-0.5">
+                      Actual
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCoverCar(null)}
+              className="mt-4 w-full h-11 rounded-xl border border-gray-200 text-sm font-medium text-gray-600"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

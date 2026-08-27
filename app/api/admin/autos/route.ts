@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidateCatalog } from "@/lib/revalidate-catalog";
+import { fetchAutosOrdered, nextFrontSortOrder } from "@/lib/autos-order";
 import type { AutoRow, CarFormPayload } from "@/types";
 
 function asInt(value: unknown, fallback = 0): number {
@@ -38,10 +39,7 @@ function sanitizePayload(body: Partial<CarFormPayload>) {
 export async function GET() {
   try {
     const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("autos")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await fetchAutosOrdered(supabase);
     if (error) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 500 });
     }
@@ -69,9 +67,10 @@ export async function POST(request: Request) {
 
   try {
     const supabase = createAdminClient();
+    const sort_order = await nextFrontSortOrder(supabase);
     const { data, error } = await supabase
       .from("autos")
-      .insert(parsed.data)
+      .insert({ ...parsed.data, sort_order })
       .select("*")
       .single();
     if (error) {

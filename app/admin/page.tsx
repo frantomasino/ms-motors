@@ -1,5 +1,6 @@
 import AdminCarsList from "@/components/admin/cars-list";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { fetchAutosOrdered } from "@/lib/autos-order";
 import type { AutoRow } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -7,10 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   try {
     const supabase = createAdminClient();
-    const { data, error } = await supabase
-      .from("autos")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await fetchAutosOrdered(supabase);
 
     if (error) {
       const missingTable = /does not exist|schema cache|relation/i.test(error.message);
@@ -31,7 +29,7 @@ export default async function AdminPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Stock</h1>
         <p className="text-sm text-gray-500 mb-6">
-          Cargá autos desde el celular. Las fotos se recortan solas a 1600×1200.
+          Cargá autos desde el celular. Las fotos se recortan solas a 1600×1200. Con las flechas ordenás cuál se ve primero.
         </p>
         <AdminCarsList initialCars={(data ?? []) as AutoRow[]} />
       </div>

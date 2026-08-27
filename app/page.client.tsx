@@ -20,9 +20,10 @@ import AnimateOnScroll from "@/components/animate-on-scroll";
 interface ClientPageProps {
   initialCars: CarType[];
   soldCars: CarType[];
+  clientPhotos?: string[];
 }
 
-export default function ClientPage({ initialCars, soldCars }: ClientPageProps) {
+export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }: ClientPageProps) {
   const [selectedCar, setSelectedCar] = useState<CarType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -325,7 +326,7 @@ export default function ClientPage({ initialCars, soldCars }: ClientPageProps) {
       </main>
 
       <ReviewsSection />
-      <SoldCarsSection soldCars={soldCars} />
+      <SoldCarsSection soldCars={soldCars} clientPhotos={clientPhotos} />
       <Footer />
 
       {selectedCar && (

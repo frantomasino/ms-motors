@@ -1,14 +1,12 @@
 import { fetchAutos } from "@/services/autosService";
 import { mapCsvToCar, mapRowToCar } from "@/lib/map-car";
+import { fetchAutosOrdered } from "@/lib/autos-order";
 import { supabase } from "@/lib/supabase";
 import type { AutoRow, CarType } from "@/types";
 
 export async function getCarsData(): Promise<CarType[]> {
   try {
-    const { data, error } = await supabase
-      .from("autos")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await fetchAutosOrdered(supabase);
 
     if (!error && data && data.length > 0) {
       return (data as AutoRow[]).map(mapRowToCar);
