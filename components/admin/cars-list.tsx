@@ -18,7 +18,9 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   const [message, setMessage] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
   const [coverCar, setCoverCar] = useState<AutoRow | null>(null);
+  const [tab, setTab] = useState<"activos" | "vendidos">("activos");
 
   async function importCsv() {
     if (!confirm("Esto copia el catálogo actual del Sheet a este panel. Los que ya estén no se duplican.")) return;
@@ -116,7 +118,6 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
     setCars((prev) => prev.filter((c) => c.id !== car.id));
   }
 
-  const [tab, setTab] = useState<"activos" | "vendidos">("activos");
   const activos = cars.filter((c) => c.estado !== "vendido").sort(bySortOrder);
   const vendidos = cars.filter((c) => c.estado === "vendido").sort(bySortOrder);
   const visible = tab === "activos" ? activos : vendidos;
