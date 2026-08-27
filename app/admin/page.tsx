@@ -13,10 +13,15 @@ export default async function AdminPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
+      const missingTable = /does not exist|schema cache|relation/i.test(error.message);
       return (
         <SetupMessage
-          title="Falta crear la tabla de autos"
-          body="En Supabase → SQL Editor, ejecutá el archivo supabase/schema.sql de este repo. Después recargá esta página."
+          title={missingTable ? "Falta crear la tabla de autos" : "No se pudo leer el catálogo"}
+          body={
+            missingTable
+              ? "En Supabase → SQL Editor, ejecutá el archivo supabase/schema.sql de este repo. Después recargá esta página."
+              : "Revisá SUPABASE_SERVICE_ROLE_KEY y NEXT_PUBLIC_SUPABASE_URL. Si recién creaste la tabla, recargá."
+          }
           detail={error.message}
         />
       );
