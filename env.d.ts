@@ -9,6 +9,10 @@ declare namespace NodeJS {
     // CSV (requerida)
     NEXT_PUBLIC_CSV_URL: string;
 
+    ADMIN_PIN: string;
+    ADMIN_SECRET?: string;
+    SUPABASE_SERVICE_ROLE_KEY: string;
+
     // Firebase (opcionales, solo si todavía tenés algo usando Firebase)
     NEXT_PUBLIC_FIREBASE_API_KEY?: string;
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?: string;

@@ -4,19 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CarType } from "@/types";
 import { Gauge, Fuel, Settings2, MessageCircle, Images, BadgeCheck, Palette, Share2 } from "lucide-react";
+import { carSlug } from "@/lib/slug";
 
 interface CarCardProps {
   car: CarType;
   onViewDetails: () => void;
-}
-
-function slugify(brand: string, model: string, year: number) {
-  return `${brand}-${model}-${year}`
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }
 
 export default function CarCard({ car, onViewDetails }: CarCardProps) {
@@ -27,7 +19,7 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
-  const slug = slugify(car.brand, car.model, car.year);
+  const slug = carSlug(car);
 
   const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();

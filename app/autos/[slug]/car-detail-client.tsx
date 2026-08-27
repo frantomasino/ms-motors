@@ -9,25 +9,17 @@ import {
   Calendar, Gauge, Fuel, Settings2, Palette, BadgeCheck
 } from "lucide-react";
 import type { CarType } from "@/types";
+import { carSlug } from "@/lib/slug";
 
 function isVideo(u?: string) {
   if (!u) return false;
   return /\.(mp4|mov|webm|m4v)$/i.test(u.split("?")[0]);
 }
 
-function slugify(brand: string, model: string, year: number) {
-  return `${brand}-${model}-${year}`
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 function RelatedCard({ car }: { car: CarType }) {
   const firstImage = car.images?.find(img => img && !img.includes(".mp4")) || "/placeholder.svg";
   const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
-  const slug = slugify(car.brand, car.model, car.year);
+  const slug = carSlug(car);
 
   return (
     <Link href={`/autos/${slug}`}

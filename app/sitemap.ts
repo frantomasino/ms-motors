@@ -1,15 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BASE_URL } from "@/lib/config";
 import { getCarsData } from "@/app/cars-data-provider";
-
-function slugify(brand: string, model: string, year: number) {
-  return `${brand}-${model}-${year}`
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { carSlug } from "@/lib/slug";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -46,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const cars = await getCarsData();
     const carPages: MetadataRoute.Sitemap = cars.map((car) => ({
-      url: `${BASE_URL}/autos/${slugify(car.brand, car.model, car.year)}`,
+      url: `${BASE_URL}/autos/${carSlug(car)}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.8,
