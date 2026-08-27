@@ -96,7 +96,10 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
     setCars((prev) => prev.filter((c) => c.id !== car.id));
   }
 
-  const disponibles = cars.filter((c) => c.estado !== "vendido").length;
+  const [tab, setTab] = useState<"activos" | "vendidos">("activos");
+  const activos = cars.filter((c) => c.estado !== "vendido");
+  const vendidos = cars.filter((c) => c.estado === "vendido");
+  const visible = tab === "activos" ? activos : vendidos;
 
   return (
     <div className="space-y-5">
@@ -126,12 +129,42 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
 
       {message && <p className="text-sm text-gray-600">{message}</p>}
 
-      <p className="text-xs text-gray-400">
-        {cars.length} en el panel · {disponibles} publicados
-      </p>
+      {cars.length > 0 && (
+        <div className="flex items-center gap-1 p-1 bg-white border border-gray-100 rounded-xl shadow-sm w-fit">
+          <button
+            type="button"
+            onClick={() => setTab("activos")}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+              tab === "activos" ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            Activos
+            <span className={`ml-1.5 text-xs ${tab === "activos" ? "text-white/60" : "text-gray-300"}`}>
+              {activos.length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("vendidos")}
+            className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
+              tab === "vendidos" ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+            }`}
+          >
+            Vendidos
+            <span className={`ml-1.5 text-xs ${tab === "vendidos" ? "text-white/60" : "text-gray-300"}`}>
+              {vendidos.length}
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
-        {cars.map((car) => {
+        {cars.length > 0 && visible.length === 0 && (
+          <p className="text-sm text-gray-400 py-8 text-center">
+            {tab === "activos" ? "No hay autos activos." : "No hay autos vendidos."}
+          </p>
+        )}
+        {visible.map((car) => {
           const cover = car.images?.[0];
           const sold = car.estado === "vendido";
           return (
