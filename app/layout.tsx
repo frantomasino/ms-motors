@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Barlow_Condensed, Inter } from "next/font/google";
 import Script from "next/script";
@@ -82,6 +82,11 @@ export const metadata: Metadata = {
   verification: {
     google: "UsX8QnChnimUNbESC4SczMi_WvsZlgDMQ8S77rwaguQ",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0c0e12",
+  viewportFit: "cover",
 };
 
 const localBusinessSchema = {
@@ -170,7 +175,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es-AR">
       <head>
         <link rel="icon" type="image/png" href="/icono-ms-favicon.png" />
-        <meta name="theme-color" content="#0c0e12" />
         <meta name="geo.region" content="AR-B" />
         <meta name="geo.placename" content="Quilmes, Buenos Aires" />
         <Script

@@ -27,7 +27,7 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)] ${
         solid
           ? "bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-[0_8px_24px_rgba(16,24,40,0.06)]"
           : "bg-transparent border-b border-transparent"
@@ -88,7 +88,8 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
               href="https://wa.me/5491159456142"
               target="_blank"
               rel="noopener noreferrer"
-              className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full transition-all hover:scale-[1.02] ${
+              aria-label="Contactar por WhatsApp"
+              className={`flex items-center justify-center gap-1.5 text-sm font-medium rounded-full transition-all hover:scale-[1.02] h-9 w-9 sm:h-auto sm:w-auto sm:px-4 sm:py-2 ${
                 solid
                   ? "bg-ink hover:bg-black text-white"
                   : "bg-white text-ink hover:bg-white/90"

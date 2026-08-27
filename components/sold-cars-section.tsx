@@ -105,7 +105,7 @@ export default function SoldCarsSection({ soldCars = [], clientPhotos = [] }: So
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Historial</p>
-            <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl text-ink">
+            <h2 className="font-title text-[1.75rem] sm:text-4xl lg:text-5xl text-ink">
               {tab === "clientes" ? "Clientes felices" : "Autos vendidos"}
             </h2>
             <p className="text-gray-400 text-sm mt-1">

@@ -86,10 +86,10 @@ export default function CarDetailClient({
   const currentMedia = mediaList[current] ?? "";
 
   return (
-    <div className="min-h-screen bg-surface pb-28 lg:pb-0">
+    <div className="min-h-screen bg-surface pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-0">
       <SiteHeader />
 
-      <div className="container mx-auto px-4 pt-20 sm:pt-24 pb-8 max-w-6xl">
+      <div className="container mx-auto px-4 pt-[calc(5rem+env(safe-area-inset-top))] sm:pt-24 pb-8 max-w-6xl">
         <div className="flex items-center justify-between mb-5">
           <Link href="/#catalog"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-ink transition-colors">
@@ -150,9 +150,9 @@ export default function CarDetailClient({
           <div className="flex flex-col gap-5">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">{car.brand}</p>
-              <h1 className="font-title text-3xl sm:text-5xl text-ink mt-1">{car.model}</h1>
+              <h1 className="font-title text-[1.75rem] sm:text-5xl text-ink mt-1 leading-tight">{car.model}</h1>
               <p className="text-sm text-gray-500 mt-1.5">{car.year} · {formatMileage(car.mileage)}</p>
-              <p className="font-title text-3xl sm:text-4xl text-brand mt-3 tabular-nums">{formatCarPrice(car.price, car.currency)}</p>
+              <p className="font-title text-[1.85rem] sm:text-4xl text-brand mt-3 tabular-nums leading-none">{formatCarPrice(car.price, car.currency)}</p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -216,7 +216,7 @@ export default function CarDetailClient({
         )}
       </div>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 px-4 py-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <a href={`https://wa.me/5491159456142?text=${encodeURIComponent(waText)}`}
           target="_blank" rel="noreferrer"
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold py-3.5 rounded-2xl transition-all text-sm">

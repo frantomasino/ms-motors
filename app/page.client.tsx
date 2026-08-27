@@ -116,12 +116,12 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
       <HeroSection />
 
       <main id="catalog" className="scroll-mt-20 bg-surface border-y border-gray-100/80">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl py-12 sm:py-20">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl pt-12 pb-20 sm:py-20">
           <div className="flex flex-col gap-5 mb-8">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Stock</p>
-                <h2 className="font-title text-3xl sm:text-4xl md:text-5xl text-ink">Autos disponibles</h2>
+                <h2 className="font-title text-[1.75rem] sm:text-4xl md:text-5xl text-ink">Autos disponibles</h2>
                 <p className="mt-1.5 text-sm text-gray-500">
                   <span className={activeFiltersCount > 0 ? "text-brand font-semibold" : ""}>
                     {filteredCars.length} vehículo{filteredCars.length !== 1 ? "s" : ""}
@@ -219,7 +219,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp"
-        className="fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white pl-3.5 pr-4 h-12 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03]"
+        className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 sm:right-5 z-40 flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white pl-3.5 pr-3.5 sm:pr-4 h-12 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03]"
       >
         <FaWhatsapp className="h-5 w-5" />
         <span className="text-sm font-semibold hidden sm:inline">WhatsApp</span>

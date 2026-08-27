@@ -32,7 +32,7 @@ export default function AboutSection() {
           {/* Texto */}
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-3">Quiénes somos</p>
-            <h2 className="font-title text-3xl sm:text-4xl lg:text-[2.75rem] text-ink leading-[1.05] mb-4 sm:mb-6">
+            <h2 className="font-title text-[1.75rem] sm:text-4xl lg:text-[2.75rem] text-ink leading-[1.05] mb-4 sm:mb-6">
               Más de 5 años<br />vendiendo con confianza
             </h2>
             <p className="text-sm sm:text-base text-gray-500 leading-relaxed mb-3 sm:mb-6">

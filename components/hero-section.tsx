@@ -5,7 +5,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-[#0c0e12] text-white min-h-[100svh] flex flex-col justify-end">
+    <section className="relative bg-[#0c0e12] text-white min-h-[100svh] flex flex-col justify-end overflow-hidden">
 
 
       {/* Imagen mobile — se muestra solo en pantallas chicas */}
@@ -26,18 +26,18 @@ export default function HeroSection() {
       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-transparent via-red-600 to-transparent opacity-60" />
 
       {/* Contenido */}
-      <div className="relative px-5 sm:px-10 lg:px-16 pt-24 pb-16 sm:pb-20 max-w-2xl">
+      <div className="relative px-5 sm:px-10 lg:px-16 pt-[calc(5.5rem+env(safe-area-inset-top))] pb-[max(4rem,calc(2.5rem+env(safe-area-inset-bottom)))] sm:pb-20 max-w-2xl">
 
 
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-white/50 uppercase tracking-widest">
+        <div className="inline-flex max-w-full items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs text-white/50 uppercase tracking-[0.14em] sm:tracking-widest">
           <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-          MS Motors · Quilmes, Buenos Aires
+          <span className="truncate">MS Motors · Quilmes</span>
         </div>
 
         {/* Título */}
-        <h1 className="font-title mb-5 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.25rem] leading-[0.95] tracking-tight">
+        <h1 className="font-title mb-5 text-[2.45rem] sm:text-6xl lg:text-7xl xl:text-[5.25rem] leading-[0.95] tracking-tight">
           El auto que<br />
           <span className="text-brand">buscabas</span>,<br />
           está acá.

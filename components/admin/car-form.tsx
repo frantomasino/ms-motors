@@ -181,7 +181,7 @@ export default function CarForm({ mode, initial }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 pb-28">
+    <form onSubmit={onSubmit} className="space-y-5 pb-[calc(7rem+env(safe-area-inset-bottom))]">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
         <label className="block">
           <span className="text-xs font-medium text-gray-500 mb-1.5 block">Marca</span>
@@ -290,7 +290,7 @@ export default function CarForm({ mode, initial }: Props) {
       {error && <p className="text-sm text-brand">{error}</p>}
       {status && <p className="text-sm text-gray-500">{status}</p>}
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-100 bg-white/90 backdrop-blur-md px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-100 bg-white/90 backdrop-blur-md px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <div className="max-w-3xl mx-auto flex gap-2">
           <button
             type="button"

@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-[100svh] bg-surface">
-      <header className="sticky top-0 z-50 bg-[#0c0e12] text-white">
+      <header className="sticky top-0 z-50 bg-[#0c0e12] text-white pt-[env(safe-area-inset-top)]">
         <div className="brand-stripe" />
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
           <Link href="/admin" className="font-title text-lg tracking-tight shrink-0">

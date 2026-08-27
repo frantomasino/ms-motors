@@ -15,7 +15,7 @@ export default function Footer() {
         <div className="pointer-events-none absolute -right-16 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-brand/20 blur-3xl" />
         <div className="container relative mx-auto px-4 sm:px-10 lg:px-16 text-center">
           <p className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-3">¿Tenés alguna consulta?</p>
-          <h3 className="font-title text-3xl sm:text-4xl lg:text-5xl text-white mb-6">Hablemos por WhatsApp</h3>
+          <h3 className="font-title text-[1.75rem] sm:text-4xl lg:text-5xl text-white mb-6">Hablemos por WhatsApp</h3>
           <a href="https://wa.me/5491159456142" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold px-7 py-3.5 sm:px-8 rounded-full transition-all hover:scale-[1.02] shadow-lg shadow-green-900/40 text-sm">
             <FaWhatsapp className="h-5 w-5" />

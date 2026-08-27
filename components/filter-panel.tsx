@@ -314,7 +314,7 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-5 py-4 flex gap-2.5 bg-white">
+        <div className="border-t border-gray-100 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2.5 bg-white">
           <Button variant="outline" onClick={clearAll}
             className="flex-1 rounded-xl h-11 text-sm font-medium border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400">
             {activeCount > 0 ? `Limpiar (${activeCount})` : "Limpiar"}

@@ -44,6 +44,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   * { @apply border-border; }
@@ -59,6 +60,7 @@
     font-weight: 400;
     font-size: 15px;
     line-height: 1.6;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
