@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Star, Trash2, Loader2 } from "lucide-react";
+import { ImagePlus, Trash2, Loader2 } from "lucide-react";
 import { PHOTO_LABEL } from "@/lib/photo-config";
 import { isImageFile, processCarPhoto } from "@/lib/process-image";
 
@@ -81,7 +81,7 @@ export default function PhotoUploader({ photos, onChange, disabled }: Props) {
         <div>
           <p className="text-sm font-semibold text-gray-900">Fotos</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            Cualquier tamaño o del celular. Se recortan todas a {PHOTO_LABEL} (4:3).
+            Cualquier tamaño o del celular. Se recortan todas a {PHOTO_LABEL} (4:3). Tocá una foto para que se vea primero.
           </p>
         </div>
         <span className="text-xs text-gray-400 tabular-nums">{photos.filter((p) => p.status === "ready").length}</span>
@@ -130,30 +130,30 @@ export default function PhotoUploader({ photos, onChange, disabled }: Props) {
                 </div>
               )}
               {index === 0 && photo.status === "ready" && (
-                <span className="absolute top-1 left-1 text-[9px] font-bold uppercase tracking-wide bg-black/75 text-white px-1.5 py-0.5 rounded-md">
-                  Portada
+                <span className="absolute top-1 left-1 text-[9px] font-bold uppercase tracking-wide bg-red-600 text-white px-1.5 py-0.5 rounded-md">
+                  Se ve primero
                 </span>
               )}
-              <div className="absolute bottom-1 right-1 flex gap-1">
-                {index > 0 && photo.status === "ready" && (
-                  <button
-                    type="button"
-                    onClick={() => makeCover(index)}
-                    className="h-7 w-7 rounded-full bg-black/70 text-white flex items-center justify-center"
-                    title="Usar como portada"
-                  >
-                    <Star className="h-3.5 w-3.5" />
-                  </button>
-                )}
+              {photo.status === "ready" && index > 0 && (
                 <button
                   type="button"
-                  onClick={() => removeAt(index)}
-                  className="h-7 w-7 rounded-full bg-black/70 text-white flex items-center justify-center"
-                  title="Sacar foto"
+                  onClick={() => makeCover(index)}
+                  className="absolute inset-0 bg-black/0 hover:bg-black/25 transition-colors"
+                  title="Ver primero"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <span className="absolute bottom-1 left-1 right-8 text-[9px] font-semibold text-white bg-black/60 px-1.5 py-0.5 rounded-md">
+                    Usar primero
+                  </span>
                 </button>
-              </div>
+              )}
+              <button
+                type="button"
+                onClick={() => removeAt(index)}
+                className="absolute bottom-1 right-1 h-7 w-7 rounded-full bg-black/70 text-white flex items-center justify-center z-10"
+                title="Sacar foto"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           ))}
         </div>

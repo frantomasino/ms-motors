@@ -18,7 +18,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   const [message, setMessage] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [coverCar, setCoverCar] = useState<AutoRow | null>(null);
 
   async function importCsv() {
     if (!confirm("Esto copia el catálogo actual del Sheet a este panel. Los que ya estén no se duplican.")) return;
@@ -70,6 +70,25 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
       return;
     }
     setCars((prev) => prev.map((c) => (c.id === car.id ? data.car : c)));
+  }
+
+  async function setCoverPhoto(car: AutoRow, url: string) {
+    const rest = (car.images ?? []).filter((u) => u !== url);
+    const images = [url, ...rest];
+    setBusyId(car.id);
+    const res = await fetch(`/api/admin/autos/${car.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ images }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusyId(null);
+    if (!res.ok) {
+      setMessage(data.error || "No se pudo cambiar la foto");
+      return;
+    }
+    setCars((prev) => prev.map((c) => (c.id === car.id ? data.car : c)));
+    setCoverCar(null);
   }
 
   async function duplicate(car: AutoRow) {
@@ -195,7 +214,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
 
       {cars.length > 0 && (
         <p className="text-xs text-gray-400">
-          Las flechas mueven el auto. El primero de Activos es el primero del catálogo.
+          Las flechas mueven el auto. Tocá la miniatura para elegir qué foto se ve primero.
         </p>
       )}
 
@@ -242,14 +261,24 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
                     <ChevronDown className="h-4 w-4 mx-auto" />
                   </button>
                 </div>
-                <div className="relative h-20 w-[6.5rem] shrink-0 rounded-xl overflow-hidden bg-gray-100">
+                <button
+                  type="button"
+                  onClick={() => (car.images?.length ?? 0) > 1 ? setCoverCar(car) : undefined}
+                  className="relative h-20 w-[6.5rem] shrink-0 rounded-xl overflow-hidden bg-gray-100"
+                  title={(car.images?.length ?? 0) > 1 ? "Elegir foto de portada" : undefined}
+                >
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={cover} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-[10px] text-gray-400">Sin foto</div>
                   )}
-                </div>
+                  {(car.images?.length ?? 0) > 1 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] font-semibold py-0.5">
+                      Elegir foto
+                    </span>
+                  )}
+                </button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -327,6 +356,50 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
           );
         })}
       </div>
+
+      {coverCar && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center p-4"
+          onClick={() => setCoverCar(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-md p-4 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm font-bold text-gray-900 mb-1">¿Cuál se ve primero?</p>
+            <p className="text-xs text-gray-400 mb-3">
+              {coverCar.brand} {coverCar.model} · tocá la foto de portada
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {(coverCar.images ?? []).map((url, i) => (
+                <button
+                  key={url + i}
+                  type="button"
+                  onClick={() => setCoverPhoto(coverCar, url)}
+                  className={`relative aspect-[4/3] rounded-xl overflow-hidden ${
+                    i === 0 ? "ring-2 ring-red-600" : ""
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  {i === 0 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-red-600 text-white text-[9px] font-bold py-0.5">
+                      Actual
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setCoverCar(null)}
+              className="mt-4 w-full h-11 rounded-xl border border-gray-200 text-sm font-medium text-gray-600"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

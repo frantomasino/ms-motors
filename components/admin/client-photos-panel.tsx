@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, ChevronsUp, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { CLIENT_PHOTO_LABEL, CLIENT_PHOTO_SIZE } from "@/lib/photo-config";
 import { isImageFile, processCarPhoto } from "@/lib/process-image";
 import type { ClientPhotoRow } from "@/lib/client-photos";
@@ -160,7 +160,7 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
 
       {photos.length > 0 && (
         <p className="text-xs text-gray-400">
-          {photos.length} fotos · las flechas ordenan · se recortan a {CLIENT_PHOTO_LABEL} (cuadradas)
+          {photos.length} fotos · tocá una para que se vea primero
         </p>
       )}
 
@@ -170,35 +170,21 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
             <div className="relative aspect-square bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.url} alt="" className="h-full w-full object-cover" />
-              <div className="absolute top-1.5 left-1.5 flex flex-col gap-0.5">
+              {index === 0 && (
+                <span className="absolute bottom-0 inset-x-0 bg-red-600 text-white text-[10px] font-bold py-1 text-center">
+                  Se ve primero
+                </span>
+              )}
+              {index > 0 && (
                 <button
                   type="button"
-                  disabled={index === 0 || Boolean(busy)}
+                  disabled={Boolean(busy)}
                   onClick={() => move(index, "first")}
-                  className="h-7 w-7 rounded-lg bg-black/60 text-white disabled:opacity-20"
-                  title="Primero"
+                  className="absolute bottom-0 inset-x-0 bg-black/65 text-white text-[10px] font-semibold py-1"
                 >
-                  <ChevronsUp className="h-4 w-4 mx-auto" />
+                  Usar primero
                 </button>
-                <button
-                  type="button"
-                  disabled={index === 0 || Boolean(busy)}
-                  onClick={() => move(index, "up")}
-                  className="h-7 w-7 rounded-lg bg-black/60 text-white disabled:opacity-20"
-                  title="Subir"
-                >
-                  <ChevronUp className="h-4 w-4 mx-auto" />
-                </button>
-                <button
-                  type="button"
-                  disabled={index === photos.length - 1 || Boolean(busy)}
-                  onClick={() => move(index, "down")}
-                  className="h-7 w-7 rounded-lg bg-black/60 text-white disabled:opacity-20"
-                  title="Bajar"
-                >
-                  <ChevronDown className="h-4 w-4 mx-auto" />
-                </button>
-              </div>
+              )}
               <button
                 type="button"
                 disabled={Boolean(busy)}
