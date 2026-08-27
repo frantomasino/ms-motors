@@ -9,9 +9,8 @@ export function slugifyName(brand: string, model: string, year: number): string 
     .replace(/^-|-$/g, "");
 }
 
-export function carSlug(car: Pick<CarType, "id" | "brand" | "model" | "year" | "source">): string {
+export function carSlug(car: Pick<CarType, "id" | "brand" | "model" | "year">): string {
   const base = slugifyName(car.brand, car.model, car.year);
-  if (car.source === "csv" || String(car.id).startsWith("csv-")) return base;
   const short = String(car.id).replace(/-/g, "").slice(0, 8);
   return `${base}-${short}`;
 }

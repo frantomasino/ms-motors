@@ -12,7 +12,6 @@ import CurrencyToggle from "@/components/admin/currency-toggle";
 export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] }) {
   const router = useRouter();
   const [cars, setCars] = useState(initialCars);
-  const [importing, setImporting] = useState(false);
   const [message, setMessage] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
@@ -20,23 +19,6 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   const [busyId, setBusyId] = useState<string | null>(null);
   const [coverCar, setCoverCar] = useState<AutoRow | null>(null);
   const [tab, setTab] = useState<"activos" | "vendidos">("activos");
-
-  async function importCsv() {
-    if (!confirm("Esto copia el catálogo actual del Sheet a este panel. Los que ya estén no se duplican.")) return;
-    setImporting(true);
-    setMessage("");
-    try {
-      const res = await fetch("/api/admin/import-csv", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "No se pudo importar");
-      setMessage(`Listo: ${data.imported} nuevos, ${data.skipped} ya estaban.`);
-      router.refresh();
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Error al importar");
-    } finally {
-      setImporting(false);
-    }
-  }
 
   async function toggleSold(car: AutoRow) {
     const next = car.estado === "vendido" ? "disponible" : "vendido";
@@ -164,20 +146,11 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
         >
           Nuevo auto
         </Link>
-        <button
-          type="button"
-          onClick={importCsv}
-          disabled={importing}
-          className="h-11 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-gray-300 hover:text-ink disabled:opacity-50"
-        >
-          {importing ? "Importando…" : "Traer del Sheet"}
-        </button>
       </div>
 
       {cars.length === 0 && (
         <div className="rounded-2xl border border-amber-200/80 bg-amber-50 px-5 py-4 text-sm text-amber-900 leading-relaxed">
-          Todavía no hay autos en este panel. El sitio público sigue mostrando el Sheet.
-          Traé el catálogo actual o cargá el primero. Cuando haya al menos uno acá, el sitio usa solo este panel.
+          Todavía no hay autos. Cargá el primero con <span className="font-semibold">Nuevo auto</span>.
         </div>
       )}
 

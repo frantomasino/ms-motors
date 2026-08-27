@@ -12,8 +12,6 @@ export interface CarType {
   description: string
   images: string[]
   estado?: string
-  fotos?: string
-  source?: "supabase" | "csv"
   score?: number
   reasons?: string[]
 }
@@ -27,22 +25,6 @@ export interface FilterState {
   mileageRange: [number, number]
   colors: string[]
   fuelTypes: string[]
-}
-
-export interface Auto {
-  Marca: string;
-  Modelo: string;
-  Año: string;
-  Precio: string;
-  Color: string;
-  Kilometraje: string;
-  Transmisión: string;
-  Combustible: string;
-  Descripción?: string;
-  Estado?: string;
-  CarpetaFirebase?: string;
-  imagenes: string[];
-  fotos?: string;
 }
 
 export interface AutoRow {
