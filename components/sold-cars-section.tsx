@@ -13,12 +13,14 @@ interface SoldCarsSectionProps {
 
 function SoldCarCard({ car }: { car: CarType }) {
   const fmt = (m: number) => new Intl.NumberFormat("es-AR").format(m);
-  const firstImage = car.images?.find(img => img && !img.includes(".mp4")) || "/placeholder.svg";
+  const firstImage = car.images?.find(img => img && !img.includes(".mp4") && !img.includes("placeholder.svg") && !img.includes("/proximamente/"));
   return (
     <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative h-44 sm:h-52 overflow-hidden bg-gray-100">
-        <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill
-          className="object-cover group-hover:scale-105 transition-all duration-500" />
+        {firstImage ? (
+          <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill
+            className="object-cover group-hover:scale-105 transition-all duration-500" />
+        ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-ink/80 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
           <CheckCircle2 className="h-3 w-3" />

@@ -1,5 +1,6 @@
 import type { Auto, AutoRow, CarType } from "@/types";
 import { normalizeFuel, normalizeTransmission } from "@/lib/catalog-options";
+import { usableCarPhotos } from "@/lib/photo-config";
 
 export function mapRowToCar(row: AutoRow): CarType {
   return {
@@ -14,9 +15,7 @@ export function mapRowToCar(row: AutoRow): CarType {
     fuelType: row.fuel_type || "",
     description: row.description || `${row.brand} ${row.model} ${row.year}`,
     estado: (row.estado || "disponible").toLowerCase().trim(),
-    images: Array.isArray(row.images) && row.images.length > 0
-      ? row.images
-      : ["/placeholder.svg?height=600&width=800"],
+    images: usableCarPhotos(row.images),
     source: "supabase",
   };
 }
@@ -35,9 +34,7 @@ export function mapCsvToCar(auto: Auto, index: number): CarType {
     description: auto.Descripción || `${auto.Marca} ${auto.Modelo} ${auto.Año}`,
     estado: (auto.Estado || "disponible").toLowerCase().trim(),
     fotos: auto.fotos || "",
-    images: auto.imagenes.length > 0
-      ? auto.imagenes
-      : ["/placeholder.svg?height=600&width=800"],
+    images: usableCarPhotos(auto.imagenes),
     source: "csv",
   };
 }
