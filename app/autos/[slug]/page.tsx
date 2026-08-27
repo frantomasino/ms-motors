@@ -3,20 +3,12 @@ import { notFound } from "next/navigation";
 import CarDetailClient from "./car-detail-client";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
-
-export function slugify(brand: string, model: string, year: number) {
-  return `${brand}-${model}-${year}`
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+import { carSlug } from "@/lib/slug";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const cars = await getCarsData();
-  const car = cars.find(c => slugify(c.brand, c.model, c.year) === slug);
+  const car = cars.find(c => carSlug(c) === slug);
   if (!car) return { title: "Auto no encontrado" };
   return {
     title: `${car.brand} ${car.model} ${car.year} | MS Motors`,
@@ -31,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export async function generateStaticParams() {
   const cars = await getCarsData();
-  return cars.map(c => ({ slug: slugify(c.brand, c.model, c.year) }));
+  return cars.map(c => ({ slug: carSlug(c) }));
 }
 
 export const revalidate = 60;
@@ -56,46 +48,42 @@ async function fetchSupabaseMedia(fotos: string): Promise<string[]> {
   }
 }
 
+function relatedCarsFor(cars: Awaited<ReturnType<typeof getCarsData>>, car: NonNullable<Awaited<ReturnType<typeof getCarsData>>[number]>) {
+  const available = cars.filter(c => c.estado !== "vendido");
+  const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
+  const sameBrand = shuffle(
+    available.filter(c => c.id !== car.id && c.brand === car.brand)
+  ).slice(0, 3);
+  if (sameBrand.length >= 2) return sameBrand;
+  return [
+    ...sameBrand,
+    ...shuffle(available.filter(c => c.id !== car.id && c.brand !== car.brand))
+      .sort((a, b) => Math.abs(a.price - car.price) - Math.abs(b.price - car.price))
+      .slice(0, 3 - sameBrand.length),
+  ].slice(0, 3);
+}
+
 export default async function CarDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const cars = await getCarsData();
-  const car = cars.find(c => slugify(c.brand, c.model, c.year) === slug);
+  const car = cars.find(c => carSlug(c) === slug);
   if (!car) notFound();
 
-  const csvImages = car!.images?.filter(
+  const csvImages = car.images?.filter(
     img => img && img !== "/placeholder.svg?height=600&width=800"
   ) || [];
 
-  const fotos = (car as any).fotos as string | undefined;
-  const supabaseMedia = fotos ? await fetchSupabaseMedia(fotos) : [];
+  let mediaList = csvImages;
+  if (car.source !== "supabase") {
+    const fotos = car.fotos;
+    const supabaseMedia = fotos ? await fetchSupabaseMedia(fotos) : [];
+    const allMedia = Array.from(new Set([
+      ...supabaseMedia.filter(u => !/\.(mp4|mov|webm|m4v)$/i.test(u)),
+      ...supabaseMedia.filter(u => /\.(mp4|mov|webm|m4v)$/i.test(u)),
+      ...csvImages,
+    ]));
+    mediaList = allMedia.length > 0 ? allMedia : csvImages;
+  }
 
-  const allMedia = Array.from(new Set([
-    ...supabaseMedia.filter(u => !/\.(mp4|mov|webm|m4v)$/i.test(u)),
-    ...supabaseMedia.filter(u => /\.(mp4|mov|webm|m4v)$/i.test(u)),
-    ...csvImages,
-  ]));
-
-  const mediaList = allMedia.length > 0 ? allMedia : csvImages;
-
-  const available = cars.filter(c => (c as any).estado !== "vendido");
-
-  // Mezcla aleatoria
-const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
-
-const sameBrand = shuffle(
-  available.filter(c => c.id !== car!.id && c.brand === car!.brand)
-).slice(0, 3);
-
-const related = sameBrand.length >= 2
-  ? sameBrand
-  : [
-      ...sameBrand,
-      ...shuffle(
-        available.filter(c => c.id !== car!.id && c.brand !== car!.brand)
-      )
-        .sort((a, b) => Math.abs(a.price - car!.price) - Math.abs(b.price - car!.price))
-        .slice(0, 3 - sameBrand.length),
-    ].slice(0, 3);
-
-  return <CarDetailClient car={car!} mediaList={mediaList} relatedCars={related} />;
+  return <CarDetailClient car={car} mediaList={mediaList} relatedCars={relatedCarsFor(cars, car)} />;
 }

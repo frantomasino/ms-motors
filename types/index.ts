@@ -1,5 +1,5 @@
 export interface CarType {
-  id: number
+  id: string
   model: string
   brand: string
   price: number
@@ -12,13 +12,14 @@ export interface CarType {
   images: string[]
   estado?: string
   fotos?: string
+  source?: "supabase" | "csv"
   score?: number
   reasons?: string[]
 }
 
 export interface FilterState {
   brands: string[]
-   models: string[]
+  models: string[]
   transmissions: string[]
   priceRange: [number, number]
   yearRange: [number, number]
@@ -37,6 +38,38 @@ export interface Auto {
   Transmisión: string;
   Combustible: string;
   Descripción?: string;
+  Estado?: string;
   CarpetaFirebase?: string;
   imagenes: string[];
+  fotos?: string;
+}
+
+export interface AutoRow {
+  id: string
+  brand: string
+  model: string
+  year: number
+  price: number
+  color: string
+  mileage: number
+  transmission: string
+  fuel_type: string
+  description: string
+  estado: string
+  images: string[] | null
+  created_at: string
+  updated_at: string
+}
+
+export type CarFormPayload = {
+  brand: string
+  model: string
+  year: number
+  price: number
+  color: string
+  mileage: number
+  transmission: string
+  fuel_type: string
+  description: string
+  estado?: "disponible" | "vendido"
 }

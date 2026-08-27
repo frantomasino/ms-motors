@@ -1,44 +1,41 @@
 import { fetchAutos } from "@/services/autosService";
-import { Auto } from "@/types";
+import { mapCsvToCar, mapRowToCar } from "@/lib/map-car";
+import { supabase } from "@/lib/supabase";
+import type { AutoRow, CarType } from "@/types";
 
-function mapAutosToCarFormat(autos: Auto[]) {
-  return autos.map((auto, index) => ({
-    id: index + 1,
-    model: auto.Modelo,
-    brand: auto.Marca,
-    price: parseInt(auto.Precio.replace(/\D/g, '')) || 0,
-    year: parseInt(auto.Año) || 2000,
-    color: auto.Color,
-    mileage: parseInt(auto.Kilometraje.replace(/\D/g, '')) || 0,
-    transmission: auto.Transmisión,
-    fuelType: auto.Combustible,
-    description: auto.Descripción || `${auto.Marca} ${auto.Modelo} ${auto.Año}`,
-    estado: (auto as any).Estado?.toLowerCase().trim() || "disponible",
-    fotos: (auto as any).fotos || "",
-    images: auto.imagenes.length > 0
-      ? auto.imagenes
-      : ["/placeholder.svg?height=600&width=800"],
-  }));
-}
+export async function getCarsData(): Promise<CarType[]> {
+  try {
+    const { data, error } = await supabase
+      .from("autos")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-export async function getCarsData() {
+    if (!error && data && data.length > 0) {
+      return (data as AutoRow[]).map(mapRowToCar);
+    }
+
+    if (error) {
+      console.warn("Tabla autos no disponible, usando CSV:", error.message);
+    }
+  } catch (error) {
+    console.error("Error leyendo tabla autos:", error);
+  }
+
   try {
     const autos = await fetchAutos();
-    return mapAutosToCarFormat(autos);
+    return autos.map(mapCsvToCar);
   } catch (error) {
     console.error("Error fetching cars data:", error);
     return [];
   }
 }
 
-// Solo los disponibles para el catálogo
 export async function getDisponibles() {
   const cars = await getCarsData();
-  return cars.filter(c => c.estado !== "vendido");
+  return cars.filter((c) => c.estado !== "vendido");
 }
 
-// Solo los vendidos para la sección historial
 export async function getVendidos() {
   const cars = await getCarsData();
-  return cars.filter(c => c.estado === "vendido");
+  return cars.filter((c) => c.estado === "vendido");
 }

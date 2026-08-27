@@ -68,7 +68,7 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
       let fromSb: string[] = [];
       if ((car as any).fotos) {
         const bucket = process.env.NEXT_PUBLIC_SUPABASE_BUCKET!;
-        const folder = String((car as any).fotos).replace(/^\/+|\/+$/g, "");
+        const folder = String(car.fotos).replace(/^\/+|\/+$/g, "");
         const { data } = await supabase.storage.from(bucket).list(folder, { limit: 500 });
         if (data) {
           fromSb = data
