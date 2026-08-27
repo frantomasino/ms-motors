@@ -18,7 +18,7 @@ function SoldCarCard({ car }: { car: CarType }) {
     <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="relative h-44 sm:h-52 overflow-hidden bg-gray-100">
         <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill
-          className="object-contain group-hover:scale-105 transition-all duration-500" />
+          className="object-cover group-hover:scale-105 transition-all duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
           <CheckCircle2 className="h-3 w-3" />
@@ -102,8 +102,8 @@ export default function SoldCarsSection({ soldCars = [], clientPhotos = [] }: So
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-2">Historial</p>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Historial</p>
+            <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl text-ink">
               {tab === "clientes" ? "Clientes felices" : "Autos vendidos"}
             </h2>
             <p className="text-gray-400 text-sm mt-1">

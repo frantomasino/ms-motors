@@ -2,15 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap');
-
 @layer utilities {
   .text-balance { text-wrap: balance; }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
+    --background: 40 10% 98%;
     --foreground: 220 20% 8%;
 
     --card: 0 0% 100%;
@@ -22,43 +20,68 @@
     --secondary: 220 14% 94%;
     --secondary-foreground: 220 20% 20%;
 
-    --muted: 220 14% 94%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 40 10% 95%;
+    --muted-foreground: 220 8% 42%;
 
     --accent: 215 28% 17%;
     --accent-foreground: 0 0% 98%;
 
-    --border: 220 13% 88%;
-    --input: 220 13% 88%;
-    --ring: 220 20% 8%;
+    --border: 40 8% 90%;
+    --input: 40 8% 88%;
+    --ring: 4 86% 44%;
 
     --destructive: 0 72% 42%;
     --destructive-foreground: 0 0% 98%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Token de marca — el único color de acento */
-    --brand: 4 86% 44%;          /* rojo motor #D0230F */
+    /* Rojo motor — único acento de marca */
+    --brand: 4 86% 44%;
     --brand-foreground: 0 0% 98%;
+    --ink: 222 20% 8%;
+    --surface: 40 14% 96%;
   }
-}
 
-@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * { @apply border-border; }
 
+  ::selection {
+    background: hsl(var(--brand) / 0.18);
+    color: hsl(var(--ink));
+  }
+
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-weight: 400;              /* ← CORREGIDO: era 700 */
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+    font-weight: 400;
     font-size: 15px;
     line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;              /* ← CORREGIDO: era 400 */
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .font-title {
+    font-family: var(--font-barlow), sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .font-body {
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  .brand-stripe {
+    height: 2px;
+    background: linear-gradient(90deg, #9b1c10 0%, #d0230f 45%, #ef4444 100%);
   }
 }

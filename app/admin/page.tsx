@@ -1,4 +1,5 @@
 import AdminCarsList from "@/components/admin/cars-list";
+import AdminPageHeader from "@/components/admin/page-header";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { fetchAutosOrdered } from "@/lib/autos-order";
 import type { AutoRow } from "@/types";
@@ -27,10 +28,11 @@ export default async function AdminPage() {
 
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Stock</h1>
-        <p className="text-sm text-gray-500 mb-6">
-          Cargá autos desde el celular. Las fotos se recortan solas a 1600×1200. Con las flechas ordenás cuál se ve primero.
-        </p>
+        <AdminPageHeader
+          kicker="Gestión"
+          title="Stock"
+          description="Publicá, ordená y actualizá el catálogo. Las fotos se recortan solas a 1600×1200."
+        />
         <AdminCarsList initialCars={(data ?? []) as AutoRow[]} />
       </div>
     );
@@ -47,8 +49,9 @@ export default async function AdminPage() {
 
 function SetupMessage({ title, body, detail }: { title: string; body: string; detail?: string }) {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-      <h1 className="text-lg font-bold text-amber-950 mb-2">{title}</h1>
+    <div className="rounded-2xl border border-amber-200/80 bg-amber-50 p-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700 mb-2">Configuración</p>
+      <h1 className="font-title text-2xl text-amber-950 mb-2">{title}</h1>
       <p className="text-sm text-amber-900 leading-relaxed">{body}</p>
       {detail && <p className="mt-3 text-xs text-amber-800/80 break-all">{detail}</p>}
     </div>

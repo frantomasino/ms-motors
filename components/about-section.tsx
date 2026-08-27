@@ -31,8 +31,8 @@ export default function AboutSection() {
 
           {/* Texto */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-3">Quiénes somos</p>
-            <h2 className="text-2xl sm:text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-3">Quiénes somos</p>
+            <h2 className="font-title text-3xl sm:text-4xl lg:text-[2.75rem] text-ink leading-[1.05] mb-4 sm:mb-6">
               Más de 5 años<br />vendiendo con confianza
             </h2>
             <p className="text-sm sm:text-base text-gray-500 leading-relaxed mb-3 sm:mb-6">
@@ -51,7 +51,7 @@ export default function AboutSection() {
                 { value: "5+",   label: "Años" },
               ].map((s, i) => (
                 <div key={i}>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{s.value}</p>
+                  <p className="font-title text-2xl sm:text-3xl text-ink tabular-nums">{s.value}</p>
                   <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider mt-1">{s.label}</p>
                 </div>
               ))}
@@ -61,9 +61,9 @@ export default function AboutSection() {
           {/* Cards — 2 columnas desde mobile */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {values.map(({ icon: Icon, title, desc }, i) => (
-              <div key={i} className="group flex flex-col gap-2 sm:gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-red-50 group-hover:bg-red-100 transition-colors">
-                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              <div key={i} className="group flex flex-col gap-2 sm:gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 bg-white hover:border-red-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-red-50 group-hover:bg-brand transition-colors">
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-brand group-hover:text-white transition-colors" />
                 </div>
                 <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">{title}</h3>
                 <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed hidden sm:block">{desc}</p>

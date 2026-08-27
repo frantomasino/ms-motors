@@ -19,20 +19,26 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-[100svh] bg-gray-50">
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/admin" className="text-sm font-bold text-gray-900 shrink-0">
-            MS<span className="text-red-500"> Motors</span>
+    <div className="min-h-[100svh] bg-surface">
+      <header className="sticky top-0 z-50 bg-[#0c0e12] text-white">
+        <div className="brand-stripe" />
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+          <Link href="/admin" className="font-title text-lg tracking-tight shrink-0">
+            MS<span className="text-brand"> Motors</span>
           </Link>
           <AdminNav />
-          <div className="ml-auto flex items-center gap-3">
-            <Link href="/" className="text-xs text-gray-400 hover:text-gray-700">Ver sitio</Link>
+          <div className="ml-auto flex items-center gap-1">
+            <Link
+              href="/"
+              className="text-xs text-white/45 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            >
+              Ver sitio
+            </Link>
             <LogoutButton />
           </div>
         </div>
       </header>
-      <div className="max-w-2xl mx-auto px-4 py-6">{children}</div>
+      <div className="max-w-3xl mx-auto px-4 py-7">{children}</div>
     </div>
   );
 }

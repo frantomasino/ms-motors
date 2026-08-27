@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Poppins } from "next/font/google";
+import { Barlow_Condensed, Inter } from "next/font/google";
 import Script from "next/script";
 import { BASE_URL } from "@/lib/config";
 
-const poppins = Poppins({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-inter",
   display: "swap",
-  preload: true,
+});
+
+const barlow = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-barlow",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -165,8 +170,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es-AR">
       <head>
         <link rel="icon" type="image/png" href="/icono-ms-favicon.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="theme-color" content="#0c0e12" />
         <meta name="geo.region" content="AR-B" />
         <meta name="geo.placename" content="Quilmes, Buenos Aires" />
@@ -183,7 +186,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={poppins.variable}>{children}</body>
+      <body className={`${inter.variable} ${barlow.variable} font-sans`}>{children}</body>
     </html>
   );
 }

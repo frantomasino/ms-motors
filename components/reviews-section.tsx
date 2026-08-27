@@ -106,8 +106,8 @@ export default function ReviewsSection() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-2">Reseñas</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Lo que dicen nuestros clientes</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Reseñas</p>
+            <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl text-ink">Lo que dicen nuestros clientes</h2>
           </div>
           <a href={GOOGLE_URL} target="_blank" rel="noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all bg-white shrink-0">

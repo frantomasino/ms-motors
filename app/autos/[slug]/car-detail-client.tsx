@@ -33,7 +33,7 @@ function RelatedCard({ car }: { car: CarType }) {
       </div>
       <div className="p-3">
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
-        <p className="text-sm font-bold text-gray-900 mt-0.5 group-hover:text-red-600 transition-colors">{car.model}</p>
+        <p className="font-title text-lg text-ink mt-0.5 group-hover:text-brand transition-colors">{car.model}</p>
         <p className="text-xs text-gray-400 mt-1">{car.year} · {new Intl.NumberFormat("es-AR").format(car.mileage)} km</p>
       </div>
     </Link>
@@ -84,16 +84,20 @@ const specs = [
     <div className="min-h-screen bg-gray-50 pb-28 lg:pb-0">
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40">
+        <div className="brand-stripe" />
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/#catalog"
-            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-ink transition-colors">
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Volver al catálogo</span>
             <span className="sm:hidden">Volver</span>
           </Link>
+          <Link href="/" className="hidden sm:flex items-center gap-2">
+            <span className="font-title text-lg tracking-tight text-ink">MS<span className="text-brand"> Motors</span></span>
+          </Link>
           <button onClick={handleShare}
-            className="flex items-center gap-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-3 sm:px-4 py-2 rounded-full transition-all">
+            className="flex items-center gap-2 text-sm font-medium text-white bg-ink hover:bg-black px-3 sm:px-4 py-2 rounded-full transition-all">
             {copied ? <Check className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
             <span className="hidden sm:inline">{copied ? "¡Copiado!" : "Compartir"}</span>
           </button>
@@ -151,9 +155,9 @@ const specs = [
           {/* Info */}
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{car.brand}</p>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-0.5">{car.model}</h1>
-              <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-1.5">{formatPrice(car.price)}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">{car.brand}</p>
+              <h1 className="font-title text-3xl sm:text-4xl text-ink mt-1">{car.model}</h1>
+              <p className="font-title text-2xl sm:text-3xl text-brand mt-2 tabular-nums">{formatPrice(car.price)}</p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
@@ -203,11 +207,11 @@ const specs = [
         {relatedCars.length > 0 && (
           <div className="mt-10 sm:mt-14">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">También te puede interesar</h2>
+              <h2 className="font-title text-xl sm:text-2xl text-ink">También te puede interesar</h2>
               {/* ✅ Link correcto al catálogo */}
               <button
   onClick={() => { window.location.href = "/#catalog"; }}
-  className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors"
+  className="text-sm text-brand hover:text-red-700 font-medium transition-colors"
 >
   Ver todos →
 </button>

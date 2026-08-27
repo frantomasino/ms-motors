@@ -79,9 +79,9 @@ export default function PhotoUploader({ photos, onChange, disabled }: Props) {
     <div className="space-y-3">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-gray-900">Fotos</p>
+          <p className="text-sm font-semibold text-ink">Fotos</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            Cualquier tamaño o del celular. Se recortan todas a {PHOTO_LABEL} (4:3). Tocá una foto para que se vea primero.
+            Se recortan a {PHOTO_LABEL} (4:3). Tocá una para usarla de portada.
           </p>
         </div>
         <span className="text-xs text-gray-400 tabular-nums">{photos.filter((p) => p.status === "ready").length}</span>
@@ -91,7 +91,7 @@ export default function PhotoUploader({ photos, onChange, disabled }: Props) {
         type="button"
         disabled={disabled || busy}
         onClick={() => inputRef.current?.click()}
-        className="w-full min-h-[7.5rem] rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-red-300 hover:bg-red-50/40 transition-colors flex flex-col items-center justify-center gap-2 px-4 py-6 disabled:opacity-60"
+        className="w-full min-h-[7.5rem] rounded-2xl border-2 border-dashed border-gray-200 bg-white hover:border-brand/40 hover:bg-red-50/30 transition-colors flex flex-col items-center justify-center gap-2 px-4 py-6 disabled:opacity-60"
       >
         {busy ? (
           <Loader2 className="h-6 w-6 text-red-500 animate-spin" />
@@ -130,8 +130,8 @@ export default function PhotoUploader({ photos, onChange, disabled }: Props) {
                 </div>
               )}
               {index === 0 && photo.status === "ready" && (
-                <span className="absolute top-1 left-1 text-[9px] font-bold uppercase tracking-wide bg-red-600 text-white px-1.5 py-0.5 rounded-md">
-                  Se ve primero
+                <span className="absolute top-1 left-1 text-[9px] font-bold uppercase tracking-wide bg-brand text-white px-1.5 py-0.5 rounded-md">
+                  Portada
                 </span>
               )}
               {photo.status === "ready" && index > 0 && (

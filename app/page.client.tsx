@@ -134,27 +134,28 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
   const activeFiltersCount = activeChips.length;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
 
-      {/* Header — siempre visible, siempre blanco */}
-      <header className={`sticky top-0 z-50 bg-white border-b transition-all duration-300 ${
-        scrolled ? "border-gray-100 shadow-sm" : "border-transparent"
+      {/* Header */}
+      <header className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md transition-all duration-300 ${
+        scrolled ? "border-b border-gray-100 shadow-[0_8px_24px_rgba(16,24,40,0.06)]" : "border-b border-transparent"
       }`}>
+        <div className="brand-stripe" />
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl">
-          <div className="flex items-center justify-between h-14 sm:h-16">
+          <div className="flex items-center justify-between h-14 sm:h-[4.25rem]">
 
             {/* Logo */}
             <a href="#" className="flex items-center gap-2.5 shrink-0">
-              <div className="relative h-9 w-9">
+              <div className="relative h-9 w-9 sm:h-10 sm:w-10">
                 <Image src="/logo-ms-motors.png" alt="Logo MS Motors" fill className="object-contain" />
               </div>
-              <span className="text-lg font-bold tracking-tight text-gray-900">
-                MS<span className="text-red-500"> Motors</span>
+              <span className="font-title text-xl tracking-tight text-ink">
+                MS<span className="text-brand"> Motors</span>
               </span>
             </a>
 
             {/* Nav desktop */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-0.5">
               {[
                 { href: "#",         label: "Inicio" },
                 { href: "#catalog",  label: "Catálogo" },
@@ -162,7 +163,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
                 { href: "#vendidos", label: "Vendidos" },
               ].map(({ href, label }) => (
                 <a key={label} href={href}
-                  className="px-3 py-1.5 text-sm font-medium rounded-lg text-gray-600 hover:text-red-600 hover:bg-red-50 transition-all">
+                  className="px-3.5 py-1.5 text-[13px] font-medium rounded-lg text-gray-600 hover:text-brand hover:bg-red-50/80 transition-all">
                   {label}
                 </a>
               ))}
@@ -171,15 +172,15 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
             {/* Acciones */}
             <div className="flex items-center gap-1.5">
               <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer" aria-label="Instagram"
-                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all">
+                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-brand hover:bg-red-50 transition-all">
                 <FaInstagram className="h-4 w-4" />
               </a>
               <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer" aria-label="TikTok"
-                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all">
+                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:text-brand hover:bg-red-50 transition-all">
                 <FaTiktok className="h-4 w-4" />
               </a>
               <a href="https://wa.me/5491159456142" target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full bg-gray-900 hover:bg-gray-800 text-white transition-all hover:scale-[1.02]">
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-full bg-ink hover:bg-black text-white transition-all hover:scale-[1.02]">
                 <Phone className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Contactar</span>
               </a>
@@ -209,17 +210,17 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
                 { href: "#vendidos", label: "Vendidos" },
               ].map(({ href, label }) => (
                 <a key={label} href={href} onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                  className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-brand hover:bg-red-50 rounded-lg transition-all">
                   {label}
                 </a>
               ))}
               <div className="flex gap-3 px-4 pt-2 border-t border-gray-100 mt-1">
                 <a href="https://www.instagram.com/ms.motorsquilmes/" target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors">
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-brand transition-colors">
                   <FaInstagram className="h-4 w-4" /> Instagram
                 </a>
                 <a href="https://www.tiktok.com/@msmotorsquilmes" target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-600 transition-colors">
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-brand transition-colors">
                   <FaTiktok className="h-4 w-4" /> TikTok
                 </a>
               </div>
@@ -237,11 +238,12 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Catálogo de Vehículos</h2>
-                <p className="mt-1 text-sm">
-                  <span className={activeFiltersCount > 0 ? "text-red-600 font-semibold" : "text-gray-500"}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Stock</p>
+                <h2 className="font-title text-3xl sm:text-4xl md:text-5xl text-ink">Autos disponibles</h2>
+                <p className="mt-1.5 text-sm">
+                  <span className={activeFiltersCount > 0 ? "text-brand font-semibold" : "text-gray-500"}>
                     {filteredCars.length} vehículo{filteredCars.length !== 1 ? "s" : ""}
-                    {activeFiltersCount > 0 ? " encontrados" : " disponibles"}
+                    {activeFiltersCount > 0 ? " encontrados" : " en catálogo"}
                   </span>
                 </p>
               </div>

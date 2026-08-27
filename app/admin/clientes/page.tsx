@@ -1,4 +1,5 @@
 import ClientPhotosPanel from "@/components/admin/client-photos-panel";
+import AdminPageHeader from "@/components/admin/page-header";
 import { createAdminClient } from "@/lib/supabase-admin";
 import type { ClientPhotoRow } from "@/lib/client-photos";
 
@@ -16,8 +17,9 @@ export default async function AdminClientesPage() {
     if (error) {
       const missing = /does not exist|schema cache|relation/i.test(error.message);
       return (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <h1 className="text-lg font-bold text-amber-950 mb-2">
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50 p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700 mb-2">Configuración</p>
+          <h1 className="font-title text-2xl text-amber-950 mb-2">
             {missing ? "Falta crear la tabla de fotos de clientes" : "No se pudieron leer las fotos"}
           </h1>
           <p className="text-sm text-amber-900 leading-relaxed">
@@ -32,17 +34,19 @@ export default async function AdminClientesPage() {
 
     return (
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Clientes felices</h1>
-        <p className="text-sm text-gray-500 mb-6">
-          Fotos del sitio en “Clientes”. Se recortan cuadradas a 1200×1200. Las flechas cambian el orden.
-        </p>
+        <AdminPageHeader
+          kicker="Sitio"
+          title="Clientes felices"
+          description="Fotos de la sección Clientes. Se recortan cuadradas a 1200×1200."
+        />
         <ClientPhotosPanel initialPhotos={(data ?? []) as ClientPhotoRow[]} />
       </div>
     );
   } catch (err) {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-        <h1 className="text-lg font-bold text-amber-950 mb-2">Falta configurar el servidor</h1>
+      <div className="rounded-2xl border border-amber-200/80 bg-amber-50 p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-700 mb-2">Configuración</p>
+        <h1 className="font-title text-2xl text-amber-950 mb-2">Falta configurar el servidor</h1>
         <p className="text-sm text-amber-900 leading-relaxed">
           Agregá ADMIN_PIN y SUPABASE_SERVICE_ROLE_KEY en Vercel.
         </p>

@@ -32,10 +32,10 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
   };
 
   return (
-    <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+    <div className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100/90 shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:shadow-[0_16px_40px_rgba(16,24,40,0.10)] hover:-translate-y-1 transition-all duration-300">
 
       {/* Imagen */}
-      <Link href={`/autos/${slug}`} className="relative h-48 sm:h-52 overflow-hidden bg-gray-100 block">
+      <Link href={`/autos/${slug}`} className="relative h-52 sm:h-56 overflow-hidden bg-neutral-100 block">
         <Image
           src={firstValidImage}
           alt={`${car.brand} ${car.model}`}
@@ -45,7 +45,7 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/5 to-transparent" />
 
         {/* Precio — arriba derecha */}
-        <div className="absolute top-3 right-3 bg-black/75 backdrop-blur-sm text-white text-sm font-bold px-3 py-1.5 rounded-xl tracking-tight">
+        <div className="absolute top-3 right-3 bg-ink/85 backdrop-blur-md text-white text-[13px] font-semibold px-3 py-1.5 rounded-lg tracking-tight tabular-nums">
           {formatPrice(car.price)}
         </div>
 
@@ -70,14 +70,14 @@ export default function CarCard({ car, onViewDetails }: CarCardProps) {
         <Link href={`/autos/${slug}`} className="block">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
-              <h3 className="text-base font-bold text-gray-900 leading-tight mt-0.5 group-hover:text-red-600 transition-colors">{car.model}</h3>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.18em]">{car.brand}</p>
+              <h3 className="font-title text-lg text-ink leading-tight mt-0.5 group-hover:text-brand transition-colors">{car.model}</h3>
             </div>
             {/* Docs OK + compartir juntos */}
             <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-              <div className="flex items-center gap-1 bg-green-50 border border-green-100 text-green-700 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+              <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                 <BadgeCheck className="h-3 w-3" />
-                Docs OK
+                Al día
               </div>
               <button
                 onClick={handleShare}

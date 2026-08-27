@@ -121,7 +121,7 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
           type="button"
           disabled={Boolean(busy)}
           onClick={() => inputRef.current?.click()}
-          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-12 px-5 rounded-2xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold text-sm"
+          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-brand hover:bg-red-700 disabled:opacity-50 text-white font-semibold text-sm shadow-sm shadow-red-900/10"
         >
           {busy && busy !== "order" && !photos.some((p) => p.id === busy) ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -134,7 +134,7 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
           type="button"
           onClick={importExisting}
           disabled={importing}
-          className="h-12 px-4 rounded-2xl border border-gray-200 text-sm font-medium text-gray-700 hover:border-gray-400 disabled:opacity-50"
+          className="h-11 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-gray-300 hover:text-ink disabled:opacity-50"
         >
           {importing ? "Importando…" : "Traer fotos de Supabase"}
         </button>
@@ -150,7 +150,7 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
       />
 
       {photos.length === 0 && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900 leading-relaxed">
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50 px-5 py-4 text-sm text-amber-900 leading-relaxed">
           Todavía no hay fotos en este panel. El sitio sigue mostrando la carpeta <span className="font-medium">clientes</span> de Supabase.
           Traé las actuales o subí nuevas. Cuando haya al menos una acá, el sitio usa solo este panel.
         </div>
@@ -166,13 +166,13 @@ export default function ClientPhotosPanel({ initialPhotos }: { initialPhotos: Cl
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {photos.map((photo, index) => (
-          <article key={photo.id} className="relative rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+          <article key={photo.id} className="relative rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
             <div className="relative aspect-square bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.url} alt="" className="h-full w-full object-cover" />
               {index === 0 && (
-                <span className="absolute bottom-0 inset-x-0 bg-red-600 text-white text-[10px] font-bold py-1 text-center">
-                  Se ve primero
+                <span className="absolute bottom-0 inset-x-0 bg-brand text-white text-[10px] font-bold py-1 text-center">
+                  Primero
                 </span>
               )}
               {index > 0 && (
