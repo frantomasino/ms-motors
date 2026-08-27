@@ -15,12 +15,14 @@ create table if not exists public.autos (
   description text not null default '',
   estado text not null default 'disponible' check (estado in ('disponible', 'vendido')),
   images text[] not null default '{}',
+  sort_order int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 create index if not exists autos_estado_idx on public.autos (estado);
 create index if not exists autos_created_at_idx on public.autos (created_at desc);
+create index if not exists autos_sort_order_idx on public.autos (sort_order);
 
 create or replace function public.set_autos_updated_at()
 returns trigger

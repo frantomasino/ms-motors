@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Pencil, Trash2 } from "lucide-react";
+import { Copy, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUp } from "lucide-react";
 import type { AutoRow } from "@/types";
+import { bySortOrder } from "@/lib/autos-order";
 
 function formatPrice(n: number) {
   return `USD ${new Intl.NumberFormat("es-AR").format(n)}`;
@@ -97,9 +98,43 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   }
 
   const [tab, setTab] = useState<"activos" | "vendidos">("activos");
-  const activos = cars.filter((c) => c.estado !== "vendido");
-  const vendidos = cars.filter((c) => c.estado === "vendido");
+  const activos = cars.filter((c) => c.estado !== "vendido").sort(bySortOrder);
+  const vendidos = cars.filter((c) => c.estado === "vendido").sort(bySortOrder);
   const visible = tab === "activos" ? activos : vendidos;
+
+  async function persistOrder(nextVisible: AutoRow[]) {
+    const ids = nextVisible.map((c) => c.id);
+    const orderById = new Map(ids.map((id, i) => [id, i + 1]));
+    setCars((prev) => prev.map((c) => (orderById.has(c.id) ? { ...c, sort_order: orderById.get(c.id) } : c)));
+    setBusyId("order");
+    try {
+      const res = await fetch("/api/admin/autos/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) setMessage(data.error || "No se pudo guardar el orden");
+    } catch {
+      setMessage("No se pudo guardar el orden");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function moveCar(index: number, dir: "up" | "down" | "first") {
+    const list = [...visible];
+    if (dir === "first") {
+      if (index === 0) return;
+      const [item] = list.splice(index, 1);
+      list.unshift(item);
+    } else {
+      const j = dir === "up" ? index - 1 : index + 1;
+      if (j < 0 || j >= list.length) return;
+      [list[index], list[j]] = [list[j], list[index]];
+    }
+    persistOrder(list);
+  }
 
   return (
     <div className="space-y-5">
@@ -158,18 +193,55 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
         </div>
       )}
 
+      {cars.length > 0 && (
+        <p className="text-xs text-gray-400">
+          Las flechas mueven el auto. El primero de Activos es el primero del catálogo.
+        </p>
+      )}
+
       <div className="flex flex-col gap-3">
         {cars.length > 0 && visible.length === 0 && (
           <p className="text-sm text-gray-400 py-8 text-center">
             {tab === "activos" ? "No hay autos activos." : "No hay autos vendidos."}
           </p>
         )}
-        {visible.map((car) => {
+        {visible.map((car, index) => {
           const cover = car.images?.[0];
           const sold = car.estado === "vendido";
+          const isFirst = index === 0;
+          const isLast = index === visible.length - 1;
           return (
             <article key={car.id} className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-              <div className="flex gap-3 p-3">
+              <div className="flex gap-2 p-3">
+                <div className="flex flex-col justify-center gap-0.5 shrink-0">
+                  <button
+                    type="button"
+                    disabled={isFirst || busyId === "order"}
+                    onClick={() => moveCar(index, "first")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Poner primero"
+                  >
+                    <ChevronsUp className="h-4 w-4 mx-auto" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isFirst || busyId === "order"}
+                    onClick={() => moveCar(index, "up")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Subir"
+                  >
+                    <ChevronUp className="h-4 w-4 mx-auto" />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isLast || busyId === "order"}
+                    onClick={() => moveCar(index, "down")}
+                    className="h-7 w-7 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 disabled:opacity-20"
+                    title="Bajar"
+                  >
+                    <ChevronDown className="h-4 w-4 mx-auto" />
+                  </button>
+                </div>
                 <div className="relative h-20 w-[6.5rem] shrink-0 rounded-xl overflow-hidden bg-gray-100">
                   {cover ? (
                     // eslint-disable-next-line @next/next/no-img-element

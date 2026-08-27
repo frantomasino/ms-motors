@@ -3,6 +3,7 @@ import { fetchAutos } from "@/services/autosService";
 import { csvToInsert } from "@/lib/map-car";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidateCatalog } from "@/lib/revalidate-catalog";
+import { nextEndSortOrder } from "@/lib/autos-order";
 import type { AutoRow } from "@/types";
 
 export const runtime = "nodejs";
@@ -38,7 +39,10 @@ export async function POST() {
       return NextResponse.json({ imported: 0, skipped: csvAutos.length, total: count ?? 0 });
     }
 
-    const { data, error } = await supabase.from("autos").insert(toInsert).select("id");
+    let order = await nextEndSortOrder(supabase);
+    const rows = toInsert.map((row) => ({ ...row, sort_order: order++ }));
+
+    const { data, error } = await supabase.from("autos").insert(rows).select("id");
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

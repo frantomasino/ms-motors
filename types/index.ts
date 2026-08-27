@@ -57,6 +57,7 @@ export interface AutoRow {
   description: string
   estado: string
   images: string[] | null
+  sort_order?: number
   created_at: string
   updated_at: string
 }
