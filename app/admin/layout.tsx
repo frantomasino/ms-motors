@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { COOKIE_NAME, verifySessionToken } from "@/lib/admin-auth";
 import LogoutButton from "@/components/admin/logout-button";
+import AdminNav from "@/components/admin/admin-nav";
 
 export const metadata: Metadata = {
   title: "Panel | MS Motors",
@@ -20,12 +21,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="min-h-[100svh] bg-gray-50">
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/admin" className="text-sm font-bold text-gray-900">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+          <Link href="/admin" className="text-sm font-bold text-gray-900 shrink-0">
             MS<span className="text-red-500"> Motors</span>
-            <span className="ml-2 text-xs font-medium text-gray-400">Panel</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <AdminNav />
+          <div className="ml-auto flex items-center gap-3">
             <Link href="/" className="text-xs text-gray-400 hover:text-gray-700">Ver sitio</Link>
             <LogoutButton />
           </div>

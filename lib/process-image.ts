@@ -1,4 +1,4 @@
-import { PHOTO_HEIGHT, PHOTO_MAX_INPUT_BYTES, PHOTO_MIME, PHOTO_QUALITY, PHOTO_WIDTH } from "@/lib/photo-config";
+import { PHOTO_MAX_INPUT_BYTES, PHOTO_MIME, PHOTO_QUALITY, PHOTO_WIDTH, PHOTO_HEIGHT } from "@/lib/photo-config";
 
 export type ProcessImageResult = {
   blob: Blob;
@@ -43,26 +43,32 @@ async function decodeImage(file: File): Promise<ImageBitmap> {
  * Recorta al centro (cover) y deja todas las fotos en 1600×1200 WebP.
  * No importa el tamaño, la orientación ni el recorte original.
  */
-export async function processCarPhoto(file: File): Promise<ProcessImageResult> {
+export async function processCarPhoto(
+  file: File,
+  size?: { width?: number; height?: number }
+): Promise<ProcessImageResult> {
   if (file.size > PHOTO_MAX_INPUT_BYTES) {
     throw new Error("La foto pesa demasiado (máximo 25 MB)");
   }
 
+  const width = size?.width ?? PHOTO_WIDTH;
+  const height = size?.height ?? PHOTO_HEIGHT;
+
   const bitmap = await decodeImage(file);
   const canvas = document.createElement("canvas");
-  canvas.width = PHOTO_WIDTH;
-  canvas.height = PHOTO_HEIGHT;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("No se pudo procesar la foto");
 
   ctx.fillStyle = "#0c0e12";
-  ctx.fillRect(0, 0, PHOTO_WIDTH, PHOTO_HEIGHT);
+  ctx.fillRect(0, 0, width, height);
 
-  const scale = Math.max(PHOTO_WIDTH / bitmap.width, PHOTO_HEIGHT / bitmap.height);
+  const scale = Math.max(width / bitmap.width, height / bitmap.height);
   const dw = bitmap.width * scale;
   const dh = bitmap.height * scale;
-  const dx = (PHOTO_WIDTH - dw) / 2;
-  const dy = (PHOTO_HEIGHT - dh) / 2;
+  const dx = (width - dw) / 2;
+  const dy = (height - dh) / 2;
   ctx.drawImage(bitmap, dx, dy, dw, dh);
   bitmap.close?.();
 

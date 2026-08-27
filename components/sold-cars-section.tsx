@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, Calendar, Gauge, Car, Users, ChevronDown } from "lucide-react";
 import type { CarType } from "@/types";
-import { supabase } from "@/lib/supabase";
 import AnimatedCounter from "@/components/animated-counter";
 
 interface SoldCarsSectionProps {
   soldCars: CarType[];
+  clientPhotos?: string[];
 }
 
 function SoldCarCard({ car }: { car: CarType }) {
@@ -41,41 +41,12 @@ function SoldCarCard({ car }: { car: CarType }) {
   );
 }
 
-function ClientPhotos() {
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+function ClientPhotos({ photos }: { photos: string[] }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   const INITIAL_COUNT = 6;
   const visible = showAll ? photos : photos.slice(0, INITIAL_COUNT);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const { data } = await supabase.storage.from("Msmotors").list("clientes", { limit: 50 });
-        if (data) {
-          const urls = data
-            .filter(f => /\.(jpe?g|png|webp)$/i.test(f.name))
-            .map(f => supabase.storage.from("Msmotors").getPublicUrl(`clientes/${f.name}`).data.publicUrl);
-          setPhotos(urls);
-        }
-      } catch(e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
-
-  if (loading) return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-      {[0,1,2,3,4,5].map(i => (
-        <div key={i} className="aspect-square rounded-2xl bg-gray-100 animate-pulse" />
-      ))}
-    </div>
-  );
 
   if (photos.length === 0) return (
     <p className="text-center text-gray-400 py-10">No hay fotos disponibles.</p>
@@ -117,7 +88,7 @@ function ClientPhotos() {
   );
 }
 
-export default function SoldCarsSection({ soldCars = [] }: SoldCarsSectionProps) {
+export default function SoldCarsSection({ soldCars = [], clientPhotos = [] }: SoldCarsSectionProps) {
   const [tab, setTab] = useState<"vehiculos" | "clientes">(soldCars.length === 0 ? "clientes" : "vehiculos");
   const [showAll, setShowAll] = useState(false);
 
@@ -195,7 +166,7 @@ export default function SoldCarsSection({ soldCars = [] }: SoldCarsSectionProps)
         )}
 
         {/* Clientes */}
-        {tab === "clientes" && <ClientPhotos />}
+        {tab === "clientes" && <ClientPhotos photos={clientPhotos} />}
       </div>
     </section>
   );
