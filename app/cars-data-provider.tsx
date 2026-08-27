@@ -2,6 +2,7 @@ import { fetchAutos } from "@/services/autosService";
 import { mapCsvToCar, mapRowToCar } from "@/lib/map-car";
 import { fetchAutosOrdered } from "@/lib/autos-order";
 import { supabase } from "@/lib/supabase";
+import { DEV_SOLD, DEV_STOCK } from "@/lib/dev-fixtures";
 import type { AutoRow, CarType } from "@/types";
 
 export async function getCarsData(): Promise<CarType[]> {
@@ -21,19 +22,15 @@ export async function getCarsData(): Promise<CarType[]> {
 
   try {
     const autos = await fetchAutos();
-    return autos.map(mapCsvToCar);
+    const cars = autos.map(mapCsvToCar);
+    if (cars.length > 0) return cars;
   } catch (error) {
     console.error("Error fetching cars data:", error);
-    return [];
   }
-}
 
-export async function getDisponibles() {
-  const cars = await getCarsData();
-  return cars.filter((c) => c.estado !== "vendido");
-}
+  if (process.env.NODE_ENV !== "production") {
+    return [...DEV_STOCK, ...DEV_SOLD];
+  }
 
-export async function getVendidos() {
-  const cars = await getCarsData();
-  return cars.filter((c) => c.estado === "vendido");
+  return [];
 }

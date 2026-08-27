@@ -26,7 +26,7 @@ export default function HeroSection() {
       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-transparent via-red-600 to-transparent opacity-60" />
 
       {/* Contenido */}
-      <div className="relative px-5 sm:px-10 lg:px-16 pt-16 pb-24 sm:pb-20 max-w-2xl">
+      <div className="relative px-5 sm:px-10 lg:px-16 pt-24 pb-16 sm:pb-20 max-w-2xl">
 
 
 

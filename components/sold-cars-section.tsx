@@ -20,14 +20,14 @@ function SoldCarCard({ car }: { car: CarType }) {
         <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill
           className="object-cover group-hover:scale-105 transition-all duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-ink/80 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full">
           <CheckCircle2 className="h-3 w-3" />
           Vendido
         </div>
       </div>
       <div className="p-3 sm:p-4">
-        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
-        <h3 className="text-sm sm:text-base font-bold text-gray-900 mt-0.5">{car.model}</h3>
+        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.18em]">{car.brand}</p>
+        <h3 className="font-title text-base sm:text-lg text-ink mt-0.5">{car.model}</h3>
         <div className="flex items-center gap-3 mt-1.5">
           <span className="flex items-center gap-1 text-xs text-gray-400">
             <Calendar className="h-3.5 w-3.5" />{car.year}

@@ -67,7 +67,7 @@ function StarRating({ rating }: { rating: number }) {
 
 function ReviewCard({ review }: { review: typeof reviews[0] }) {
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300 bg-white h-full">
+    <div className="flex flex-col gap-4 p-5 rounded-2xl border border-gray-100 hover:border-red-100 hover:shadow-[0_10px_30px_rgba(16,24,40,0.06)] transition-all duration-300 bg-white h-full">
       <div className="flex items-start justify-between">
         <Quote className="h-6 w-6 text-gray-100 fill-gray-100" />
         <StarRating rating={review.rating} />
@@ -100,7 +100,7 @@ export default function ReviewsSection() {
   const desktopReviews = reviews.slice(desktopPage * 3, desktopPage * 3 + 3);
 
   return (
-    <section className="bg-white border-t border-gray-100 py-20">
+    <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}

@@ -65,8 +65,8 @@ export default function AboutSection() {
                 <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-red-50 group-hover:bg-brand transition-colors">
                   <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-brand group-hover:text-white transition-colors" />
                 </div>
-                <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">{title}</h3>
-                <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed hidden sm:block">{desc}</p>
+                <h3 className="font-title text-sm sm:text-base text-ink leading-snug">{title}</h3>
+                <p className="text-[11px] sm:text-xs text-gray-500 leading-relaxed line-clamp-3 sm:line-clamp-none">{desc}</p>
               </div>
             ))}
           </div>

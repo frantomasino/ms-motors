@@ -2,7 +2,7 @@ export default function CarDetailLoading() {
   return (
     <div className="min-h-screen bg-gray-50 animate-pulse">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 h-14 flex items-center px-4">
+      <div className="bg-white border-b border-gray-100 h-14 sm:h-[4.25rem] mt-[2px] flex items-center px-4">
         <div className="h-4 w-32 bg-gray-100 rounded-full" />
       </div>
 
