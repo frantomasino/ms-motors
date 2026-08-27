@@ -26,7 +26,7 @@ export default function HeroSection() {
       <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-transparent via-red-600 to-transparent opacity-60" />
 
       {/* Contenido */}
-      <div className="relative px-5 sm:px-10 lg:px-16 pt-16 pb-24 sm:pb-20 max-w-2xl">
+      <div className="relative px-5 sm:px-10 lg:px-16 pt-24 pb-16 sm:pb-20 max-w-2xl">
 
 
 
@@ -37,13 +37,13 @@ export default function HeroSection() {
         </div>
 
         {/* Título */}
-        <h1 className="font-title mb-4 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.05] tracking-tight">
+        <h1 className="font-title mb-5 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.25rem] leading-[0.95] tracking-tight">
           El auto que<br />
-          <span className="text-red-500">buscabas</span>,<br />
+          <span className="text-brand">buscabas</span>,<br />
           está acá.
         </h1>
 
-        <p className="font-body mb-7 max-w-md text-sm sm:text-base text-white/50 leading-relaxed">
+        <p className="font-body mb-8 max-w-md text-sm sm:text-base text-white/55 leading-relaxed">
           Comprá con confianza. Vehículos verificados, atención personalizada y financiación disponible.
         </p>
 
@@ -51,7 +51,7 @@ export default function HeroSection() {
         <div className="flex flex-row gap-2 flex-wrap">
           <a href="#catalog">
             <Button size="default"
-              className="font-body gap-2 rounded-full bg-red-600 hover:bg-red-700 text-white px-6 shadow-lg shadow-red-900/40 transition-all hover:scale-[1.02] text-sm">
+              className="font-body gap-2 rounded-full bg-brand hover:bg-red-700 text-white px-6 shadow-lg shadow-red-900/40 transition-all hover:scale-[1.02] text-sm">
               Ver catálogo
               <ArrowRight className="h-4 w-4" />
             </Button>

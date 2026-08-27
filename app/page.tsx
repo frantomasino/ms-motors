@@ -2,7 +2,7 @@ import { getCarsData } from "./cars-data-provider";
 import { fetchClientPhotos } from "@/lib/client-photos";
 import ClientPage from "./page.client";
 
-export const revalidate = 60; // revalida cada 60 segundos
+export const revalidate = 60;
 
 export default async function Home() {
   const [allCars, clientPhotos] = await Promise.all([getCarsData(), fetchClientPhotos()]);

@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const car = cars.find(c => carSlug(c) === slug);
   if (!car) return { title: "Auto no encontrado" };
   return {
-    title: `${car.brand} ${car.model} ${car.year} | MS Motors`,
+    title: `${car.brand} ${car.model} ${car.year}`,
     description: `${car.brand} ${car.model} ${car.year} – USD ${car.price.toLocaleString("es-AR")} · ${car.mileage.toLocaleString("es-AR")} km · ${car.transmission} · ${car.fuelType}. En MS Motors, Quilmes.`,
     openGraph: {
       title: `${car.brand} ${car.model} ${car.year} | MS Motors`,

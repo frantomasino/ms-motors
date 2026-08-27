@@ -10,12 +10,14 @@ export default function Footer() {
   return (
     <footer>
       {/* CTA WhatsApp */}
-      <div className="bg-gradient-to-b from-gray-50 to-gray-900 py-10 sm:py-14">
-        <div className="container mx-auto px-4 sm:px-10 lg:px-16 text-center">
-          <p className="text-xs uppercase tracking-widest text-gray-400 mb-2 sm:mb-3">¿Tenés alguna consulta?</p>
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-5 sm:mb-6">Hablemos por WhatsApp</h3>
+      <div className="relative bg-[#0c0e12] py-12 sm:py-16 overflow-hidden">
+        <div className="brand-stripe absolute inset-x-0 top-0" />
+        <div className="pointer-events-none absolute -right-16 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-brand/20 blur-3xl" />
+        <div className="container relative mx-auto px-4 sm:px-10 lg:px-16 text-center">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-white/40 mb-3">¿Tenés alguna consulta?</p>
+          <h3 className="font-title text-3xl sm:text-4xl lg:text-5xl text-white mb-6">Hablemos por WhatsApp</h3>
           <a href="https://wa.me/5491159456142" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold px-7 py-3 sm:px-8 sm:py-3.5 rounded-full transition-all hover:scale-[1.02] shadow-lg shadow-green-900/30 text-sm">
+            className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold px-7 py-3.5 sm:px-8 rounded-full transition-all hover:scale-[1.02] shadow-lg shadow-green-900/40 text-sm">
             <FaWhatsapp className="h-5 w-5" />
             Escribinos ahora
           </a>
@@ -23,7 +25,7 @@ export default function Footer() {
       </div>
 
       {/* Cuerpo */}
-      <div className="bg-gray-900">
+      <div className="bg-[#0c0e12]">
         <div className="container mx-auto px-4 sm:px-10 lg:px-16 py-10 sm:py-12">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10">
 
@@ -33,7 +35,7 @@ export default function Footer() {
                 <div className="relative h-10 w-10 rounded-full overflow-hidden bg-white p-1 shrink-0">
                   <Image src="/logo-ms-motors.png" alt="MS Motors" fill className="object-contain" />
                 </div>
-                <span className="text-lg font-bold text-white">MS<span className="text-red-500"> Motors</span></span>
+                <span className="font-title text-xl tracking-tight text-white">MS<span className="text-brand"> Motors</span></span>
               </div>
 
               <div className="flex flex-col gap-3">

@@ -13,7 +13,7 @@ import {
 import type { AutoRow, CarFormPayload } from "@/types";
 
 const fieldClass =
-  "w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400";
+  "w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40";
 
 type Props = {
   mode: "create" | "edit";
@@ -177,7 +177,7 @@ export default function CarForm({ mode, initial }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5 pb-28">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
         <label className="block">
           <span className="text-xs font-medium text-gray-500 mb-1.5 block">Marca</span>
           <select
@@ -269,30 +269,32 @@ export default function CarForm({ mode, initial }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:border-gray-400"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40"
             placeholder="Único dueño, service al día…"
           />
         </label>
       </div>
 
-      <PhotoUploader photos={photos} onChange={setPhotos} disabled={saving} />
+      <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-5">
+        <PhotoUploader photos={photos} onChange={setPhotos} disabled={saving} />
+      </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-brand">{error}</p>}
       {status && <p className="text-sm text-gray-500">{status}</p>}
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-100 bg-white/95 backdrop-blur px-4 py-3">
-        <div className="max-w-2xl mx-auto flex gap-2">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-100 bg-white/90 backdrop-blur-md px-4 py-3">
+        <div className="max-w-3xl mx-auto flex gap-2">
           <button
             type="button"
             onClick={() => router.push("/admin")}
-            className="h-12 px-4 rounded-2xl border border-gray-200 text-sm font-medium text-gray-600"
+            className="h-12 px-4 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:text-ink"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 h-12 rounded-2xl bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-semibold"
+            className="flex-1 h-12 rounded-xl bg-brand hover:bg-red-700 disabled:opacity-50 text-white font-semibold"
           >
             {saving ? "Guardando…" : mode === "create" ? "Publicar auto" : "Guardar cambios"}
           </button>

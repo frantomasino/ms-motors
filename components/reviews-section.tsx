@@ -67,7 +67,7 @@ function StarRating({ rating }: { rating: number }) {
 
 function ReviewCard({ review }: { review: typeof reviews[0] }) {
   return (
-    <div className="flex flex-col gap-4 p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300 bg-white h-full">
+    <div className="flex flex-col gap-4 p-5 rounded-2xl border border-gray-100 hover:border-red-100 hover:shadow-[0_10px_30px_rgba(16,24,40,0.06)] transition-all duration-300 bg-white h-full">
       <div className="flex items-start justify-between">
         <Quote className="h-6 w-6 text-gray-100 fill-gray-100" />
         <StarRating rating={review.rating} />
@@ -100,14 +100,14 @@ export default function ReviewsSection() {
   const desktopReviews = reviews.slice(desktopPage * 3, desktopPage * 3 + 3);
 
   return (
-    <section className="bg-white border-t border-gray-100 py-20">
+    <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-red-500 mb-2">Reseñas</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Lo que dicen nuestros clientes</h2>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Reseñas</p>
+            <h2 className="font-title text-3xl sm:text-4xl lg:text-5xl text-ink">Lo que dicen nuestros clientes</h2>
           </div>
           <a href={GOOGLE_URL} target="_blank" rel="noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all bg-white shrink-0">

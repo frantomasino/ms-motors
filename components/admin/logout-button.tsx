@@ -10,7 +10,11 @@ export default function LogoutButton() {
     router.refresh();
   }
   return (
-    <button type="button" onClick={logout} className="text-xs text-gray-400 hover:text-gray-700">
+    <button
+      type="button"
+      onClick={logout}
+      className="text-xs text-white/45 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+    >
       Salir
     </button>
   );
