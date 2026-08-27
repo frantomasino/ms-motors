@@ -4,15 +4,12 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { CarType } from "@/types";
-import { ChevronLeft, ChevronRight, Fuel, Settings2, MessageCircle } from "lucide-react";
+import { Fuel, Settings2, MessageCircle } from "lucide-react";
 import { carSlug } from "@/lib/slug";
+import { usableCarPhotos } from "@/lib/photo-config";
 
 function gallery(car: CarType) {
-  const raw = (car.images ?? []).filter(
-    (img) => img && !img.includes(".mp4") && !img.includes("placeholder.svg")
-  );
-  const real = raw.filter((img) => !img.includes("/proximamente/"));
-  return real.length > 0 ? real : raw;
+  return usableCarPhotos(car.images);
 }
 
 export default function CarCard({ car }: { car: CarType }) {
@@ -78,7 +75,9 @@ export default function CarCard({ car }: { car: CarType }) {
               className="object-cover"
             />
           ) : (
-            <div className="absolute inset-0 bg-neutral-200" />
+            <div className="absolute inset-0 flex items-center justify-center bg-neutral-100">
+              <span className="text-xs font-medium text-gray-400">Fotos pronto</span>
+            </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent pointer-events-none" />
         </Link>

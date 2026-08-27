@@ -11,3 +11,14 @@ export const CLIENT_PHOTO_SIZE = 1200;
 export const CLIENT_PHOTO_LABEL = `${CLIENT_PHOTO_SIZE}×${CLIENT_PHOTO_SIZE}`;
 export const CLIENT_FOLDER = "clientes";
 export const IMAGE_FILE_RE = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
+
+/** Saca placeholders rotos y el banner de “próximamente” que no existe en Storage. */
+export function usableCarPhotos(urls: string[] | null | undefined): string[] {
+  return (urls ?? []).filter((url) => {
+    if (!url || url.includes(".mp4")) return false;
+    if (url.includes("placeholder.svg")) return false;
+    if (url.includes("/proximamente/")) return false;
+    return true;
+  });
+}
+

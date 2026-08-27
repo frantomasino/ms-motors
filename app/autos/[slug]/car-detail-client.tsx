@@ -11,6 +11,7 @@ import {
 import type { CarType } from "@/types";
 import { carSlug } from "@/lib/slug";
 import SiteHeader from "@/components/site-header";
+import { usableCarPhotos } from "@/lib/photo-config";
 
 function isVideo(u?: string) {
   if (!u) return false;
@@ -18,7 +19,7 @@ function isVideo(u?: string) {
 }
 
 function RelatedCard({ car }: { car: CarType }) {
-  const firstImage = car.images?.find(img => img && !img.includes(".mp4")) || "/placeholder.svg";
+  const firstImage = usableCarPhotos(car.images)[0];
   const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const slug = carSlug(car);
 
@@ -26,7 +27,11 @@ function RelatedCard({ car }: { car: CarType }) {
     <Link href={`/autos/${slug}`}
       className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-        <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        {firstImage ? (
+          <Image src={firstImage} alt={`${car.brand} ${car.model}`} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400">Fotos pronto</div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute bottom-2 left-2 right-2">
           <p className="font-title text-white text-lg tabular-nums">{formatPrice(car.price)}</p>
@@ -109,7 +114,7 @@ export default function CarDetailClient({
                   <source src={currentMedia} />
                 </video>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/20 text-sm">Sin imagen</div>
+                <div className="w-full h-full flex items-center justify-center bg-neutral-200 text-gray-500 text-sm">Fotos pronto</div>
               )}
 
               {mediaList.length > 1 && (

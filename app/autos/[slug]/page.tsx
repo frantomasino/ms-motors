@@ -4,6 +4,7 @@ import CarDetailClient from "./car-detail-client";
 import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import { carSlug } from "@/lib/slug";
+import { usableCarPhotos } from "@/lib/photo-config";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -69,9 +70,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ slug
   const car = cars.find(c => carSlug(c) === slug);
   if (!car) notFound();
 
-  const csvImages = car.images?.filter(
-    img => img && img !== "/placeholder.svg?height=600&width=800"
-  ) || [];
+  const csvImages = usableCarPhotos(car.images);
 
   let mediaList = csvImages;
   if (car.source !== "supabase") {
