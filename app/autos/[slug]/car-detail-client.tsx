@@ -12,6 +12,7 @@ import type { CarType } from "@/types";
 import { carSlug } from "@/lib/slug";
 import SiteHeader from "@/components/site-header";
 import { usableCarPhotos } from "@/lib/photo-config";
+import { formatCarPrice } from "@/lib/price";
 
 function isVideo(u?: string) {
   if (!u) return false;
@@ -20,7 +21,6 @@ function isVideo(u?: string) {
 
 function RelatedCard({ car }: { car: CarType }) {
   const firstImage = usableCarPhotos(car.images)[0];
-  const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const slug = carSlug(car);
 
   return (
@@ -34,7 +34,7 @@ function RelatedCard({ car }: { car: CarType }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute bottom-2 left-2 right-2">
-          <p className="font-title text-white text-lg tabular-nums">{formatPrice(car.price)}</p>
+          <p className="font-title text-white text-lg tabular-nums">{formatCarPrice(car.price, car.currency)}</p>
         </div>
       </div>
       <div className="p-3">
@@ -61,11 +61,10 @@ export default function CarDetailClient({
   const prev = () => setCurrent(i => (i === 0 ? mediaList.length - 1 : i - 1));
   const next = () => setCurrent(i => (i === mediaList.length - 1 ? 0 : i + 1));
 
-  const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const waText = `Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible? ${shareUrl}`;
+  const waText = `Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatCarPrice(car.price, car.currency)}). ¿Está disponible? ${shareUrl}`;
 
   const handleShare = () => {
     if (navigator.share) {
@@ -153,7 +152,7 @@ export default function CarDetailClient({
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">{car.brand}</p>
               <h1 className="font-title text-3xl sm:text-5xl text-ink mt-1">{car.model}</h1>
               <p className="text-sm text-gray-500 mt-1.5">{car.year} · {formatMileage(car.mileage)}</p>
-              <p className="font-title text-3xl sm:text-4xl text-brand mt-3 tabular-nums">{formatPrice(car.price)}</p>
+              <p className="font-title text-3xl sm:text-4xl text-brand mt-3 tabular-nums">{formatCarPrice(car.price, car.currency)}</p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">

@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { createAdminClient, getBucket, pathFromPublicUrl } from "@/lib/supabase-admin";
 import { revalidateCatalog } from "@/lib/revalidate-catalog";
 import type { AutoRow, CarFormPayload } from "@/types";
+import {
+  isMissingPriceCurrencyColumn,
+  MISSING_CURRENCY_COLUMN_MSG,
+  parsePriceCurrency,
+} from "@/lib/price";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -51,6 +56,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if (year !== undefined) patch.year = year;
   if (price !== undefined) patch.price = price;
   if (mileage !== undefined) patch.mileage = mileage;
+  if (body.price_currency !== undefined) patch.price_currency = parsePriceCurrency(body.price_currency);
   if (Array.isArray(body.images)) {
     patch.images = body.images.filter((u) => typeof u === "string" && u.trim());
   }
@@ -62,6 +68,22 @@ export async function PATCH(request: Request, ctx: Ctx) {
   try {
     const supabase = createAdminClient();
     const { data, error } = await supabase.from("autos").update(patch).eq("id", id).select("*").single();
+    if (error && isMissingPriceCurrencyColumn(error) && "price_currency" in patch) {
+      if (patch.price_currency === "ARS") {
+        return NextResponse.json({ error: MISSING_CURRENCY_COLUMN_MSG }, { status: 500 });
+      }
+      const { price_currency: _ignored, ...withoutCurrency } = patch;
+      if (Object.keys(withoutCurrency).length === 0) {
+        const existing = await supabase.from("autos").select("*").eq("id", id).single();
+        return NextResponse.json({ car: existing.data as AutoRow });
+      }
+      const retry = await supabase.from("autos").update(withoutCurrency).eq("id", id).select("*").single();
+      if (retry.error || !retry.data) {
+        return NextResponse.json({ error: retry.error?.message || "Auto no encontrado" }, { status: 404 });
+      }
+      revalidateCatalog();
+      return NextResponse.json({ car: retry.data as AutoRow });
+    }
     if (error || !data) {
       return NextResponse.json({ error: error?.message || "Auto no encontrado" }, { status: 404 });
     }

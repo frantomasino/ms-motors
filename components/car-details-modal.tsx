@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import type { CarType } from "@/types";
 import { supabase } from "@/lib/supabase";
+import { formatCarPrice } from "@/lib/price";
 
 
 
@@ -118,7 +119,6 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
 
   const currentMedia = mediaList[currentMediaIndex] ?? "";
   const currentIsVideo = isVideo(currentMedia);
-  const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
   const specs = [
@@ -142,7 +142,7 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
               <h2 className="text-xl font-bold text-white">{car.model} <span className="text-white/40 font-normal">{car.year}</span></h2>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-2xl font-bold text-red-400">{formatPrice(car.price)}</span>
+              <span className="text-2xl font-bold text-red-400">{formatCarPrice(car.price, car.currency)}</span>
               <button onClick={onClose}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
                 <X className="h-4 w-4" />
@@ -241,7 +241,7 @@ export default function CarDetailsModal({ car, isOpen, onClose }: CarDetailsModa
               {/* CTA WhatsApp */}
               <div className="mt-auto pt-2">
                 <a
-                  href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible?`)}`}
+                  href={`https://wa.me/5491159456142?text=${encodeURIComponent(`Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatCarPrice(car.price, car.currency)}). ¿Está disponible?`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3.5 rounded-xl transition-all hover:scale-[1.01] shadow-lg shadow-green-100"

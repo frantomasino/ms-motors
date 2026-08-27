@@ -8,6 +8,7 @@ create table if not exists public.autos (
   model text not null,
   year int not null,
   price int not null default 0,
+  price_currency text not null default 'USD' check (price_currency in ('USD', 'ARS')),
   color text not null default '',
   mileage int not null default 0,
   transmission text not null default '',

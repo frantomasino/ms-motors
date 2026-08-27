@@ -17,7 +17,7 @@ export default async function EditAutoPage({ params }: { params: Promise<{ id: s
         <AdminPageHeader
           kicker="Catálogo"
           title="Editar auto"
-          description="Cambiá precio, kilometraje o fotos. Las nuevas se recortan al mismo tamaño."
+          description="Cambiá precio (USD o pesos), kilometraje o fotos. Las nuevas se recortan al mismo tamaño."
         />
         <CarForm mode="edit" initial={data as AutoRow} />
       </div>

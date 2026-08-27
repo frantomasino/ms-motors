@@ -24,7 +24,7 @@ const sameFilters = (a: FilterState, b: FilterState) =>
   sameArr(a.fuelTypes, b.fuelTypes) && sameRange(a.priceRange, b.priceRange) &&
   sameRange(a.yearRange, b.yearRange) && sameRange(a.mileageRange, b.mileageRange);
 
-const fmtUSD = (n: number) => "USD " + n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+const fmtNum = (n: number) => n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const fmtKM = (n: number) => n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " km";
 
 function Pill({ label, count, selected, onClick }: { label: string; count: number; selected: boolean; onClick: () => void }) {
@@ -284,7 +284,7 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
               </button>
             </div>
             <div className="flex justify-between text-[11px] text-gray-400 mt-2">
-              <span>{fmtUSD(priceRange[0])}</span><span>{fmtUSD(priceRange[1])}</span>
+              <span>{fmtNum(priceRange[0])}</span><span>{fmtNum(priceRange[1])}</span>
             </div>
           </Section>
 

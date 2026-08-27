@@ -9,7 +9,7 @@ export default function NuevoAutoPage() {
       <AdminPageHeader
         kicker="Catálogo"
         title="Nuevo auto"
-        description="Completá los datos y subí las fotos. No hace falta crear carpetas en Supabase."
+        description="Completá los datos, elegí si el precio va en USD o en pesos, y subí las fotos."
       />
       <CarForm mode="create" />
     </div>

@@ -3,6 +3,7 @@ export interface CarType {
   model: string
   brand: string
   price: number
+  currency?: "USD" | "ARS"
   year: number
   color: string
   mileage: number
@@ -50,6 +51,7 @@ export interface AutoRow {
   model: string
   year: number
   price: number
+  price_currency?: "USD" | "ARS"
   color: string
   mileage: number
   transmission: string
@@ -67,6 +69,7 @@ export type CarFormPayload = {
   model: string
   year: number
   price: number
+  price_currency?: "USD" | "ARS"
   color: string
   mileage: number
   transmission: string

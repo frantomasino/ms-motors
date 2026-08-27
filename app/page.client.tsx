@@ -100,7 +100,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
     filters.colors.forEach(c => chips.push({ key: `color:${c}`, label: `Color: ${c}`, onRemove: () => removeColor(c) }));
     filters.fuelTypes.forEach(f => chips.push({ key: `fuel:${f}`, label: `Combustible: ${f}`, onRemove: () => removeFuel(f) }));
     if (filters.priceRange[0] !== defaultRanges.price[0] || filters.priceRange[1] !== defaultRanges.price[1])
-      chips.push({ key: `price:${filters.priceRange.join("-")}`, label: `Precio: USD ${filters.priceRange[0].toLocaleString("es-AR")} – USD ${filters.priceRange[1].toLocaleString("es-AR")}`, onRemove: resetPrice });
+      chips.push({ key: `price:${filters.priceRange.join("-")}`, label: `Precio: ${filters.priceRange[0].toLocaleString("es-AR")} – ${filters.priceRange[1].toLocaleString("es-AR")}`, onRemove: resetPrice });
     if (filters.yearRange[0] !== defaultRanges.year[0] || filters.yearRange[1] !== defaultRanges.year[1])
       chips.push({ key: `year:${filters.yearRange.join("-")}`, label: `Año: ${filters.yearRange[0]} – ${filters.yearRange[1]}`, onRemove: resetYear });
     if (filters.mileageRange[0] !== defaultRanges.mileage[0] || filters.mileageRange[1] !== defaultRanges.mileage[1])

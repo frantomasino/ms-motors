@@ -7,6 +7,7 @@ import type { CarType } from "@/types";
 import { ChevronLeft, ChevronRight, Fuel, Settings2, MessageCircle } from "lucide-react";
 import { carSlug } from "@/lib/slug";
 import { usableCarPhotos } from "@/lib/photo-config";
+import { formatCarPrice } from "@/lib/price";
 
 function gallery(car: CarType) {
   return usableCarPhotos(car.images);
@@ -21,11 +22,10 @@ export default function CarCard({ car }: { car: CarType }) {
   const touchX = useRef<number | null>(null);
   const swiped = useRef(false);
 
-  const formatPrice = (p: number) => `USD ${new Intl.NumberFormat("es-AR").format(p)}`;
   const formatMileage = (m: number) => `${new Intl.NumberFormat("es-AR").format(m)} km`;
 
   const waHref = `https://wa.me/5491159456142?text=${encodeURIComponent(
-    `Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatPrice(car.price)}). ¿Está disponible?`
+    `Hola! Me interesa el ${car.brand} ${car.model} ${car.year} (${formatCarPrice(car.price, car.currency)}). ¿Está disponible?`
   )}`;
 
   function go(dir: -1 | 1) {
@@ -108,7 +108,7 @@ export default function CarCard({ car }: { car: CarType }) {
 
         <div className="absolute bottom-3 left-3 right-3 z-10 flex items-end justify-between gap-3 pointer-events-none">
           <p className="font-title text-2xl text-white tabular-nums tracking-tight drop-shadow-sm">
-            {formatPrice(car.price)}
+            {formatCarPrice(car.price, car.currency)}
           </p>
           {count > 1 && count <= 10 && (
             <div className="flex justify-end gap-1 pb-1.5">

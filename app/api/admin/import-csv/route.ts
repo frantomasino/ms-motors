@@ -42,7 +42,13 @@ export async function POST() {
     let order = await nextEndSortOrder(supabase);
     const rows = toInsert.map((row) => ({ ...row, sort_order: order++ }));
 
-    const { data, error } = await supabase.from("autos").insert(rows).select("id");
+    let { data, error } = await supabase.from("autos").insert(rows).select("id");
+    if (error && String(error.message || "").toLowerCase().includes("price_currency")) {
+      const withoutCurrency = rows.map(({ price_currency: _c, ...rest }) => rest);
+      const retry = await supabase.from("autos").insert(withoutCurrency).select("id");
+      data = retry.data;
+      error = retry.error;
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

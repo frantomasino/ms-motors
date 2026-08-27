@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import { Copy, Pencil, Trash2, ChevronUp, ChevronDown, ChevronsUp } from "lucide-react";
 import type { AutoRow } from "@/types";
 import { bySortOrder } from "@/lib/autos-order";
-
-function formatPrice(n: number) {
-  return `USD ${new Intl.NumberFormat("es-AR").format(n)}`;
-}
+import { formatCarPrice, parsePriceCurrency, type PriceCurrency } from "@/lib/price";
+import CurrencyToggle from "@/components/admin/currency-toggle";
 
 export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] }) {
   const router = useRouter();
@@ -18,6 +16,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
   const [message, setMessage] = useState("");
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceDraft, setPriceDraft] = useState("");
+  const [currencyDraft, setCurrencyDraft] = useState<PriceCurrency>("USD");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [coverCar, setCoverCar] = useState<AutoRow | null>(null);
   const [tab, setTab] = useState<"activos" | "vendidos">("activos");
@@ -62,7 +61,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
     const res = await fetch(`/api/admin/autos/${car.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ price }),
+      body: JSON.stringify({ price, price_currency: currencyDraft }),
     });
     const data = await res.json().catch(() => ({}));
     setBusyId(null);
@@ -297,7 +296,7 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
 
                   {editingPrice === car.id ? (
                     <form
-                      className="mt-1.5 flex items-center gap-2"
+                      className="mt-1.5 flex items-center gap-2 flex-wrap"
                       onSubmit={(e) => { e.preventDefault(); savePrice(car); }}
                     >
                       <input
@@ -307,16 +306,21 @@ export default function AdminCarsList({ initialCars }: { initialCars: AutoRow[] 
                         onChange={(e) => setPriceDraft(e.target.value)}
                         className="h-8 w-28 rounded-lg border border-gray-200 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40"
                       />
+                      <CurrencyToggle size="sm" value={currencyDraft} onChange={setCurrencyDraft} />
                       <button type="submit" className="text-xs font-semibold text-brand">OK</button>
                       <button type="button" onClick={() => setEditingPrice(null)} className="text-xs text-gray-400">Cancelar</button>
                     </form>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => { setEditingPrice(car.id); setPriceDraft(String(car.price)); }}
+                      onClick={() => {
+                        setEditingPrice(car.id);
+                        setPriceDraft(String(car.price));
+                        setCurrencyDraft(parsePriceCurrency(car.price_currency));
+                      }}
                       className="mt-1 font-title text-lg text-ink tabular-nums"
                     >
-                      {formatPrice(car.price)}
+                      {formatCarPrice(car.price, car.price_currency)}
                       <span className="ml-1.5 text-[10px] font-medium font-sans text-gray-400">editar</span>
                     </button>
                   )}

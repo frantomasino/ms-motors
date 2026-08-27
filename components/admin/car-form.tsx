@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import PhotoUploader, { type PhotoItem } from "@/components/admin/photo-uploader";
+import CurrencyToggle from "@/components/admin/currency-toggle";
 import {
   CAR_BRANDS,
   FUEL_TYPES,
@@ -11,6 +12,7 @@ import {
   YEAR_OPTIONS,
 } from "@/lib/catalog-options";
 import type { AutoRow, CarFormPayload } from "@/types";
+import { parsePriceCurrency, type PriceCurrency } from "@/lib/price";
 
 const fieldClass =
   "w-full h-11 rounded-xl border border-gray-200 bg-white px-3 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40";
@@ -29,6 +31,7 @@ function rowToForm(row?: AutoRow | null): CarFormPayload & { brandSelect: string
     model: row?.model || "",
     year: row?.year || new Date().getFullYear(),
     price: row?.price || 0,
+    price_currency: parsePriceCurrency(row?.price_currency),
     color: row?.color || "",
     mileage: row?.mileage || 0,
     transmission: row?.transmission || "Manual",
@@ -46,6 +49,7 @@ export default function CarForm({ mode, initial }: Props) {
   const [model, setModel] = useState(start.model);
   const [year, setYear] = useState(start.year);
   const [price, setPrice] = useState(start.price ? String(start.price) : "");
+  const [priceCurrency, setPriceCurrency] = useState<PriceCurrency>(start.price_currency || "USD");
   const [color, setColor] = useState(start.color);
   const [mileage, setMileage] = useState(start.mileage ? String(start.mileage) : "");
   const [transmission, setTransmission] = useState(start.transmission);
@@ -127,6 +131,7 @@ export default function CarForm({ mode, initial }: Props) {
         model: model.trim(),
         year: Number(year),
         price: parseInt(price.replace(/\D/g, ""), 10) || 0,
+        price_currency: priceCurrency,
         color: color.trim(),
         mileage: parseInt(mileage.replace(/\D/g, ""), 10) || 0,
         transmission,
@@ -210,15 +215,18 @@ export default function CarForm({ mode, initial }: Props) {
             ))}
           </select>
         </label>
-        <label className="block">
-          <span className="text-xs font-medium text-gray-500 mb-1.5 block">Precio (USD)</span>
-          <input
-            inputMode="numeric"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className={fieldClass}
-            placeholder="15000"
-          />
+        <label className="block sm:col-span-2">
+          <span className="text-xs font-medium text-gray-500 mb-1.5 block">Precio</span>
+          <div className="flex gap-2">
+            <CurrencyToggle value={priceCurrency} onChange={setPriceCurrency} />
+            <input
+              inputMode="numeric"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className={`${fieldClass} flex-1 min-w-0`}
+              placeholder={priceCurrency === "ARS" ? "15000000" : "15000"}
+            />
+          </div>
         </label>
         <label className="block">
           <span className="text-xs font-medium text-gray-500 mb-1.5 block">Kilómetros</span>

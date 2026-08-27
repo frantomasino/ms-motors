@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Metadata } from "next";
 import { carSlug } from "@/lib/slug";
 import { usableCarPhotos } from "@/lib/photo-config";
+import { formatCarPrice } from "@/lib/price";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!car) return { title: "Auto no encontrado" };
   return {
     title: `${car.brand} ${car.model} ${car.year}`,
-    description: `${car.brand} ${car.model} ${car.year} – USD ${car.price.toLocaleString("es-AR")} · ${car.mileage.toLocaleString("es-AR")} km · ${car.transmission} · ${car.fuelType}. En MS Motors, Quilmes.`,
+    description: `${car.brand} ${car.model} ${car.year} – ${formatCarPrice(car.price, car.currency)} · ${car.mileage.toLocaleString("es-AR")} km · ${car.transmission} · ${car.fuelType}. En MS Motors, Quilmes.`,
     openGraph: {
       title: `${car.brand} ${car.model} ${car.year} | MS Motors`,
       description: car.description,

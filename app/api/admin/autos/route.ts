@@ -3,6 +3,11 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { revalidateCatalog } from "@/lib/revalidate-catalog";
 import { fetchAutosOrdered, nextFrontSortOrder } from "@/lib/autos-order";
 import type { AutoRow, CarFormPayload } from "@/types";
+import {
+  isMissingPriceCurrencyColumn,
+  MISSING_CURRENCY_COLUMN_MSG,
+  parsePriceCurrency,
+} from "@/lib/price";
 
 function asInt(value: unknown, fallback = 0): number {
   const n = typeof value === "number" ? value : parseInt(String(value ?? ""), 10);
@@ -20,6 +25,7 @@ function sanitizePayload(body: Partial<CarFormPayload>) {
   const fuel_type = String(body.fuel_type || "").trim();
   const description = String(body.description || "").trim();
   const estado = body.estado === "vendido" ? "vendido" : "disponible";
+  const price_currency = parsePriceCurrency(body.price_currency);
 
   if (!brand || !model) {
     return { error: "Marca y modelo son obligatorios" as const };
@@ -32,7 +38,7 @@ function sanitizePayload(body: Partial<CarFormPayload>) {
   }
 
   return {
-    data: { brand, model, year, price, color, mileage, transmission, fuel_type, description, estado },
+    data: { brand, model, year, price, price_currency, color, mileage, transmission, fuel_type, description, estado },
   };
 }
 
@@ -61,18 +67,32 @@ export async function POST(request: Request) {
   }
 
   const parsed = sanitizePayload(body);
-  if ("error" in parsed && parsed.error) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  if (!("data" in parsed) || !parsed.data) {
+    return NextResponse.json({ error: "error" in parsed ? parsed.error : "Pedido inválido" }, { status: 400 });
   }
+  const payload = parsed.data;
 
   try {
     const supabase = createAdminClient();
     const sort_order = await nextFrontSortOrder(supabase);
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from("autos")
-      .insert({ ...parsed.data, sort_order })
+      .insert({ ...payload, sort_order })
       .select("*")
       .single();
+    if (error && isMissingPriceCurrencyColumn(error)) {
+      if (payload.price_currency === "ARS") {
+        return NextResponse.json({ error: MISSING_CURRENCY_COLUMN_MSG }, { status: 500 });
+      }
+      const { price_currency: _ignored, ...withoutCurrency } = payload;
+      const retry = await supabase
+        .from("autos")
+        .insert({ ...withoutCurrency, sort_order })
+        .select("*")
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }

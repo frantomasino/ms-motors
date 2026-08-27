@@ -1,6 +1,7 @@
 import type { Auto, AutoRow, CarType } from "@/types";
 import { normalizeFuel, normalizeTransmission } from "@/lib/catalog-options";
 import { usableCarPhotos } from "@/lib/photo-config";
+import { parsePriceCurrency } from "@/lib/price";
 
 export function mapRowToCar(row: AutoRow): CarType {
   return {
@@ -9,6 +10,7 @@ export function mapRowToCar(row: AutoRow): CarType {
     model: row.model,
     year: Number(row.year) || 2000,
     price: Number(row.price) || 0,
+    currency: parsePriceCurrency(row.price_currency),
     color: row.color || "",
     mileage: Number(row.mileage) || 0,
     transmission: row.transmission || "",
@@ -26,6 +28,7 @@ export function mapCsvToCar(auto: Auto, index: number): CarType {
     model: auto.Modelo,
     brand: auto.Marca,
     price: parseInt(String(auto.Precio ?? "").replace(/\D/g, ""), 10) || 0,
+    currency: "USD",
     year: parseInt(String(auto.Año ?? ""), 10) || 2000,
     color: auto.Color || "",
     mileage: parseInt(String(auto.Kilometraje ?? "").replace(/\D/g, ""), 10) || 0,
@@ -45,6 +48,7 @@ export function csvToInsert(auto: Auto) {
     model: (auto.Modelo || "").trim(),
     year: parseInt(String(auto.Año ?? ""), 10) || 2000,
     price: parseInt(String(auto.Precio ?? "").replace(/\D/g, ""), 10) || 0,
+    price_currency: "USD" as const,
     color: (auto.Color || "").trim(),
     mileage: parseInt(String(auto.Kilometraje ?? "").replace(/\D/g, ""), 10) || 0,
     transmission: normalizeTransmission(auto.Transmisión || ""),
