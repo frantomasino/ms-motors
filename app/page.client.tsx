@@ -301,11 +301,11 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
           </div>
 
           {filteredCars.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4"><Search className="h-16 w-16 mx-auto" /></div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No se encontraron vehículos</h3>
-              <p className="text-gray-600 mb-4">Intenta ajustar tus filtros o términos de búsqueda</p>
-              <Button variant="outline" onClick={clearAllFilters}>Limpiar filtros</Button>
+            <div className="text-center py-16 rounded-2xl border border-dashed border-gray-200 bg-white">
+              <div className="text-gray-300 mb-4"><Search className="h-10 w-10 mx-auto" /></div>
+              <h3 className="font-title text-2xl text-ink mb-2">No se encontraron vehículos</h3>
+              <p className="text-gray-500 mb-5 text-sm">Probá ajustar los filtros o el término de búsqueda.</p>
+              <Button variant="outline" onClick={clearAllFilters} className="rounded-full">Limpiar filtros</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

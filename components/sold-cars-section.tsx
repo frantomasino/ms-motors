@@ -49,7 +49,7 @@ function ClientPhotos({ photos }: { photos: string[] }) {
   const visible = showAll ? photos : photos.slice(0, INITIAL_COUNT);
 
   if (photos.length === 0) return (
-    <p className="text-center text-gray-400 py-10">No hay fotos disponibles.</p>
+    <p className="text-center text-sm text-gray-400 py-12">Pronto vamos a mostrar más entregas.</p>
   );
 
   return (
