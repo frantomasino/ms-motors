@@ -138,8 +138,8 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
       <SiteHeader overlay />
       <HeroSection />
 
-      <main id="catalog" className="scroll-mt-20 bg-surface border-y border-gray-100/80">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl pt-12 pb-20 sm:py-20">
+      <main id="catalog" className="scroll-mt-[calc(5.25rem+env(safe-area-inset-top))] bg-surface border-y border-gray-100/80">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl pt-10 pb-28 sm:py-20">
           <div className="flex flex-col gap-5 mb-8">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
               <div>
@@ -158,14 +158,14 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
                   <Input
                     placeholder="Buscar marca o modelo..."
-                    className="pl-9 pr-4 h-11 w-full rounded-xl border-gray-200 bg-white focus:border-gray-400 text-sm"
+                    className="pl-9 pr-4 h-12 sm:h-11 w-full rounded-xl border-gray-200 bg-white focus:border-gray-400 text-base md:text-sm"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setIsFilterOpen(true)}
-                    className="relative flex flex-1 sm:flex-none items-center justify-center gap-2 h-11 px-4 rounded-xl border border-gray-200 hover:border-gray-400 bg-white text-sm font-medium text-gray-700 hover:text-gray-900 transition-all">
+                    className="relative flex flex-1 sm:flex-none items-center justify-center gap-2 h-12 sm:h-11 px-4 rounded-xl border border-gray-200 hover:border-gray-400 bg-white text-sm font-medium text-gray-700 hover:text-gray-900 transition-all">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
                     </svg>
@@ -177,7 +177,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
                     )}
                   </button>
                   <select value={sortBy} onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                    className="flex-1 sm:flex-none h-11 px-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 hover:border-gray-400 transition-all cursor-pointer focus:outline-none">
+                    className="flex-1 sm:flex-none h-12 sm:h-11 px-3 rounded-xl border border-gray-200 bg-white text-base sm:text-sm text-gray-700 hover:border-gray-400 transition-all cursor-pointer focus:outline-none">
                     <option value="default">Ordenar</option>
                     <option value="price-asc">Precio ↑</option>
                     <option value="price-desc">Precio ↓</option>
@@ -192,7 +192,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
               <div className="flex flex-wrap items-center gap-2 p-3 bg-white rounded-xl border border-gray-100">
                 {activeChips.map(chip => (
                   <button key={chip.key} onClick={chip.onRemove}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface border border-gray-200 text-gray-700 hover:border-red-300 hover:text-brand transition-all">
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium bg-surface border border-gray-200 text-gray-700 hover:border-red-300 hover:text-brand transition-all">
                     {chip.label}
                     <span className="text-gray-400">×</span>
                   </button>
@@ -213,7 +213,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
               <Button variant="outline" onClick={clearAllFilters} className="rounded-full">Limpiar filtros</Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {[...filteredCars]
                 .sort((a, b) => {
                   const scaleA = priceScale(a.price, a.currency) === "ARS" ? 1 : 0;
@@ -244,9 +244,9 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp"
-        className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 sm:right-5 z-40 flex items-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white pl-3.5 pr-3.5 sm:pr-4 h-12 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03]"
+        className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 sm:right-5 z-40 flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white h-14 w-14 sm:h-12 sm:w-auto sm:pl-3.5 sm:pr-4 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03] ${isFilterOpen ? "hidden" : ""}`}
       >
-        <FaWhatsapp className="h-5 w-5" />
+        <FaWhatsapp className="h-6 w-6 sm:h-5 sm:w-5" />
         <span className="text-sm font-semibold hidden sm:inline">WhatsApp</span>
       </a>
 

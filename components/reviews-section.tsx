@@ -2,7 +2,7 @@
 
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const reviews = [
   {
@@ -93,6 +93,7 @@ export default function ReviewsSection() {
   // Mobile: de a 1 — Desktop: de a 3 (2 páginas con 6 reseñas)
   const [mobilePage, setMobilePage] = useState(0);
   const [desktopPage, setDesktopPage] = useState(0);
+  const touchX = useRef<number | null>(null);
 
   const totalMobilePages = reviews.length;                        // 6 páginas de 1
   const totalDesktopPages = Math.ceil(reviews.length / 3);       // 2 páginas de 3
@@ -107,7 +108,7 @@ export default function ReviewsSection() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand mb-2">Reseñas</p>
-            <h2 className="font-title text-[1.75rem] sm:text-4xl lg:text-5xl text-ink">Lo que dicen nuestros clientes</h2>
+            <h2 className="font-title text-[1.6rem] sm:text-4xl lg:text-5xl text-ink leading-tight">Lo que dicen nuestros clientes</h2>
           </div>
           <a href={GOOGLE_URL} target="_blank" rel="noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all bg-white shrink-0">
@@ -127,23 +128,36 @@ export default function ReviewsSection() {
         </div>
 
         {/* ── Mobile: carrusel de a 1 ── */}
-        <div className="sm:hidden">
+        <div
+          className="sm:hidden"
+          onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            if (touchX.current == null) return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            if (Math.abs(dx) > 40) {
+              setMobilePage(i => dx < 0
+                ? (i === totalMobilePages - 1 ? 0 : i + 1)
+                : (i === 0 ? totalMobilePages - 1 : i - 1));
+            }
+            touchX.current = null;
+          }}
+        >
           <ReviewCard review={reviews[mobilePage]} />
           <div className="flex items-center justify-between mt-5">
             <button onClick={() => setMobilePage(i => (i === 0 ? totalMobilePages - 1 : i - 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 text-gray-400 hover:text-gray-900 transition-all">
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 text-gray-400 hover:text-gray-900 transition-all">
               <ChevronLeft className="h-4 w-4" />
             </button>
             <div className="flex gap-1.5">
               {reviews.map((_, i) => (
                 <button key={i} onClick={() => setMobilePage(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === mobilePage ? "w-5 bg-gray-900" : "w-1.5 bg-gray-200"
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === mobilePage ? "w-5 bg-gray-900" : "w-2 bg-gray-200"
                   }`} />
               ))}
             </div>
             <button onClick={() => setMobilePage(i => (i === totalMobilePages - 1 ? 0 : i + 1))}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 text-gray-400 hover:text-gray-900 transition-all">
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 text-gray-400 hover:text-gray-900 transition-all">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

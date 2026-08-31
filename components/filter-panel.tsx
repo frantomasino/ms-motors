@@ -33,7 +33,7 @@ const scaleOf = (car: CarType) => priceScale(car.price, car.currency);
 function Pill({ label, count, selected, onClick }: { label: string; count: number; selected: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+      className={`inline-flex items-center gap-1.5 min-h-9 px-3 py-2 rounded-full text-xs font-medium border transition-all ${
         selected
           ? "bg-gray-900 text-white border-gray-900"
           : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900"
@@ -49,7 +49,7 @@ function Section({ title, children, badge }: { title: string; children: React.Re
   return (
     <div className="border-b border-gray-100 last:border-0">
       <button type="button" onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between py-3.5 group">
+        className="w-full flex items-center justify-between py-3.5 min-h-11 group">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-gray-800">{title}</span>
           {badge ? <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white">{badge}</span> : null}
@@ -64,21 +64,21 @@ function Section({ title, children, badge }: { title: string; children: React.Re
 function usdBuckets(max: number) {
   const top = Math.max(max, 40000);
   return [
-    { label: "Hasta USD 10 mil", min: 0, max: 10000 },
-    { label: "USD 10 – 20 mil", min: 10000, max: 20000 },
-    { label: "USD 20 – 30 mil", min: 20000, max: 30000 },
-    { label: "USD 30 – 40 mil", min: 30000, max: 40000 },
-    { label: "Más de USD 40 mil", min: 40000, max: top },
+    { label: "Hasta USD 10k", min: 0, max: 10000 },
+    { label: "USD 10–20k", min: 10000, max: 20000 },
+    { label: "USD 20–30k", min: 20000, max: 30000 },
+    { label: "USD 30–40k", min: 30000, max: 40000 },
+    { label: "Más de USD 40k", min: 40000, max: top },
   ];
 }
 
 function arsBuckets(max: number) {
   const top = Math.max(max, 30_000_000);
   return [
-    { label: "Hasta $ 10 millones", min: 0, max: 10_000_000 },
-    { label: "$ 10 – 20 millones", min: 10_000_000, max: 20_000_000 },
-    { label: "$ 20 – 30 millones", min: 20_000_000, max: 30_000_000 },
-    { label: "Más de $ 30 millones", min: 30_000_000, max: top },
+    { label: "Hasta $10M", min: 0, max: 10_000_000 },
+    { label: "$10–20M", min: 10_000_000, max: 20_000_000 },
+    { label: "$20–30M", min: 20_000_000, max: 30_000_000 },
+    { label: "Más de $30M", min: 30_000_000, max: top },
   ];
 }
 
@@ -123,6 +123,15 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
   const [maxKmInput, setMaxKmInput] = useState("");
 
   const userInteracted = useRef(false);
+  const [sheetSide, setSheetSide] = useState<"bottom" | "right">("bottom");
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const apply = () => setSheetSide(mq.matches ? "right" : "bottom");
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -253,10 +262,25 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:w-[400px] flex flex-col p-0 gap-0 bg-white [&>button]:hidden" side="right">
+      <SheetContent
+        side={sheetSide}
+        className={`flex flex-col p-0 gap-0 bg-white [&>button]:hidden ${
+          sheetSide === "bottom"
+            ? "inset-x-0 bottom-0 h-[min(92dvh,100%)] w-full rounded-t-2xl border-l-0"
+            : "w-full sm:w-[400px]"
+        }`}
+      >
         <SheetTitle className="sr-only">Filtros</SheetTitle>
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        {sheetSide === "bottom" && (
+          <div className="flex justify-center pt-2.5 pb-0" aria-hidden>
+            <span className="h-1 w-10 rounded-full bg-gray-200" />
+          </div>
+        )}
+
+        <div className={`flex items-center justify-between px-5 border-b border-gray-100 ${
+          sheetSide === "bottom" ? "py-3" : "py-4 pt-[max(1rem,env(safe-area-inset-top))]"
+        }`}>
           <div className="flex items-center gap-2">
             <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 10h10M11 16h2" />
@@ -266,8 +290,8 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">{activeCount}</span>
             )}
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400">
-            <X className="h-4 w-4" />
+          <button onClick={onClose} className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400">
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -377,11 +401,11 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
               </div>
             )}
             <div className="flex items-center gap-2">
-              <Input type="number" placeholder="Mín" value={minPriceInput} onChange={(e) => setMinPriceInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <Input type="number" inputMode="numeric" placeholder="Mín" value={minPriceInput} onChange={(e) => setMinPriceInput(e.target.value)} className="h-11 sm:h-8 text-base sm:text-xs rounded-lg" />
               <span className="text-gray-300 text-sm shrink-0">–</span>
-              <Input type="number" placeholder="Máx" value={maxPriceInput} onChange={(e) => setMaxPriceInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <Input type="number" inputMode="numeric" placeholder="Máx" value={maxPriceInput} onChange={(e) => setMaxPriceInput(e.target.value)} className="h-11 sm:h-8 text-base sm:text-xs rounded-lg" />
               <button type="button" onClick={applyCustomPrice}
-                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
+                className="shrink-0 h-11 w-11 sm:h-8 sm:w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
                 <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
               </button>
             </div>
@@ -405,11 +429,11 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <Input type="number" placeholder="Mín" value={minKmInput} onChange={(e) => setMinKmInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <Input type="number" inputMode="numeric" placeholder="Mín" value={minKmInput} onChange={(e) => setMinKmInput(e.target.value)} className="h-11 sm:h-8 text-base sm:text-xs rounded-lg" />
               <span className="text-gray-300 text-sm shrink-0">–</span>
-              <Input type="number" placeholder="Máx" value={maxKmInput} onChange={(e) => setMaxKmInput(e.target.value)} className="h-8 text-xs rounded-lg" />
+              <Input type="number" inputMode="numeric" placeholder="Máx" value={maxKmInput} onChange={(e) => setMaxKmInput(e.target.value)} className="h-11 sm:h-8 text-base sm:text-xs rounded-lg" />
               <button type="button" onClick={() => setMileage([Math.max(0, Number(minKmInput || 0)), Math.min(maxMileage, Number(maxKmInput || maxMileage))])}
-                className="shrink-0 h-8 w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
+                className="shrink-0 h-11 w-11 sm:h-8 sm:w-8 flex items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition-colors">
                 <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
               </button>
             </div>
@@ -421,13 +445,13 @@ export default function FilterPanel({ isOpen, onClose, filters, onFiltersChange,
           <div className="h-4" />
         </div>
 
-        <div className="border-t border-gray-100 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2.5 bg-white">
+        <div className="border-t border-gray-100 px-5 pt-3 sm:pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2.5 bg-white">
           <Button variant="outline" onClick={clearAll}
-            className="flex-1 rounded-xl h-11 text-sm font-medium border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400">
+            className="flex-1 rounded-xl h-12 sm:h-11 text-sm font-medium border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400">
             {activeCount > 0 ? `Limpiar (${activeCount})` : "Limpiar"}
           </Button>
           <Button onClick={onClose}
-            className="flex-1 rounded-xl h-11 bg-gray-900 hover:bg-black text-white text-sm font-semibold">
+            className="flex-1 rounded-xl h-12 sm:h-11 bg-gray-900 hover:bg-black text-white text-sm font-semibold">
             Ver resultados
           </Button>
         </div>

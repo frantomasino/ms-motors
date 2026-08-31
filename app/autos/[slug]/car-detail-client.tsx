@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -34,13 +34,13 @@ function RelatedCard({ car }: { car: CarType }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute bottom-2 left-2 right-2">
-          <p className="font-title text-white text-lg tabular-nums">{formatCarPrice(car.price, car.currency)}</p>
+          <p className="font-title text-white text-[0.95rem] sm:text-lg tabular-nums leading-none truncate">{formatCarPrice(car.price, car.currency)}</p>
         </div>
       </div>
       <div className="p-3">
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{car.brand}</p>
-        <p className="font-title text-lg text-ink mt-0.5 group-hover:text-brand transition-colors">{car.model}</p>
-        <p className="text-xs text-gray-400 mt-1">{car.year} · {new Intl.NumberFormat("es-AR").format(car.mileage)} km</p>
+        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest truncate">{car.brand}</p>
+        <p className="font-title text-base sm:text-lg text-ink mt-0.5 group-hover:text-brand transition-colors line-clamp-1">{car.model}</p>
+        <p className="text-xs text-gray-400 mt-1 truncate">{car.year} · {new Intl.NumberFormat("es-AR").format(car.mileage)} km</p>
       </div>
     </Link>
   );
@@ -57,6 +57,7 @@ export default function CarDetailClient({
 }) {
   const [current, setCurrent] = useState(0);
   const [copied, setCopied] = useState(false);
+  const touchX = useRef<number | null>(null);
 
   const prev = () => setCurrent(i => (i === 0 ? mediaList.length - 1 : i - 1));
   const next = () => setCurrent(i => (i === mediaList.length - 1 ? 0 : i + 1));
@@ -90,22 +91,31 @@ export default function CarDetailClient({
       <SiteHeader />
 
       <div className="container mx-auto px-4 pt-[calc(5rem+env(safe-area-inset-top))] sm:pt-24 pb-8 max-w-6xl">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between gap-3 mb-5">
           <Link href="/#catalog"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-ink transition-colors">
+            className="inline-flex items-center gap-1.5 min-h-11 text-sm font-medium text-gray-500 hover:text-ink transition-colors">
             <ArrowLeft className="h-4 w-4" />
-            Volver al catálogo
+            Volver
           </Link>
           <button onClick={handleShare}
-            className="inline-flex items-center gap-2 text-sm font-medium text-ink hover:text-brand transition-colors">
+            className="inline-flex items-center gap-2 min-h-11 text-sm font-medium text-ink hover:text-brand transition-colors">
             {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4" />}
-            {copied ? "Link copiado" : "Compartir"}
+            {copied ? "Copiado" : "Compartir"}
           </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
           <div>
-            <div className="relative rounded-2xl overflow-hidden bg-black aspect-[4/3] shadow-[0_12px_40px_rgba(16,24,40,0.12)]">
+            <div
+              className="relative rounded-2xl overflow-hidden bg-black aspect-[4/3] shadow-[0_12px_40px_rgba(16,24,40,0.12)]"
+              onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                if (touchX.current == null || mediaList.length < 2) return;
+                const dx = e.changedTouches[0].clientX - touchX.current;
+                if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
+                touchX.current = null;
+              }}
+            >
               {currentMedia && !isVideo(currentMedia) ? (
                 <Image src={currentMedia} alt={`${car.brand} ${car.model}`} fill priority={current === 0} className="object-cover" />
               ) : currentMedia && isVideo(currentMedia) ? (
@@ -118,10 +128,10 @@ export default function CarDetailClient({
 
               {mediaList.length > 1 && (
                 <>
-                  <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
+                  <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
+                  <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm transition-all">
                     <ChevronRight className="h-5 w-5" />
                   </button>
                   <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full backdrop-blur-sm tabular-nums">
@@ -132,7 +142,7 @@ export default function CarDetailClient({
             </div>
 
             {mediaList.length > 1 && (
-              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
                 {mediaList.map((m, i) => (
                   <button key={i} onClick={() => setCurrent(i)}
                     className={`relative h-14 w-20 sm:h-16 sm:w-24 shrink-0 rounded-xl overflow-hidden transition-all ${i === current ? "ring-2 ring-brand ring-offset-2" : "opacity-50 hover:opacity-80"}`}>
@@ -201,10 +211,10 @@ export default function CarDetailClient({
 
         {relatedCars.length > 0 && (
           <div className="mt-12 sm:mt-16">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-title text-2xl sm:text-3xl text-ink">También te puede interesar</h2>
-              <Link href="/#catalog" className="text-sm text-brand hover:text-red-700 font-medium transition-colors">
-                Ver todos →
+            <div className="flex items-center justify-between gap-3 mb-5">
+              <h2 className="font-title text-xl sm:text-3xl text-ink leading-tight">También te puede interesar</h2>
+              <Link href="/#catalog" className="shrink-0 text-sm text-brand hover:text-red-700 font-medium transition-colors min-h-11 inline-flex items-center">
+                Ver todos
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -219,7 +229,7 @@ export default function CarDetailClient({
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <a href={`https://wa.me/5491159456142?text=${encodeURIComponent(waText)}`}
           target="_blank" rel="noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold py-3.5 rounded-2xl transition-all text-sm">
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold min-h-12 py-3.5 rounded-2xl transition-all text-sm">
           <MessageCircle className="h-5 w-5" />
           Consultar por WhatsApp
         </a>

@@ -30,12 +30,12 @@ function SoldCarCard({ car }: { car: CarType }) {
       <div className="p-3 sm:p-4">
         <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.18em]">{car.brand}</p>
         <h3 className="font-title text-base sm:text-lg text-ink mt-0.5">{car.model}</h3>
-        <div className="flex items-center gap-3 mt-1.5">
-          <span className="flex items-center gap-1 text-xs text-gray-400">
+        <div className="flex items-center gap-3 mt-1.5 min-w-0">
+          <span className="flex items-center gap-1 text-xs text-gray-400 shrink-0">
             <Calendar className="h-3.5 w-3.5" />{car.year}
           </span>
-          <span className="flex items-center gap-1 text-xs text-gray-400">
-            <Gauge className="h-3.5 w-3.5" />{fmt(car.mileage)} km
+          <span className="flex items-center gap-1 text-xs text-gray-400 min-w-0 truncate">
+            <Gauge className="h-3.5 w-3.5 shrink-0" />{fmt(car.mileage)} km
           </span>
         </div>
       </div>
@@ -77,13 +77,13 @@ function ClientPhotos({ photos }: { photos: string[] }) {
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]"
           onClick={() => setSelected(null)}>
           <div className="relative max-w-2xl w-full aspect-square rounded-2xl overflow-hidden">
             <Image src={selected} alt="Cliente" fill className="object-cover" />
           </div>
           <button onClick={() => setSelected(null)}
-            className="absolute top-5 right-5 text-white/60 hover:text-white text-3xl leading-none">×</button>
+            className="absolute top-[max(1.25rem,env(safe-area-inset-top))] right-4 h-11 w-11 flex items-center justify-center text-white/80 hover:text-white text-3xl leading-none">×</button>
         </div>
       )}
     </>
@@ -98,7 +98,7 @@ export default function SoldCarsSection({ soldCars = [], clientPhotos = [] }: So
   const INITIAL_DESKTOP = 3;
 
   return (
-    <section id="vendidos" className="bg-gray-50 border-t border-gray-100 py-12 sm:py-20 scroll-mt-20">
+    <section id="vendidos" className="bg-gray-50 border-t border-gray-100 py-12 sm:py-20 scroll-mt-[calc(5.25rem+env(safe-area-inset-top))]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}

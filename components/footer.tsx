@@ -122,7 +122,7 @@ export default function Footer() {
           </div>
 
           {/* Barra inferior */}
-          <div className="border-t border-white/5 mt-8 sm:mt-10 pt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="border-t border-white/5 mt-8 sm:mt-10 pt-6 pb-[max(5.5rem,env(safe-area-inset-bottom))] sm:pb-0 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-white/20 text-center sm:text-left">
               © {new Date().getFullYear()} MS Motors. Todos los derechos reservados.
             </p>

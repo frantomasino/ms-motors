@@ -25,6 +25,15 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 pt-[env(safe-area-inset-top)] ${
@@ -89,18 +98,18 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Contactar por WhatsApp"
-              className={`flex items-center justify-center gap-1.5 text-sm font-medium rounded-full transition-all hover:scale-[1.02] h-9 w-9 sm:h-auto sm:w-auto sm:px-4 sm:py-2 ${
+              className={`flex items-center justify-center gap-1.5 text-sm font-medium rounded-full transition-all hover:scale-[1.02] h-11 w-11 sm:h-auto sm:w-auto sm:px-4 sm:py-2 ${
                 solid
                   ? "bg-ink hover:bg-black text-white"
                   : "bg-white text-ink hover:bg-white/90"
               }`}
             >
-              <Phone className="h-3.5 w-3.5" />
+              <Phone className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
               <span className="hidden sm:inline">Contactar</span>
             </a>
             <button
               onClick={() => setOpen((v) => !v)}
-              className={`flex md:hidden h-9 w-9 items-center justify-center rounded-full transition-all ${
+              className={`flex md:hidden h-11 w-11 items-center justify-center rounded-full transition-all ${
                 solid ? "text-gray-600 hover:bg-gray-100" : "text-white hover:bg-white/10"
               }`}
               aria-label="Menú"
@@ -119,23 +128,32 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
         </div>
 
         {open && (
-          <nav className="md:hidden border-t border-gray-100 py-3 flex flex-col gap-1">
+          <nav className="md:hidden border-t border-gray-100 py-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex flex-col gap-0.5">
             {NAV.map(({ href, label }) => (
               <Link
                 key={label}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-brand hover:bg-red-50 rounded-lg transition-all"
+                className="px-4 py-3.5 text-[15px] font-medium text-gray-700 hover:text-brand hover:bg-red-50 rounded-lg transition-all"
               >
                 {label}
               </Link>
             ))}
-            <div className="flex gap-3 px-4 pt-2 border-t border-gray-100 mt-1">
+            <a
+              href="https://wa.me/5491159456142"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="mx-4 mt-2 mb-2 flex items-center justify-center gap-2 h-11 rounded-xl bg-[#25D366] text-white text-sm font-semibold"
+            >
+              <Phone className="h-4 w-4" /> WhatsApp
+            </a>
+            <div className="flex gap-4 px-4 pt-3 border-t border-gray-100 mt-1">
               <a
                 href="https://www.instagram.com/ms.motorsquilmes/"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-brand transition-colors"
+                className="flex items-center gap-2 min-h-11 text-sm text-gray-500 hover:text-brand transition-colors"
               >
                 <FaInstagram className="h-4 w-4" /> Instagram
               </a>
@@ -143,7 +161,7 @@ export default function SiteHeader({ overlay = false }: { overlay?: boolean }) {
                 href="https://www.tiktok.com/@msmotorsquilmes"
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-brand transition-colors"
+                className="flex items-center gap-2 min-h-11 text-sm text-gray-500 hover:text-brand transition-colors"
               >
                 <FaTiktok className="h-4 w-4" /> TikTok
               </a>

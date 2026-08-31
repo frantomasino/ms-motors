@@ -107,7 +107,7 @@ export default function CarCard({ car }: { car: CarType }) {
         )}
 
         <div className="absolute bottom-3 left-3 right-3 z-10 flex items-end justify-between gap-3 pointer-events-none">
-          <p className="font-title text-[1.35rem] sm:text-2xl text-white tabular-nums tracking-tight drop-shadow-sm leading-none min-w-0">
+          <p className="font-title text-[1.2rem] sm:text-2xl text-white tabular-nums tracking-tight drop-shadow-sm leading-none min-w-0 truncate">
             {formatCarPrice(car.price, car.currency)}
           </p>
           {count > 1 && count <= 10 && (
@@ -153,7 +153,7 @@ export default function CarCard({ car }: { car: CarType }) {
         <div className="mt-auto pt-1 flex gap-2">
           <Link
             href={`/autos/${slug}`}
-            className="flex-1 flex items-center justify-center text-sm font-medium text-ink border border-gray-200 hover:border-ink rounded-xl py-2.5 transition-all"
+            className="flex-1 flex items-center justify-center text-sm font-medium text-ink border border-gray-200 hover:border-ink rounded-xl min-h-11 py-2.5 transition-all"
           >
             Ver auto
           </Link>
@@ -161,7 +161,7 @@ export default function CarCard({ car }: { car: CarType }) {
             href={waHref}
             target="_blank"
             rel="noreferrer"
-            className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] rounded-xl py-2.5 transition-all"
+            className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] rounded-xl min-h-11 py-2.5 transition-all"
           >
             <MessageCircle className="h-4 w-4" />
             WhatsApp
