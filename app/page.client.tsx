@@ -15,6 +15,7 @@ import SoldCarsSection from "@/components/sold-cars-section";
 import AboutSection from "@/components/about-section";
 import ReviewsSection from "@/components/reviews-section";
 import AnimateOnScroll from "@/components/animate-on-scroll";
+import { formatAmount, priceScale } from "@/lib/price";
 
 interface ClientPageProps {
   initialCars: CarType[];
@@ -33,6 +34,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
     const maxMileage = Math.max(...initialCars.map(c => c.mileage),  0);
     return {
       brands: [], models: [], transmissions: [], colors: [], fuelTypes: [],
+      currency: null,
       priceRange:   [0, maxPrice]      as [number, number],
       yearRange:    [minYear, maxYear] as [number, number],
       mileageRange: [0, maxMileage]    as [number, number],
@@ -58,6 +60,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
   const clearAllFilters = () => {
     setFilters({
       brands: [], models: [], transmissions: [], colors: [], fuelTypes: [],
+      currency: null,
       priceRange:   defaultRanges.price,
       yearRange:    defaultRanges.year,
       mileageRange: defaultRanges.mileage,
@@ -66,27 +69,38 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
   };
 
   const filteredCars = useMemo(() => {
+    const maxUsd = Math.max(...cars.filter((c) => priceScale(c.price, c.currency) === "USD").map((c) => c.price), 0);
+    const maxArs = Math.max(...cars.filter((c) => priceScale(c.price, c.currency) === "ARS").map((c) => c.price), 0);
+    const priceCap = filters.currency === "USD" ? maxUsd : filters.currency === "ARS" ? maxArs : defaultRanges.price[1];
+    const priceNarrowed = filters.priceRange[0] > 0 || filters.priceRange[1] < priceCap;
+
     return cars.filter((car) => {
       const searchLower = searchTerm.toLowerCase();
-      if (searchTerm && !car.brand.toLowerCase().includes(searchLower) && !car.model.toLowerCase().includes(searchLower)) return false;
+      if (searchTerm) {
+        const hay = `${car.brand} ${car.model} ${car.year} ${car.color} ${car.fuelType}`.toLowerCase();
+        if (!hay.includes(searchLower)) return false;
+      }
       if (filters.brands.length > 0 && !filters.brands.includes(car.brand)) return false;
       if (filters.models.length > 0 && !filters.models.includes(car.model)) return false;
       if (filters.transmissions.length > 0 && !filters.transmissions.includes(car.transmission)) return false;
       if (filters.colors.length > 0 && !filters.colors.includes(car.color)) return false;
       if (filters.fuelTypes.length > 0 && !filters.fuelTypes.includes(car.fuelType)) return false;
-      if (car.price < filters.priceRange[0] || car.price > filters.priceRange[1]) return false;
+      const scale = priceScale(car.price, car.currency);
+      if (filters.currency && scale !== filters.currency) return false;
+      if (priceNarrowed && (car.price < filters.priceRange[0] || car.price > filters.priceRange[1])) return false;
       if (car.year < filters.yearRange[0] || car.year > filters.yearRange[1]) return false;
       if (car.mileage < filters.mileageRange[0] || car.mileage > filters.mileageRange[1]) return false;
       return true;
     });
-  }, [cars, searchTerm, filters]);
+  }, [cars, searchTerm, filters, defaultRanges]);
 
   const removeBrand        = (b: string) => setFilters(p => ({ ...p, brands:        p.brands.filter(x => x !== b) }));
   const removeModel        = (m: string) => setFilters(p => ({ ...p, models:        p.models.filter(x => x !== m) }));
   const removeTransmission = (t: string) => setFilters(p => ({ ...p, transmissions: p.transmissions.filter(x => x !== t) }));
   const removeColor        = (c: string) => setFilters(p => ({ ...p, colors:        p.colors.filter(x => x !== c) }));
   const removeFuel         = (f: string) => setFilters(p => ({ ...p, fuelTypes:     p.fuelTypes.filter(x => x !== f) }));
-  const resetPrice         = ()          => setFilters(p => ({ ...p, priceRange:   defaultRanges.price }));
+  const resetPrice         = ()          => setFilters(p => ({ ...p, currency: null, priceRange: defaultRanges.price }));
+  const resetCurrency      = ()          => setFilters(p => ({ ...p, currency: null, priceRange: defaultRanges.price }));
   const resetYear          = ()          => setFilters(p => ({ ...p, yearRange:    defaultRanges.year }));
   const resetMileage       = ()          => setFilters(p => ({ ...p, mileageRange: defaultRanges.mileage }));
   const clearSearch        = ()          => setSearchTerm("");
@@ -99,14 +113,23 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
     filters.transmissions.forEach(t => chips.push({ key: `tr:${t}`, label: `Transmisión: ${t}`, onRemove: () => removeTransmission(t) }));
     filters.colors.forEach(c => chips.push({ key: `color:${c}`, label: `Color: ${c}`, onRemove: () => removeColor(c) }));
     filters.fuelTypes.forEach(f => chips.push({ key: `fuel:${f}`, label: `Combustible: ${f}`, onRemove: () => removeFuel(f) }));
-    if (filters.priceRange[0] !== defaultRanges.price[0] || filters.priceRange[1] !== defaultRanges.price[1])
-      chips.push({ key: `price:${filters.priceRange.join("-")}`, label: `Precio: ${filters.priceRange[0].toLocaleString("es-AR")} – ${filters.priceRange[1].toLocaleString("es-AR")}`, onRemove: resetPrice });
+    if (filters.currency)
+      chips.push({ key: "currency", label: filters.currency === "ARS" ? "Moneda: $ ARS" : "Moneda: USD", onRemove: resetCurrency });
+    const maxUsd = Math.max(...cars.filter((c) => priceScale(c.price, c.currency) === "USD").map((c) => c.price), 0);
+    const maxArs = Math.max(...cars.filter((c) => priceScale(c.price, c.currency) === "ARS").map((c) => c.price), 0);
+    const priceCap = filters.currency === "USD" ? maxUsd : filters.currency === "ARS" ? maxArs : defaultRanges.price[1];
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < priceCap)
+      chips.push({
+        key: `price:${filters.priceRange.join("-")}`,
+        label: `Precio: ${formatAmount(filters.priceRange[0])} – ${formatAmount(filters.priceRange[1])}`,
+        onRemove: resetPrice,
+      });
     if (filters.yearRange[0] !== defaultRanges.year[0] || filters.yearRange[1] !== defaultRanges.year[1])
       chips.push({ key: `year:${filters.yearRange.join("-")}`, label: `Año: ${filters.yearRange[0]} – ${filters.yearRange[1]}`, onRemove: resetYear });
     if (filters.mileageRange[0] !== defaultRanges.mileage[0] || filters.mileageRange[1] !== defaultRanges.mileage[1])
       chips.push({ key: `km:${filters.mileageRange.join("-")}`, label: `Km: ${filters.mileageRange[0].toLocaleString("es-AR")} – ${filters.mileageRange[1].toLocaleString("es-AR")}`, onRemove: resetMileage });
     return chips;
-  }, [filters, searchTerm, defaultRanges]);
+  }, [filters, searchTerm, defaultRanges, cars]);
 
   const activeFiltersCount = activeChips.length;
 
@@ -193,8 +216,10 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
               {[...filteredCars]
                 .sort((a, b) => {
-                  if (sortBy === "price-asc")   return a.price - b.price;
-                  if (sortBy === "price-desc")  return b.price - a.price;
+                  const scaleA = priceScale(a.price, a.currency) === "ARS" ? 1 : 0;
+                  const scaleB = priceScale(b.price, b.currency) === "ARS" ? 1 : 0;
+                  if (sortBy === "price-asc")   return scaleA - scaleB || a.price - b.price;
+                  if (sortBy === "price-desc")  return scaleA - scaleB || b.price - a.price;
                   if (sortBy === "year-desc")   return b.year - a.year;
                   if (sortBy === "mileage-asc") return a.mileage - b.mileage;
                   return 0;

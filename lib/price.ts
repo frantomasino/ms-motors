@@ -15,6 +15,15 @@ export function formatCarPrice(price: number, currency: PriceCurrency | string |
   return parsePriceCurrency(currency) === "ARS" ? `$ ${amount}` : `USD ${amount}`;
 }
 
+/** Montos tan altos no son dólares de este catálogo: se filtran como pesos. */
+export const ARS_AMOUNT_THRESHOLD = 150_000;
+
+export function priceScale(price: number, currency?: string | null): PriceCurrency {
+  if (parsePriceCurrency(currency) === "ARS") return "ARS";
+  if ((price || 0) >= ARS_AMOUNT_THRESHOLD) return "ARS";
+  return "USD";
+}
+
 export function isMissingPriceCurrencyColumn(error: { message?: string; code?: string } | null | undefined): boolean {
   if (!error) return false;
   const msg = `${error.code || ""} ${error.message || ""}`.toLowerCase();

@@ -20,6 +20,7 @@ export interface FilterState {
   brands: string[]
   models: string[]
   transmissions: string[]
+  currency: "USD" | "ARS" | null
   priceRange: [number, number]
   yearRange: [number, number]
   mileageRange: [number, number]
