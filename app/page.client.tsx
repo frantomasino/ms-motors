@@ -244,7 +244,7 @@ export default function ClientPage({ initialCars, soldCars, clientPhotos = [] }:
         target="_blank"
         rel="noopener noreferrer"
         aria-label="WhatsApp"
-        className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 sm:right-5 z-40 flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white h-14 w-14 sm:h-12 sm:w-auto sm:pl-3.5 sm:pr-4 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03] ${isFilterOpen ? "hidden" : ""}`}
+        className={`fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 sm:right-5 z-40 hidden sm:flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white h-12 w-auto pl-3.5 pr-4 shadow-lg shadow-green-900/30 transition-transform hover:scale-[1.03] ${isFilterOpen ? "hidden" : ""}`}
       >
         <FaWhatsapp className="h-6 w-6 sm:h-5 sm:w-5" />
         <span className="text-sm font-semibold hidden sm:inline">WhatsApp</span>

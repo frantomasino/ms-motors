@@ -5,7 +5,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-[#0c0e12] text-white min-h-[78svh] sm:min-h-[100svh] flex flex-col justify-end overflow-hidden">
+    <section className="relative bg-[#0c0e12] text-white min-h-[88svh] sm:min-h-[100svh] flex flex-col justify-end overflow-hidden">
 
       {/* Imagen mobile — se muestra solo en pantallas chicas */}
       <div
